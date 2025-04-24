@@ -58,7 +58,7 @@
 
 ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
-![Kafka](https://img.shields.io/badge/kafka-%23DD0031.svg?style=for-the-badge&logo=apachekafka&logoColor=white)
+![Kafka](https://img.shields.io/badge/kafka-%231F20.svg?style=for-the-badge&logo=apachekafka&logoColor=white)
 
 ### 🛠 IDE 및 개발 도구
 
