@@ -28,7 +28,7 @@ public class GroupBuy {
     private Category category;
 
     @Column
-    private Integer minParticipants = 0;
+    private Integer targetParticipants = 0;
 
     @Column
     private Integer currentParticipants = 0;
