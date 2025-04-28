@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,21 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
+
+    // 매일 정각(00:00)에 실행
+    @Scheduled(cron = "0 0 0 * * *")
+    public void updateGroupBuyStatuses() {
+        List<GroupBuy> ongoingGroupBuys = groupBuyRepository.findByStatus(GroupBuyStatus.ONGOING);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (GroupBuy groupBuy : ongoingGroupBuys) {
+            if (groupBuy.getDeadline() != null && now.isAfter(groupBuy.getDeadline())) {
+                groupBuy.setStatus(GroupBuyStatus.CLOSED);
+            }
+        }
+
+        groupBuyRepository.saveAll(ongoingGroupBuys); // 변경된 것들 저장
+    }
 
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
