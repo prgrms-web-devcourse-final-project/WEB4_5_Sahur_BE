@@ -4,10 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderDetailResDto;
-import com.team5.backend.domain.order.dto.OrderListResDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.service.OrderService;
 
@@ -36,11 +33,12 @@ public class OrderController {
 	}
 
 	@PatchMapping("/{orderId}")
-	public Order updateOrder(
+	public OrderUpdateResDto updateOrder(
 		@PathVariable Long orderId,
 		@RequestBody OrderUpdateReqDto request
 	) {
-		return orderService.updateOrder(orderId, request);
+		Order order = orderService.updateOrder(orderId, request);
+		return OrderUpdateResDto.from(order);
 	}
 
 	@DeleteMapping("/{orderId}")
