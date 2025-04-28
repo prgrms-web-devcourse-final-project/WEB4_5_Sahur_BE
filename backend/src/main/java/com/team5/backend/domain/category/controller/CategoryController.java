@@ -4,6 +4,7 @@ import com.team5.backend.domain.category.dto.CategoryCreateReqDto;
 import com.team5.backend.domain.category.dto.CategoryResDto;
 import com.team5.backend.domain.category.dto.CategoryUpdateReqDto;
 import com.team5.backend.domain.category.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CategoryResDto> createCategory(@RequestBody CategoryCreateReqDto request) {
+    public ResponseEntity<CategoryResDto> createCategory(@RequestBody  @Valid CategoryCreateReqDto request) {
         CategoryResDto response = categoryService.createCategory(request);
         return ResponseEntity.ok(response);
     }
@@ -37,7 +38,7 @@ public class CategoryController {
 
     @PutMapping("/{categoryId}")
     public ResponseEntity<CategoryResDto> updateCategory(@PathVariable Integer categoryId,
-                                                         @RequestBody CategoryUpdateReqDto request) {
+                                                         @RequestBody  @Valid CategoryUpdateReqDto request) {
         CategoryResDto response = categoryService.updateCategory(categoryId, request);
         return ResponseEntity.ok(response);
     }
