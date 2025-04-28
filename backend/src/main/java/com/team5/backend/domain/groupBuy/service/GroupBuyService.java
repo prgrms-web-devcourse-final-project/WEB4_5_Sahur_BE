@@ -57,7 +57,7 @@ public class GroupBuyService {
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
                 .category(category)
-                .targetParticipants(request.getMinParticipants())
+                .targetParticipants(request.getTargetParticipants())
                 .currentParticipantCount(0) // 처음에는 0명
                 .round(request.getRound())
                 .deadline(request.getDeadline())
@@ -101,7 +101,7 @@ public class GroupBuyService {
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
-                    existing.setTargetParticipants(request.getMinParticipants());
+                    existing.setTargetParticipants(request.getTargetParticipants());
                     existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
                     existing.setRound(request.getRound());
                     existing.setDeadline(request.getDeadline());
@@ -116,8 +116,8 @@ public class GroupBuyService {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
                     // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
-                    if (request.getMinParticipants() != null) {
-                        existing.setTargetParticipants(request.getMinParticipants());
+                    if (request.getTargetParticipants() != null) {
+                        existing.setTargetParticipants(request.getTargetParticipants());
                     }
                     if (request.getCurrentParticipantCount() != null) {
                         existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
