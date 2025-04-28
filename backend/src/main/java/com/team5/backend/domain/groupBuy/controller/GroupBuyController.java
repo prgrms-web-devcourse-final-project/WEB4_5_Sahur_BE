@@ -52,27 +52,27 @@ public class GroupBuyController {
     }
 
     @GetMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> getGroupBuyById(@PathVariable Long id) {
-        return groupBuyService.getGroupBuyById(id)
+    public ResponseEntity<GroupBuyResDto> getGroupBuyById(@PathVariable Long groupBuyId) {
+        return groupBuyService.getGroupBuyById(groupBuyId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> updateGroupBuy(@PathVariable Long id, @RequestBody GroupBuyUpdateReqDto request) {
-        GroupBuyResDto response = groupBuyService.updateGroupBuy(id, request);
+    public ResponseEntity<GroupBuyResDto> updateGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyUpdateReqDto request) {
+        GroupBuyResDto response = groupBuyService.updateGroupBuy(groupBuyId, request);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long id, @RequestBody GroupBuyUpdateReqDto request) {
-        GroupBuyResDto response = groupBuyService.patchGroupBuy(id, request);
+    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyUpdateReqDto request) {
+        GroupBuyResDto response = groupBuyService.patchGroupBuy(groupBuyId, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{groupBuyId}")
-    public ResponseEntity<Void> deleteGroupBuy(@PathVariable Long id) {
-        groupBuyService.deleteGroupBuy(id);
+    public ResponseEntity<Void> deleteGroupBuy(@PathVariable Long groupBuyId) {
+        groupBuyService.deleteGroupBuy(groupBuyId);
         return ResponseEntity.noContent().build();
     }
 
