@@ -4,12 +4,19 @@ import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +26,7 @@ import java.util.stream.Collectors;
 public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
+    private final ProductRepository productRepository;
 
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
@@ -114,6 +122,23 @@ public class GroupBuyService {
 
     public void deleteGroupBuy(Long id) {
         groupBuyRepository.deleteById(id);
+    }
+
+    public List<GroupBuyResDto> getTodayDeadlineGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        // 오늘 00:00:00 ~ 오늘 23:59:59 구하기
+        LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endOfToday = startOfToday.plusDays(1).minusNanos(1);
+
+        // 정렬 적용
+        Sort sort = getSortForField(sortField);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // deadline이 오늘인 것만 필터링해서 가져오기 (findByDeadlineBetween 사용)
+        Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
+
+        return pageResult.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     private GroupBuyResDto toResponse(GroupBuy groupBuy) {
