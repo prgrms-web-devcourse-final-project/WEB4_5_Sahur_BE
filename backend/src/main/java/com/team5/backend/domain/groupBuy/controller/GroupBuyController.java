@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/groupBuy")
+@RequestMapping("/api/v1/groupBuy")
 @RequiredArgsConstructor
 public class GroupBuyController {
 
