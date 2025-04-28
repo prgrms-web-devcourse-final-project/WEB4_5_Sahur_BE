@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 public class DeliveryRequest {
 
 	private String address;
-	private Integer contact;
+	private String contact;
 	private Integer pccc;
 }

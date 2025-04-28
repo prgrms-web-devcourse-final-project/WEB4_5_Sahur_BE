@@ -25,23 +25,28 @@ public class Delivery {
 
 	private Integer pccc;
 
-	@Column(nullable = false)
-	private Integer contact;
+	@Column(nullable = false, length = 20)
+	private String contact;
 
-	private Delivery(Order order, String address, Integer pccc, Integer contact) {
+	private Delivery(Order order, String address, Integer pccc, String contact) {
 		this.order = order;
 		this.address = address;
 		this.pccc = pccc;
 		this.contact = contact;
 	}
 
-	public static Delivery create(Order order, String address, Integer pccc, Integer contact) {
+	public static Delivery create(Order order, String address, Integer pccc, String contact) {
 		return new Delivery(order, address, pccc, contact);
 	}
 
-	public void updateDeliveryInfo(String address, Integer contact, Integer pccc) {
+	public void updateDeliveryInfo(String address, String contact, Integer pccc) {
 		this.address = address;
 		this.contact = contact;
 		this.pccc = pccc;
+	}
+
+	public void updateAddressAndContact(String address, String contact) {
+		this.address = address;
+		this.contact = contact;
 	}
 }
