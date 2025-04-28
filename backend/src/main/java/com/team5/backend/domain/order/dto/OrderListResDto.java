@@ -22,15 +22,15 @@ public class OrderListResDto {
 
 	public static OrderListResDto from(Order order) {
 		return OrderListResDto.builder()
-			.orderId(order.getOrderId())
-			.groupId(order.getGroupBuy().getGroupBuyId())
-			.groupTitle(order.getGroupBuy().getProduct().getTitle())
-			.memberId(order.getMember().getMemberId())
-			.nickname(order.getMember().getName())
-			.totalPrice(order.getTotalPrice())
-			.quantity(order.getQuantity())
-			.status(order.getStatus())
-			.createdAt(order.getCreatedAt())
-			.build();
+				.orderId(order.getOrderId())
+				.groupId(order.getGroupBuy().getGroupBuyId())
+				.groupTitle(order.getGroupBuy().getProduct().getTitle())
+				.memberId(order.getMember().getMemberId())
+				.nickname(order.getMember().getNickname())
+				.totalPrice(order.getTotalPrice())
+				.quantity(order.getQuantity())
+				.status(order.getStatus())
+				.createdAt(order.getCreatedAt())
+				.build();
 	}
 }
