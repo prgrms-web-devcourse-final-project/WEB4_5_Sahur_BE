@@ -17,7 +17,7 @@ public class DeliveryResDto {
 		return DeliveryResDto.builder()
 			.address(delivery.getAddress())
 			.contact(delivery.getContact())
-			.pccc(delivery.getPccc())
+			.pccc(delivery.getPccc() != null ? delivery.getPccc() : 0)
 			.build();
 	}
 }
