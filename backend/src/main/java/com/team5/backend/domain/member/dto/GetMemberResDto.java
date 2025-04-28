@@ -24,7 +24,7 @@ public class GetMemberResDto {
     public static GetMemberResDto fromEntity(Member member) {
 
         return GetMemberResDto.builder()
-                .memberId(member.getId())
+                .memberId(member.getMemberId())
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .name(member.getName())
