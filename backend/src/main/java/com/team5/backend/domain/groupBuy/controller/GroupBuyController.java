@@ -75,4 +75,11 @@ public class GroupBuyController {
         groupBuyService.deleteGroupBuy(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{groupBuyId}/status")
+    public ResponseEntity<GroupBuyStatusResDto> getGroupBuyStatus(@RequestParam Long groupBuyId) {
+        GroupBuyStatusResDto status = groupBuyService.getGroupBuyStatus(groupBuyId);
+        return ResponseEntity.ok(status);
+    }
+
 }
