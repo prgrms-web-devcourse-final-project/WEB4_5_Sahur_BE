@@ -6,6 +6,7 @@ import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,33 @@ public class GroupBuyService {
                     existing.setRound(request.getRound());
                     existing.setDeadline(request.getDeadline());
                     existing.setStatus(request.getStatus());
+                    GroupBuy updated = groupBuyRepository.save(existing);
+                    return toResponse(updated);
+                })
+                .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
+    }
+
+    public GroupBuyResDto patchGroupBuy(Long id, GroupBuyUpdateReqDto request) {
+        return groupBuyRepository.findById(id)
+                .map(existing -> {
+                    // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
+                    if (request.getMinParticipants() != null) {
+                        existing.setMinParticipants(request.getMinParticipants());
+                    }
+                    if (request.getCurrentParticipants() != null) {
+                        existing.setCurrentParticipants(request.getCurrentParticipants());
+                    }
+                    if (request.getRound() != null) {
+                        existing.setRound(request.getRound());
+                    }
+                    if (request.getDeadline() != null) {
+                        existing.setDeadline(request.getDeadline());
+                    }
+                    if (request.getStatus() != null) {
+                        existing.setStatus(request.getStatus());
+                    }
+
+                    // 수정된 엔티티 저장
                     GroupBuy updated = groupBuyRepository.save(existing);
                     return toResponse(updated);
                 })

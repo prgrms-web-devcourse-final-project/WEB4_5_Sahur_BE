@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.entity;
 
+import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,16 +28,16 @@ public class GroupBuy {
     private Category category;
 
     @Column
-    private Integer minParticipants;
+    private Integer minParticipants = 0;
 
     @Column
-    private Integer currentParticipants;
+    private Integer currentParticipants = 0;
 
     @Column
-    private Integer round;
+    private Integer round = 0;
 
     @Column(nullable = false)
-    private LocalDateTime deadline;
+    private LocalDateTime deadline = null;
 
     @Enumerated(EnumType.STRING)
     @Column
