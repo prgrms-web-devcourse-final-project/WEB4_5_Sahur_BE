@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/delivery")
+@RequestMapping("/api/v1/deliveries")
 public class DeliveryController {
 
 	private final DeliveryService deliveryService;

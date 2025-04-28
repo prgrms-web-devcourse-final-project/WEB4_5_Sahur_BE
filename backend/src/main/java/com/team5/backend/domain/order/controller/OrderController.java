@@ -60,6 +60,10 @@ public class OrderController {
 		@PathVariable Long orderId,
 		@RequestBody DeliveryReqDto request
 	) {
+		if (orderId == null) {
+			throw new IllegalArgumentException("orderId는 필수 입력값입니다.");
+		}
+
 		Delivery delivery = deliveryService.createDelivery(orderId, request);
 		return DeliveryResDto.from(delivery);
 	}
