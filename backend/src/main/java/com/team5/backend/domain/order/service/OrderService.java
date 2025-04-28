@@ -39,6 +39,7 @@ public class OrderService {
 		return orderRepository.save(order);
 	}
 
+	@Transactional(readOnly = true)
 	public List<OrderListResDto> getOrders() {
 		return orderRepository.findAll()
 			.stream()
@@ -46,6 +47,7 @@ public class OrderService {
 			.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public OrderDetailResDto getOrderDetail(Long orderId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
