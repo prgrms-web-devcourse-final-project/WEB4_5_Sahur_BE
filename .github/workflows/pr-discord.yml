@@ -1,0 +1,33 @@
+name: PR Discord Notification
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        uses: tsickert/discord-webhook@v5
+        with:
+          url: ${{ secrets.DISCORD_WEBHOOK }}
+          username: "GitHub Actions"
+          avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+          content: |
+            🚀 **PR 이벤트 발생!**
+
+            **Repository:** ${{ github.repository }}
+            **PR 번호:** #${{ github.event.pull_request.number }}
+            **PR 제목:** ${{ github.event.pull_request.title }}
+            **작성자:** ${{ github.event.pull_request.user.login }}
+            **작성자 프로필:** [Profile](${{ github.event.pull_request.user.html_url }})
+            **PR 링크:** [바로가기](${{ github.event.pull_request.html_url }})
+            **상태:** ${{ github.event.action }}
+            **Base Branch:** ${{ github.event.pull_request.base.ref }}
+            **Target Branch:** ${{ github.event.pull_request.head.ref }}
+
+            ${{ github.event.pull_request.body }}
+
+            🔥 **PR을 확인하고 리뷰를 남겨주세요!**
+          
