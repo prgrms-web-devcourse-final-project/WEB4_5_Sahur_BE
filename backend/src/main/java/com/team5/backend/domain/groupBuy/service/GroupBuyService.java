@@ -2,6 +2,7 @@ package com.team5.backend.domain.groupBuy.service;
 
 import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
@@ -54,7 +55,7 @@ public class GroupBuyService {
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
                 .category(category)
-                .minParticipants(request.getMinParticipants())
+                .targetParticipants(request.getMinParticipants())
                 .currentParticipants(0) // 처음에는 0명
                 .round(request.getRound())
                 .deadline(request.getDeadline())
@@ -98,7 +99,7 @@ public class GroupBuyService {
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
-                    existing.setMinParticipants(request.getMinParticipants());
+                    existing.setTargetParticipants(request.getMinParticipants());
                     existing.setCurrentParticipants(request.getCurrentParticipants());
                     existing.setRound(request.getRound());
                     existing.setDeadline(request.getDeadline());
@@ -114,7 +115,7 @@ public class GroupBuyService {
                 .map(existing -> {
                     // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
                     if (request.getMinParticipants() != null) {
-                        existing.setMinParticipants(request.getMinParticipants());
+                        existing.setTargetParticipants(request.getMinParticipants());
                     }
                     if (request.getCurrentParticipants() != null) {
                         existing.setCurrentParticipants(request.getCurrentParticipants());
@@ -162,7 +163,7 @@ public class GroupBuyService {
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .productId(groupBuy.getProduct().getProductId())
                 .categoryId(groupBuy.getCategory().getCategoryId())
-                .minParticipants(groupBuy.getMinParticipants())
+                .minParticipants(groupBuy.getTargetParticipants())
                 .currentParticipants(groupBuy.getCurrentParticipants())
                 .round(groupBuy.getRound())
                 .deadline(groupBuy.getDeadline())
