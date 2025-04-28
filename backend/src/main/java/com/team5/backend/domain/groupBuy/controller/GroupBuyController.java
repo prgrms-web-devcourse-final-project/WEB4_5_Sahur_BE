@@ -82,4 +82,16 @@ public class GroupBuyController {
         return ResponseEntity.ok(status);
     }
 
+    @GetMapping("/members/{memberId}")
+    public ResponseEntity<List<GroupBuyResDto>> getGroupBuysByMemberId(
+            @PathVariable Long memberId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<GroupBuyResDto> responses = groupBuyService.getGroupBuysByMemberId(memberId, pageable, sortField);
+        return ResponseEntity.ok(responses);
+    }
+
 }
