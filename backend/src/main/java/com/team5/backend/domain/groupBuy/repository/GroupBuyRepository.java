@@ -16,4 +16,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     // 마감일(deadline)이 오늘인 GroupBuy 가져오기
     Page<GroupBuy> findByDeadlineBetween(LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable);
     List<GroupBuy> findByStatus(GroupBuyStatus status);
+    Page<GroupBuy> findByGroupBuyIdIn(List<Long> groupBuyIds, Pageable pageable);
+
 }
