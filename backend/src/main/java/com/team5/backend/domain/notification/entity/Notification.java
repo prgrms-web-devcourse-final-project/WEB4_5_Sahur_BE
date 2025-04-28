@@ -28,15 +28,15 @@ public class Notification {
     private NotificationType type;
 
     @Column(length = 255, nullable = false)
-    private String title;
+    private String title = "";
 
     @Column(length = 255)
-    private String message;
+    private String message = "";
 
     @Column(columnDefinition = "TEXT")
-    private String url;
+    private String url = "";
 
-    private Boolean read;
+    private Boolean read = false;
 
     @CreatedDate
     private LocalDateTime createdAt;

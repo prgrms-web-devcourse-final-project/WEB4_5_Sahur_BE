@@ -25,5 +25,5 @@ public class History {
     private Product product;
 
     @Column(nullable = false)
-    private Boolean writable; // 작성 가능 여부
+    private Boolean writable = false; // 작성 가능 여부
 }

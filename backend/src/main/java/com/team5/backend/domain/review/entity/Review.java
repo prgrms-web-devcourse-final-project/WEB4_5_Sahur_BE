@@ -29,13 +29,13 @@ public class Review {
     private Product product;
 
     @Column(length = 255)
-    private String comment;
+    private String comment = "";
 
-    private Integer rate;
+    private Integer rate = 0;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(columnDefinition = "TEXT")
-    private String imageUrl;
+    private String imageUrl = "";
 }
