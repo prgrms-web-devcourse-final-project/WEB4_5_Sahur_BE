@@ -1,12 +1,8 @@
-package com.team5.backend.domain.review.entity;
+package com.team5.backend.domain.history.entity;
 
-import com.team5.backend.domain.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -14,11 +10,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Review {
+public class History {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long reviewId;
+    private Long historyId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
@@ -28,14 +24,6 @@ public class Review {
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
-    @Column(length = 255)
-    private String comment = "";
-
-    private Integer rate = 0;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
-
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl = "";
+    @Column(nullable = false)
+    private Boolean writable = false; // 작성 가능 여부
 }

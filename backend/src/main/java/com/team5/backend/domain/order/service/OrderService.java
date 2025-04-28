@@ -2,6 +2,8 @@ package com.team5.backend.domain.order.service;
 
 import java.util.List;
 
+import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
