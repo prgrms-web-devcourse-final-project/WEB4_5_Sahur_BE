@@ -1,10 +1,10 @@
 package com.team5.backend.domain.member.controller;
 
-import com.team5.backend.domain.member.dto.GetMemberResDto;
-import com.team5.backend.domain.member.dto.SignupReqDto;
-import com.team5.backend.domain.member.dto.SignupResDto;
-import com.team5.backend.domain.member.dto.UpdateMemberReqDto;
+import com.team5.backend.domain.member.dto.*;
+import com.team5.backend.domain.member.service.AuthService;
 import com.team5.backend.domain.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/member")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
+    private final AuthService authService;
 
     // 회원 생성
     @PostMapping("/auth/signup")
@@ -29,7 +30,7 @@ public class MemberController {
     }
 
     // 회원 조회
-    @GetMapping("/{memberId}")
+    @GetMapping("/members/{memberId}")
     public ResponseEntity<GetMemberResDto> getMember(@PathVariable Long memberId) {
 
         GetMemberResDto memberResDto = memberService.getMemberById(memberId);
@@ -37,25 +38,39 @@ public class MemberController {
     }
 
     // 회원 전체 조회
-    @GetMapping
+    @GetMapping("/members")
     public ResponseEntity<List<GetMemberResDto>> getAllMembers() {
 
         List<GetMemberResDto> members = memberService.getAllMembers();
         return ResponseEntity.status(HttpStatus.OK).body(members);
     }
 
-    @PutMapping("/{memberId}")
+    @PutMapping("/members/{memberId}")
     public ResponseEntity<GetMemberResDto> updateMember(@PathVariable Long memberId, @Valid @RequestBody UpdateMemberReqDto updateMemberReqDto) {
 
         GetMemberResDto updatedMember = memberService.updateMember(memberId, updateMemberReqDto);
-        return ResponseEntity.ok(updatedMember);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedMember);
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/{memberId}")
+    @DeleteMapping("/members/{memberId}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
 
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/auth/login")
+    public ResponseEntity<LoginResDto> login(@Valid @RequestBody LoginReqDto loginReqDto, HttpServletResponse response) {
+
+        LoginResDto loginResDto = authService.login(loginReqDto, response);
+        return ResponseEntity.status(HttpStatus.OK).body(loginResDto);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        authService.logout(request, response);
+        return ResponseEntity.ok().build();
     }
 }

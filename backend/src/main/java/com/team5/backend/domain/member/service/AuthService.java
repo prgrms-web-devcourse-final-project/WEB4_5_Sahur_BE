@@ -7,6 +7,7 @@ import com.team5.backend.domain.member.entity.Member;
 import com.team5.backend.domain.member.repository.MemberRepository;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -82,7 +83,14 @@ public class AuthService {
 
     // 로그아웃 메서드
     @Transactional
-    public void logout(String accessToken, HttpServletResponse response) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+
+        // 액세스 토큰을 쿠키에서 추출
+        String accessToken = extractCookieValue(request, "accessToken");
+
+        if (accessToken == null) {
+            throw new RuntimeException("액세스 토큰이 없습니다.");
+        }
 
         // 토큰 블랙리스트에 추가하여 무효화
         jwtUtil.addToBlacklist(accessToken);
@@ -141,5 +149,21 @@ public class AuthService {
 //        cookie.setSecure(true); // HTTPS 환경에서만 사용 가능
 
         response.addCookie(cookie);
+    }
+
+    // 쿠키에서 값을 추출하는 유틸리티 메서드
+    private String extractCookieValue(HttpServletRequest request, String cookieName) {
+
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }
