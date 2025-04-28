@@ -158,6 +158,15 @@ public class GroupBuyService {
                 .collect(Collectors.toList());
     }
 
+    public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
+        return groupBuyRepository.findById(id)
+                .map(groupBuy -> GroupBuyStatusResDto.builder()
+                        .currentParticipants(groupBuy.getCurrentParticipants())
+                        .status(groupBuy.getStatus())
+                        .build())
+                .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
+    }
+
     private GroupBuyResDto toResponse(GroupBuy groupBuy) {
         return GroupBuyResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
