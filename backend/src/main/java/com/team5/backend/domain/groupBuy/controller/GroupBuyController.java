@@ -77,7 +77,7 @@ public class GroupBuyController {
     }
 
     @GetMapping("/{groupBuyId}/status")
-    public ResponseEntity<GroupBuyStatusResDto> getGroupBuyStatus(@RequestParam Long groupBuyId) {
+    public ResponseEntity<GroupBuyStatusResDto> getGroupBuyStatus(@PathVariable Long groupBuyId) {
         GroupBuyStatusResDto status = groupBuyService.getGroupBuyStatus(groupBuyId);
         return ResponseEntity.ok(status);
     }
