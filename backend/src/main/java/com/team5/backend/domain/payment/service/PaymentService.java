@@ -6,10 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.entity.Payment;
-import com.team5.backend.domain.payment.entity.PaymentStatus;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
