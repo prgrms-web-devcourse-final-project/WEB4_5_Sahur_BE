@@ -31,4 +31,10 @@ public class Category {
 
     @Column(nullable = false)
     private Integer uid;
+
+    public void updateCategoryInfo(CategoryType category, KeywordType keyword, Integer uid) {
+        this.category = category;
+        this.keyword = keyword;
+        this.uid = uid;
+    }
 }
