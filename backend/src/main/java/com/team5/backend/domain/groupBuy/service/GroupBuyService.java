@@ -8,6 +8,7 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
+    private final HistoryRepository historyRepository;
 
     // 매일 정각(00:00)에 실행
     @Scheduled(cron = "0 0 0 * * *")
@@ -152,6 +154,30 @@ public class GroupBuyService {
 
         // deadline이 오늘인 것만 필터링해서 가져오기 (findByDeadlineBetween 사용)
         Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
+
+        return pageResult.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
+        // 정렬 설정
+        Sort sort = getSortForField(sortField);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // 1. memberId로 참여한 groupBuyId 리스트 가져오기
+        List<Long> groupBuyIds = historyRepository.findByMemberId(memberId)
+                .stream()
+                .map(history -> history.getGroupBuy().getGroupBuyId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (groupBuyIds.isEmpty()) {
+            return List.of(); // 참여한 게 없으면 빈 리스트 반환
+        }
+
+        // 2. groupBuyId 리스트에 해당하는 GroupBuy 가져오기 (Pageable 사용)
+        Page<GroupBuy> pageResult = groupBuyRepository.findByGroupBuyIdIn(groupBuyIds, sortedPageable);
 
         return pageResult.stream()
                 .map(this::toResponse)
