@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class GroupBuyCreateReqDto {
     private Long productId;
     private Long categoryId;
-    private Integer minParticipants;
+    private Integer targetParticipants;
     private Integer round;
     private LocalDateTime deadline;
 }
