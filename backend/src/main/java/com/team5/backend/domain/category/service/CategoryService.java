@@ -64,12 +64,7 @@ public class CategoryService {
     }
 
     private CategoryResDto toResponse(Category category) {
-        return CategoryResDto.builder()
-                .categoryId(category.getCategoryId())
-                .productId(category.getProduct().getProductId())
-                .category(category.getCategory())
-                .keyword(category.getKeyword())
-                .uid(category.getUid())
-                .build();
+        return CategoryResDto.fromEntity(category);
     }
+
 }
