@@ -13,7 +13,7 @@ public class GroupBuyResDto {
     private Long productId;
     private Long categoryId;
     private Integer minParticipants;
-    private Integer currentParticipants;
+    private Integer currentParticipantCount;
     private Integer round;
     private LocalDateTime deadline;
     private GroupBuyStatus status;

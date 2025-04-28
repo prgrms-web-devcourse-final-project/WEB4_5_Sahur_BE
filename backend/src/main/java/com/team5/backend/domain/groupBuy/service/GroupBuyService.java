@@ -58,7 +58,7 @@ public class GroupBuyService {
                 .product(product)
                 .category(category)
                 .targetParticipants(request.getMinParticipants())
-                .currentParticipants(0) // 처음에는 0명
+                .currentParticipantCount(0) // 처음에는 0명
                 .round(request.getRound())
                 .deadline(request.getDeadline())
                 .status(GroupBuyStatus.ONGOING) // 기본값 ONGOING
@@ -102,7 +102,7 @@ public class GroupBuyService {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
                     existing.setTargetParticipants(request.getMinParticipants());
-                    existing.setCurrentParticipants(request.getCurrentParticipants());
+                    existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
                     existing.setRound(request.getRound());
                     existing.setDeadline(request.getDeadline());
                     existing.setStatus(request.getStatus());
@@ -119,8 +119,8 @@ public class GroupBuyService {
                     if (request.getMinParticipants() != null) {
                         existing.setTargetParticipants(request.getMinParticipants());
                     }
-                    if (request.getCurrentParticipants() != null) {
-                        existing.setCurrentParticipants(request.getCurrentParticipants());
+                    if (request.getCurrentParticipantCount() != null) {
+                        existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
                     }
                     if (request.getRound() != null) {
                         existing.setRound(request.getRound());
@@ -187,7 +187,7 @@ public class GroupBuyService {
     public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
         return groupBuyRepository.findById(id)
                 .map(groupBuy -> GroupBuyStatusResDto.builder()
-                        .currentParticipants(groupBuy.getCurrentParticipants())
+                        .currentParticipantCount(groupBuy.getCurrentParticipantCount())
                         .status(groupBuy.getStatus())
                         .build())
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
@@ -199,7 +199,7 @@ public class GroupBuyService {
                 .productId(groupBuy.getProduct().getProductId())
                 .categoryId(groupBuy.getCategory().getCategoryId())
                 .minParticipants(groupBuy.getTargetParticipants())
-                .currentParticipants(groupBuy.getCurrentParticipants())
+                .currentParticipants(groupBuy.getCurrentParticipantCount())
                 .round(groupBuy.getRound())
                 .deadline(groupBuy.getDeadline())
                 .status(groupBuy.getStatus())

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Getter
 public class GroupBuyUpdateReqDto {
     private Integer minParticipants;
-    private Integer currentParticipants;
+    private Integer currentParticipantCount;
     private Integer round;
     private LocalDateTime deadline;
     private GroupBuyStatus status;

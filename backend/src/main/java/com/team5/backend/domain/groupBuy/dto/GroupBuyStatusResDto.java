@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GroupBuyStatusResDto {
-    private Integer currentParticipants;
+    private Integer currentParticipantCount;
     private GroupBuyStatus status;
 }
