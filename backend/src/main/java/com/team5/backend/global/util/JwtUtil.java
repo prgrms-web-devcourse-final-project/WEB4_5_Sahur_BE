@@ -168,6 +168,10 @@ public class JwtUtil {
         return new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS512.getJcaName());
     }
 
+    public long getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
+
     public long getRefreshTokenExpiration() {
         return refreshTokenExpiration;
     }
