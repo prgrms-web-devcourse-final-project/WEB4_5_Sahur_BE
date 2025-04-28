@@ -2,21 +2,21 @@ package com.team5.backend.domain.order.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.service.DeliveryService;
-import com.team5.backend.domain.order.dto.OrderDetailResDto;
-import com.team5.backend.domain.order.dto.OrderListResDto;
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -24,12 +24,10 @@ public class OrderController {
 	private final DeliveryService deliveryService;
 
 	@PostMapping
-	public Order createOrder(
-		@RequestParam Long memberId,
-		@RequestParam Long groupBuyId,
-		@RequestParam Integer quantity
-	) {
-		return orderService.createOrder(memberId, groupBuyId, quantity);
+	@ResponseStatus(HttpStatus.CREATED)
+	public OrderCreateResDto createOrder(@RequestBody OrderCreateReqDto request) {
+		Order order = orderService.createOrder(request);
+		return OrderCreateResDto.from(order);
 	}
 
 	@GetMapping
@@ -43,19 +41,22 @@ public class OrderController {
 	}
 
 	@PatchMapping("/{orderId}")
-	public Order updateOrder(
+	public OrderUpdateResDto updateOrder(
 		@PathVariable Long orderId,
-		@RequestParam Integer quantity
+		@RequestBody OrderUpdateReqDto request
 	) {
-		return orderService.updateOrder(orderId, quantity);
+		Order order = orderService.updateOrder(orderId, request);
+		return OrderUpdateResDto.from(order);
 	}
 
 	@DeleteMapping("/{orderId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancelOrder(@PathVariable Long orderId) {
 		orderService.cancelOrder(orderId);
 	}
 
 	@PostMapping("/{orderId}/delivery")
+	@ResponseStatus(HttpStatus.CREATED)
 	public DeliveryResDto createDelivery(
 		@PathVariable Long orderId,
 		@RequestBody DeliveryReqDto request

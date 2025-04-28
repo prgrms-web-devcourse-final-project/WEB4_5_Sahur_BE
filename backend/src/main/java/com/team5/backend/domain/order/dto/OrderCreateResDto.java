@@ -10,28 +10,27 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class OrderListResDto {
+public class OrderCreateResDto {
 	private Long orderId;
 	private Long groupId;
-	private String groupTitle; // 상품명
 	private Long memberId;
-	private String nickname;   // 회원 닉네임
 	private Integer totalPrice;
+	private LocalDateTime createdAt;
 	private Integer quantity;
 	private OrderStatus status;
-	private LocalDateTime createdAt;
+	private Integer shipping;
 
-	public static OrderListResDto from(Order order) {
-		return OrderListResDto.builder()
+	public static OrderCreateResDto from(Order order) {
+		return OrderCreateResDto.builder()
 			.orderId(order.getOrderId())
 			.groupId(order.getGroupBuy().getGroupBuyId())
-			.groupTitle(order.getGroupBuy().getProduct().getTitle())
 			.memberId(order.getMember().getMemberId())
-			.nickname(order.getMember().getNickName())
 			.totalPrice(order.getTotalPrice())
+			.createdAt(order.getCreatedAt())
 			.quantity(order.getQuantity())
 			.status(order.getStatus())
-			.createdAt(order.getCreatedAt())
+			.shipping(order.getShipping())
 			.build();
 	}
 }
+
