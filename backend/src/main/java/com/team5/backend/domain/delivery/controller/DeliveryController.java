@@ -2,7 +2,7 @@ package com.team5.backend.domain.delivery.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.team5.backend.domain.delivery.dto.ModifyDeliveryReq;
+import com.team5.backend.domain.delivery.dto.DeliveryRequest;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.service.DeliveryService;
 
@@ -21,7 +21,7 @@ public class DeliveryController {
 	@PatchMapping("/{deliveryId}")
 	public Delivery updateDelivery(
 		@PathVariable Long deliveryId,
-		@RequestBody ModifyDeliveryReq request
+		@RequestBody DeliveryRequest request
 	) {
 		return deliveryService.updateDelivery(deliveryId, request);
 	}

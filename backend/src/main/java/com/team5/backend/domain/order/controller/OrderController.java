@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.team5.backend.domain.delivery.dto.CreateDeliveryReq;
+import com.team5.backend.domain.delivery.dto.DeliveryRequest;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.service.DeliveryService;
 import com.team5.backend.domain.order.dto.OrderDetailResDto;
@@ -57,7 +57,7 @@ public class OrderController {
 	@PostMapping("/{orderId}/delivery")
 	public Delivery createDelivery(
 		@PathVariable Long orderId,
-		@RequestBody CreateDeliveryReq request
+		@RequestBody DeliveryRequest request
 	) {
 		return deliveryService.createDelivery(orderId, request);
 	}
