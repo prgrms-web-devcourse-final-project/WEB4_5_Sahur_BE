@@ -3,7 +3,6 @@ package com.team5.backend.domain.groupBuy.controller;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
-import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.service.GroupBuyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,16 +1,16 @@
 package com.team5.backend.domain.payment.service;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.repository.MemberRepository;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class PaymentService {
 	public List<Payment> getPaymentsByMember(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-		return paymentRepository.findByOrderMemberId(memberId);
+		return paymentRepository.findByOrderMemberMemberId(memberId);
 	}
 
 	@Transactional(readOnly = true)

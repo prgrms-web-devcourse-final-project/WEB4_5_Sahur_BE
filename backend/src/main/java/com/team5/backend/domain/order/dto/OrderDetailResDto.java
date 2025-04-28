@@ -1,12 +1,11 @@
 package com.team5.backend.domain.order.dto;
 
-import java.time.LocalDateTime;
-
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
-
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -35,10 +34,10 @@ public class OrderDetailResDto {
 	public static OrderDetailResDto from(Order order) {
 		return OrderDetailResDto.builder()
 			.orderId(order.getOrderId())
-			.groupId(order.getGroupBuy().getId())
+			.groupId(order.getGroupBuy().getGroupBuyId())
 			.productTitle(order.getGroupBuy().getProduct().getTitle())
 			.productImage(order.getGroupBuy().getProduct().getImageUrl())
-			.memberId(order.getMember().getId())
+			.memberId(order.getMember().getMemberId())
 			.nickname(order.getMember().getName())
 			.totalPrice(order.getTotalPrice())
 			.quantity(order.getQuantity())

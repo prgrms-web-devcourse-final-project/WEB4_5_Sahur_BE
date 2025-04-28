@@ -1,5 +1,7 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
@@ -7,6 +9,7 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
@@ -101,7 +106,7 @@ public class GroupBuyService {
         return GroupBuyResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .productId(groupBuy.getProduct().getProductId())
-                .categoryId(groupBuy.getCategory().getCategoryId())
+//                .categoryId(groupBuy.getCategory().getCategoryId())
                 .minParticipants(groupBuy.getMinParticipants())
                 .currentParticipants(groupBuy.getCurrentParticipants())
                 .round(groupBuy.getRound())
