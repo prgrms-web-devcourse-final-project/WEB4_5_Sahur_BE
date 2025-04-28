@@ -2,6 +2,8 @@ package com.team5.backend.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -29,8 +31,13 @@ public class Member {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "createdAt", nullable = false)
+    @CreationTimestamp
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updatedAt", nullable = false)
+    private LocalDateTime updatedAt;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -39,11 +46,6 @@ public class Member {
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     private Role role;
-
-    // 생성 전 시간 설정
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
-    }
 }

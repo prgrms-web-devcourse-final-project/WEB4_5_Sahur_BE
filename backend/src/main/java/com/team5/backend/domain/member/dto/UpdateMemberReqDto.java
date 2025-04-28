@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,6 +26,7 @@ public class UpdateMemberReqDto {
     private String password;
 
     private String address;
+
+    @URL(message = "유효한 URL 형식이 아닙니다.")
     private String imageUrl;
-    private String role;
 }

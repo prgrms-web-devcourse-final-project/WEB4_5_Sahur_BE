@@ -6,7 +6,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +19,7 @@ public class GetMemberResDto {
     private String imageUrl;
     private String role;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static GetMemberResDto fromEntity(Member member) {
 
@@ -32,6 +32,7 @@ public class GetMemberResDto {
                 .imageUrl(member.getImageUrl())
                 .role(member.getRole().name())
                 .createdAt(member.getCreatedAt())
+                .updatedAt(member.getUpdatedAt())
                 .build();
     }
 }
