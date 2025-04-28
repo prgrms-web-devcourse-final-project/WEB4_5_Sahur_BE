@@ -2,7 +2,8 @@ package com.team5.backend.domain.delivery.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.team5.backend.domain.delivery.dto.DeliveryRequest;
+import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.dto.DeliveryResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.service.DeliveryService;
 
@@ -15,20 +16,15 @@ public class DeliveryController {
 
 	private final DeliveryService deliveryService;
 
-	/**
-	 * 특정 배송 정보 수정
-	 */
 	@PatchMapping("/{deliveryId}")
-	public Delivery updateDelivery(
+	public DeliveryResDto updateDelivery(
 		@PathVariable Long deliveryId,
-		@RequestBody DeliveryRequest request
+		@RequestBody DeliveryReqDto request
 	) {
-		return deliveryService.updateDelivery(deliveryId, request);
+		Delivery delivery = deliveryService.updateDelivery(deliveryId, request);
+		return DeliveryResDto.from(delivery);
 	}
 
-	/**
-	 * 특정 배송 정보 삭제
-	 */
 	@DeleteMapping("/{deliveryId}")
 	public void deleteDelivery(@PathVariable Long deliveryId) {
 		deliveryService.deleteDelivery(deliveryId);

@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.team5.backend.domain.delivery.dto.DeliveryRequest;
+import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.dto.DeliveryResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.service.DeliveryService;
 import com.team5.backend.domain.order.dto.OrderDetailResDto;
@@ -55,15 +56,17 @@ public class OrderController {
 	}
 
 	@PostMapping("/{orderId}/delivery")
-	public Delivery createDelivery(
+	public DeliveryResDto createDelivery(
 		@PathVariable Long orderId,
-		@RequestBody DeliveryRequest request
+		@RequestBody DeliveryReqDto request
 	) {
-		return deliveryService.createDelivery(orderId, request);
+		Delivery delivery = deliveryService.createDelivery(orderId, request);
+		return DeliveryResDto.from(delivery);
 	}
 
 	@GetMapping("/{orderId}/delivery")
-	public Delivery getDeliveryByOrder(@PathVariable Long orderId) {
-		return deliveryService.getDeliveryByOrder(orderId);
+	public DeliveryResDto getDeliveryByOrder(@PathVariable Long orderId) {
+		Delivery delivery = deliveryService.getDeliveryByOrder(orderId);
+		return DeliveryResDto.from(delivery);
 	}
 }

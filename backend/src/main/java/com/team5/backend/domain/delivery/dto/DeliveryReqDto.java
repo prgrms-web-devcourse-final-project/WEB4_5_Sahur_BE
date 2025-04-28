@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class DeliveryRequest {
+public class DeliveryReqDto {
 
 	private String address;
 	private String contact;
