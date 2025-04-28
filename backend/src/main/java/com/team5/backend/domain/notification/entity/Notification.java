@@ -1,0 +1,43 @@
+package com.team5.backend.domain.notification.entity;
+
+import com.team5.backend.domain.member.entity.Member;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Notification {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long notificationId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "memberId", nullable = false)
+    private Member member;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type;
+
+    @Column(length = 255, nullable = false)
+    private String title;
+
+    @Column(length = 255)
+    private String message;
+
+    @Column(columnDefinition = "TEXT")
+    private String url;
+
+    private Boolean read;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+}
