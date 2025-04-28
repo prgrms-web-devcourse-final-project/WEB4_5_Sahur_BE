@@ -28,7 +28,7 @@ public class OrderCreateResDto {
 			.totalPrice(order.getTotalPrice())
 			.createdAt(order.getCreatedAt())
 			.quantity(order.getQuantity())
-			.status(OrderStatus.WAITING)
+			.status(order.getStatus())
 			.shipping(order.getShipping())
 			.build();
 	}
