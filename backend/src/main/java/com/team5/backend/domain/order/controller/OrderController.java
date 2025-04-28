@@ -2,36 +2,27 @@ package com.team5.backend.domain.order.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderDetailResDto;
 import com.team5.backend.domain.order.dto.OrderListResDto;
+import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {
 
 	private final OrderService orderService;
 
 	@PostMapping
-	public Order createOrder(
-		@RequestParam Long memberId,
-		@RequestParam Long groupBuyId,
-		@RequestParam Integer quantity
-	) {
-		return orderService.createOrder(memberId, groupBuyId, quantity);
+	public Order createOrder(@RequestBody OrderCreateReqDto request) {
+		return orderService.createOrder(request);
 	}
 
 	@GetMapping
@@ -47,9 +38,9 @@ public class OrderController {
 	@PatchMapping("/{orderId}")
 	public Order updateOrder(
 		@PathVariable Long orderId,
-		@RequestParam Integer quantity
+		@RequestBody OrderUpdateReqDto request
 	) {
-		return orderService.updateOrder(orderId, quantity);
+		return orderService.updateOrder(orderId, request);
 	}
 
 	@DeleteMapping("/{orderId}")
