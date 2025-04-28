@@ -25,8 +25,9 @@ public class OrderController {
 	private final DeliveryService deliveryService;
 
 	@PostMapping
-	public Order createOrder(@RequestBody OrderCreateReqDto request) {
-		return orderService.createOrder(request);
+	public OrderCreateResDto createOrder(@RequestBody OrderCreateReqDto request) {
+		Order order = orderService.createOrder(request);
+		return OrderCreateResDto.from(order);
 	}
 
 	@GetMapping
