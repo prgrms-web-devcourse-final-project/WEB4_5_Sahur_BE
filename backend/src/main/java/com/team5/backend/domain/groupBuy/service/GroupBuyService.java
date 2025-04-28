@@ -41,10 +41,29 @@ public class GroupBuyService {
         return toResponse(saved);
     }
 
-    public List<GroupBuyResDto> getAllGroupBuys() {
-        return groupBuyRepository.findAll().stream()
+    public List<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        // GroupBuySortField에 따른 정렬 설정
+        Sort sort = getSortForField(sortField);
+
+        // Pageable에 정렬 적용
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // 페이징과 정렬 적용
+        Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
+        return pageResult.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    private Sort getSortForField(GroupBuySortField sortField) {
+        switch (sortField) {
+            case LATEST:
+                return Sort.by(Sort.Order.desc("createdAt"));
+            case POPULAR:
+                return Sort.by(Sort.Order.desc("product.dibCount"));
+            default:
+                return Sort.unsorted();
+        }
     }
 
     public Optional<GroupBuyResDto> getGroupBuyById(Long id) {
