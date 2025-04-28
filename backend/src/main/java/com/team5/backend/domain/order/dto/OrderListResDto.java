@@ -24,10 +24,10 @@ public class OrderListResDto {
 	public static OrderListResDto from(Order order) {
 		return OrderListResDto.builder()
 			.orderId(order.getOrderId())
-			.groupId(order.getGroupBuy().getId())
+			.groupId(order.getGroupBuy().getGroupBuyId())
 			.groupTitle(order.getGroupBuy().getProduct().getTitle())
-			.memberId(order.getMember().getId())
-			.nickname(order.getMember().getName())
+			.memberId(order.getMember().getMemberId())
+			.nickname(order.getMember().getNickName())
 			.totalPrice(order.getTotalPrice())
 			.quantity(order.getQuantity())
 			.status(order.getStatus())
