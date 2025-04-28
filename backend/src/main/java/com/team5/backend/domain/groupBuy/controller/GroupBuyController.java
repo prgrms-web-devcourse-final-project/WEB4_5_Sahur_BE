@@ -43,6 +43,12 @@ public class GroupBuyController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long id, @RequestBody GroupBuyUpdateReqDto request) {
+        GroupBuyResDto response = groupBuyService.patchGroupBuy(id, request);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroupBuy(@PathVariable Long id) {
         groupBuyService.deleteGroupBuy(id);

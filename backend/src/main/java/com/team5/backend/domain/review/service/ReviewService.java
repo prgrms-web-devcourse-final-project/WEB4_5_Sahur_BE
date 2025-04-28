@@ -67,6 +67,28 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
 
+    public ReviewResDto patchReview(Long id, ReviewUpdateReqDto request) {
+        return reviewRepository.findById(id)
+                .map(existingReview -> {
+                    // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
+                    if (request.getComment() != null) {
+                        existingReview.setComment(request.getComment());
+                    }
+                    if (request.getRate() != null) {
+                        existingReview.setRate(request.getRate());
+                    }
+                    if (request.getImageUrl() != null) {
+                        existingReview.setImageUrl(request.getImageUrl());
+                    }
+
+                    // 수정된 엔티티 저장
+                    Review updatedReview = reviewRepository.save(existingReview);
+                    return toResponse(updatedReview);
+                })
+                .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
+    }
+
+
     public void deleteReview(Long id) {
         reviewRepository.deleteById(id);
     }
