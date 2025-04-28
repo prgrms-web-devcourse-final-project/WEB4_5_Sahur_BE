@@ -2,7 +2,7 @@ package com.team5.backend.domain.order.entity;
 
 import java.time.LocalDateTime;
 
-import com.team5.backend.domain.Member;
+import com.team5.backend.domain.member.entity.Member;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 
 import jakarta.persistence.Column;
