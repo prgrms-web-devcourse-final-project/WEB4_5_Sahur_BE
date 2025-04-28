@@ -4,6 +4,8 @@ import com.team5.backend.domain.dibs.dto.DibsCreateReqDto;
 import com.team5.backend.domain.dibs.dto.DibsResDto;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
+import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +17,20 @@ import java.util.stream.Collectors;
 public class DibsService {
 
     private final DibsRepository dibsRepository;
+    private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
 
     public DibsResDto createDibs(DibsCreateReqDto request) {
+
+        Member member = memberRepository.findById(request.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
         Dibs dibs = Dibs.builder()
-                .memberId(request.getMemberId())
-                .productId(request.getProductId())
+                .member(member)
+                .product(product)
                 .status(true)
                 .build();
 
@@ -40,8 +51,8 @@ public class DibsService {
     private DibsResDto toResponse(Dibs dibs) {
         return DibsResDto.builder()
                 .dibsId(dibs.getDibsId())
-                .memberId(dibs.getMemberId())
-                .productId(dibs.getProductId())
+                .memberId(dibs.getMember().getMemberId())
+                .productId(dibs.getProduct().getProductId())
                 .status(dibs.getStatus())
                 .build();
     }

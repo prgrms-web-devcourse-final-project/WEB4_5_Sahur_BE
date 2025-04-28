@@ -19,8 +19,8 @@ public class DibsResDto {
     public static DibsResDto fromEntity(Dibs dibs) {
         return DibsResDto.builder()
                 .dibsId(dibs.getDibsId())
-                .memberId(dibs.getMemberId())
-                .productId(dibs.getProductId())
+                .memberId(dibs.getMember().getMemberId())
+                .productId(dibs.getProduct().getProductId())
                 .status(dibs.getStatus())
                 .build();
     }
