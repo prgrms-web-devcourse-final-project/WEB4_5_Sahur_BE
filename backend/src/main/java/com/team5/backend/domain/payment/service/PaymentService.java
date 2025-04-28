@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.entity.PaymentStatus;
@@ -30,20 +31,6 @@ public class PaymentService {
 		return paymentRepository.save(payment);
 	}
 
-	public Payment confirmPayment(Long paymentId) {
-		Payment payment = paymentRepository.findById(paymentId)
-			.orElseThrow(() -> new IllegalArgumentException("결제를 찾을 수 없습니다."));
-		payment.confirm();
-		return payment;
-	}
-
-	@Transactional(readOnly = true)
-	public PaymentStatus getPaymentStatus(Long paymentId) {
-		return paymentRepository.findById(paymentId)
-			.orElseThrow(() -> new IllegalArgumentException("결제를 찾을 수 없습니다."))
-			.getStatus();
-	}
-
 	@Transactional(readOnly = true)
 	public List<Payment> getPaymentsByMember(Long memberId) {
 		Member member = memberRepository.findById(memberId)
@@ -60,6 +47,7 @@ public class PaymentService {
 	public void cancelPayment(Long paymentId) {
 		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new IllegalArgumentException("결제를 찾을 수 없습니다."));
-		payment.cancel();
+
+		// 토스 페이먼츠 호출해서 결제 취소 로직 진행
 	}
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 import com.team5.backend.domain.payment.entity.Payment;
-import com.team5.backend.domain.payment.entity.PaymentStatus;
 import com.team5.backend.domain.payment.service.PaymentService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,18 +22,6 @@ public class PaymentController {
 		@RequestParam String paymentKey
 	) {
 		return paymentService.createPayment(orderId, paymentKey);
-	}
-
-	@PostMapping("/confirm")
-	public Payment confirmPayment(
-		@RequestParam Long paymentId
-	) {
-		return paymentService.confirmPayment(paymentId);
-	}
-
-	@GetMapping("/{paymentId}/status")
-	public PaymentStatus getPaymentStatus(@PathVariable Long paymentId) {
-		return paymentService.getPaymentStatus(paymentId);
 	}
 
 	@GetMapping("/members/{memberId}")

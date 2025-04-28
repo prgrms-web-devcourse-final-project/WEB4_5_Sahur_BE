@@ -22,25 +22,12 @@ public class Payment {
 	@Column(nullable = false)
 	private String paymentKey;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private PaymentStatus status;
-
 	private Payment(Order order, String paymentKey) {
 		this.order = order;
 		this.paymentKey = paymentKey;
-		this.status = PaymentStatus.REQUESTED;
 	}
 
 	public static Payment create(Order order, String paymentKey) {
 		return new Payment(order, paymentKey);
-	}
-
-	public void confirm() {
-		this.status = PaymentStatus.CONFIRMED;
-	}
-
-	public void cancel() {
-		this.status = PaymentStatus.CANCELED;
 	}
 }
