@@ -2,12 +2,13 @@ package com.team5.backend.domain.payment.entity;
 
 import com.team5.backend.domain.order.entity.Order;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment {
 
 	@Id
