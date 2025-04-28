@@ -31,7 +31,7 @@ public class GroupBuy {
     private Integer targetParticipants = 0;
 
     @Column
-    private Integer currentParticipants = 0;
+    private Integer currentParticipantCount = 0;
 
     @Column
     private Integer round = 0;
