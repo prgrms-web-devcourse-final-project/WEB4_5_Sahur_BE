@@ -5,6 +5,7 @@ import com.team5.backend.domain.history.dto.HistoryResDto;
 import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
 import com.team5.backend.domain.history.service.HistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,28 +18,33 @@ public class HistoryController {
     private final HistoryService historyService;
 
     @PostMapping
-    public HistoryResDto createHistory(@RequestBody HistoryCreateReqDto request) {
-        return historyService.createHistory(request);
+    public ResponseEntity<HistoryResDto> createHistory(@RequestBody HistoryCreateReqDto request) {
+        HistoryResDto response = historyService.createHistory(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<HistoryResDto> getAllHistories() {
-        return historyService.getAllHistories();
+    public ResponseEntity<List<HistoryResDto>> getAllHistories() {
+        List<HistoryResDto> responses = historyService.getAllHistories();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
-    public HistoryResDto getHistoryById(@PathVariable Long id) {
+    public ResponseEntity<HistoryResDto> getHistoryById(@PathVariable Long id) {
         return historyService.getHistoryById(id)
-                .orElseThrow(() -> new RuntimeException("History not found with id " + id));
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public HistoryResDto updateHistory(@PathVariable Long id, @RequestBody HistoryUpdateReqDto request) {
-        return historyService.updateHistory(id, request);
+    public ResponseEntity<HistoryResDto> updateHistory(@PathVariable Long id, @RequestBody HistoryUpdateReqDto request) {
+        HistoryResDto response = historyService.updateHistory(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteHistory(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteHistory(@PathVariable Long id) {
         historyService.deleteHistory(id);
+        return ResponseEntity.noContent().build();
     }
 }
