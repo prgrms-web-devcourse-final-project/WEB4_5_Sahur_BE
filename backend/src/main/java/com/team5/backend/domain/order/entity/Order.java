@@ -2,9 +2,10 @@ package com.team5.backend.domain.order.entity;
 
 import java.time.LocalDateTime;
 
-import com.team5.backend.domain.member.entity.Member;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.member.entity.Member;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,6 +59,9 @@ public class Order {
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private Delivery delivery;
+
 	public static Order create(Member member, GroupBuy groupBuy, Integer totalPrice, Integer quantity) {
 		return Order.builder()
 			.member(member)
@@ -66,6 +71,11 @@ public class Order {
 			.quantity(quantity)
 			.createdAt(LocalDateTime.now())
 			.build();
+	}
+
+	public void updateQuantityAndPrice(int quantity, int totalPrice) {
+		this.quantity = quantity;
+		this.totalPrice = totalPrice;
 	}
 
 	public void cancel() {
