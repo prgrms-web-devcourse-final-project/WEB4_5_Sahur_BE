@@ -2,15 +2,11 @@ package com.team5.backend.domain.order.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.team5.backend.domain.delivery.dto.CreateDeliveryReq;
+import com.team5.backend.domain.delivery.entity.Delivery;
+import com.team5.backend.domain.delivery.service.DeliveryService;
 import com.team5.backend.domain.order.dto.OrderDetailResDto;
 import com.team5.backend.domain.order.dto.OrderListResDto;
 import com.team5.backend.domain.order.entity.Order;
@@ -24,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 
 	private final OrderService orderService;
+	private final DeliveryService deliveryService;
 
 	@PostMapping
 	public Order createOrder(
@@ -55,5 +52,18 @@ public class OrderController {
 	@DeleteMapping("/{orderId}")
 	public void cancelOrder(@PathVariable Long orderId) {
 		orderService.cancelOrder(orderId);
+	}
+
+	@PostMapping("/{orderId}/delivery")
+	public Delivery createDelivery(
+		@PathVariable Long orderId,
+		@RequestBody CreateDeliveryReq request
+	) {
+		return deliveryService.createDelivery(orderId, request);
+	}
+
+	@GetMapping("/{orderId}/delivery")
+	public Delivery getDeliveryByOrder(@PathVariable Long orderId) {
+		return deliveryService.getDeliveryByOrder(orderId);
 	}
 }
