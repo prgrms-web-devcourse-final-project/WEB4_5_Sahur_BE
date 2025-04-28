@@ -18,7 +18,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new io.swagger.v3.oas.models.security.SecurityScheme()
-                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP) // HTTP 타입으로 설정
+                                .type(SecurityScheme.Type.HTTP) // HTTP 타입으로 설정
                                 .scheme("bearer") // Bearer 방식 적용
                                 .bearerFormat("JWT") // JWT 형식 지정
                                 .in(SecurityScheme.In.HEADER)
@@ -28,7 +28,7 @@ public class SwaggerConfig {
                 .info(apiInfo());
     }
 
-    private io.swagger.v3.oas.models.info.Info apiInfo() {
+    private Info apiInfo() {
 
         return new Info()
                 .title("퉁하자 API Test")
