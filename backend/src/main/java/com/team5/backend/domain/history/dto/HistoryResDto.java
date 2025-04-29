@@ -10,5 +10,6 @@ public class HistoryResDto {
     private Long historyId;
     private Long memberId;
     private Long productId;
+    private Long groupBuyId;
     private Boolean writable;
 }
