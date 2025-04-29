@@ -1,7 +1,7 @@
 package com.team5.backend.domain.payment.service;
 
-import com.team5.backend.domain.member.entity.Member;
-import com.team5.backend.domain.member.repository.MemberRepository;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.entity.Payment;

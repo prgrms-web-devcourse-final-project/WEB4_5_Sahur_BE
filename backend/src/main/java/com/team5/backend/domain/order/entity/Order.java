@@ -2,7 +2,7 @@ package com.team5.backend.domain.order.entity;
 
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
-import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

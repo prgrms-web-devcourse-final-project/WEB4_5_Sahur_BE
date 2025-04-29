@@ -1,6 +1,6 @@
 package com.team5.backend.domain.notification.entity;
 
-import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

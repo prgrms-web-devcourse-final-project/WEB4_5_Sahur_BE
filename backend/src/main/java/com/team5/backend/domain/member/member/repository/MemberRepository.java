@@ -1,6 +1,6 @@
-package com.team5.backend.domain.member.repository;
+package com.team5.backend.domain.member.member.repository;
 
-import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

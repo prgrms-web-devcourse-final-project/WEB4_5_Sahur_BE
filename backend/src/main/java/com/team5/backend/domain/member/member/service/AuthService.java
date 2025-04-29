@@ -1,10 +1,10 @@
-package com.team5.backend.domain.member.service;
+package com.team5.backend.domain.member.member.service;
 
-import com.team5.backend.domain.member.dto.LoginReqDto;
-import com.team5.backend.domain.member.dto.LoginResDto;
-import com.team5.backend.domain.member.dto.TokenInfoDto;
-import com.team5.backend.domain.member.entity.Member;
-import com.team5.backend.domain.member.repository.MemberRepository;
+import com.team5.backend.domain.member.member.dto.LoginReqDto;
+import com.team5.backend.domain.member.member.dto.LoginResDto;
+import com.team5.backend.domain.member.member.dto.TokenInfoDto;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,12 +1,12 @@
-package com.team5.backend.domain.member.service;
+package com.team5.backend.domain.member.member.service;
 
-import com.team5.backend.domain.member.dto.GetMemberResDto;
-import com.team5.backend.domain.member.dto.SignupReqDto;
-import com.team5.backend.domain.member.dto.SignupResDto;
-import com.team5.backend.domain.member.dto.UpdateMemberReqDto;
-import com.team5.backend.domain.member.entity.Member;
-import com.team5.backend.domain.member.entity.Role;
-import com.team5.backend.domain.member.repository.MemberRepository;
+import com.team5.backend.domain.member.member.dto.GetMemberResDto;
+import com.team5.backend.domain.member.member.dto.SignupReqDto;
+import com.team5.backend.domain.member.member.dto.SignupResDto;
+import com.team5.backend.domain.member.member.dto.UpdateMemberReqDto;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Role;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

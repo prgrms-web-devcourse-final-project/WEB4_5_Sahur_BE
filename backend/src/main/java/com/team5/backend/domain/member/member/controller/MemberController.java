@@ -1,8 +1,8 @@
-package com.team5.backend.domain.member.controller;
+package com.team5.backend.domain.member.member.controller;
 
-import com.team5.backend.domain.member.dto.*;
-import com.team5.backend.domain.member.service.AuthService;
-import com.team5.backend.domain.member.service.MemberService;
+import com.team5.backend.domain.member.member.dto.*;
+import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.member.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,7 +34,7 @@ public class MemberController {
     public ResponseEntity<GetMemberResDto> getMember(@PathVariable Long memberId) {
 
         GetMemberResDto memberResDto = memberService.getMemberById(memberId);
-        return ResponseEntity.status(HttpStatus.OK).body(memberResDto);
+        return ResponseEntity.ok(memberResDto);
     }
 
     // 회원 전체 조회
@@ -42,14 +42,14 @@ public class MemberController {
     public ResponseEntity<List<GetMemberResDto>> getAllMembers() {
 
         List<GetMemberResDto> members = memberService.getAllMembers();
-        return ResponseEntity.status(HttpStatus.OK).body(members);
+        return ResponseEntity.ok(members);
     }
 
     @PutMapping("/members/{memberId}")
     public ResponseEntity<GetMemberResDto> updateMember(@PathVariable Long memberId, @Valid @RequestBody UpdateMemberReqDto updateMemberReqDto) {
 
         GetMemberResDto updatedMember = memberService.updateMember(memberId, updateMemberReqDto);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedMember);
+        return ResponseEntity.ok(updatedMember);
     }
 
     // 회원 탈퇴
@@ -64,10 +64,10 @@ public class MemberController {
     public ResponseEntity<LoginResDto> login(@Valid @RequestBody LoginReqDto loginReqDto, HttpServletResponse response) {
 
         LoginResDto loginResDto = authService.login(loginReqDto, response);
-        return ResponseEntity.status(HttpStatus.OK).body(loginResDto);
+        return ResponseEntity.ok(loginResDto);
     }
 
-    @PostMapping("/logout")
+    @PostMapping("/auth/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
 
         authService.logout(request, response);
@@ -78,7 +78,7 @@ public class MemberController {
      * 리프레시 토큰을 사용하여 액세스 토큰 갱신 API
      * 필요한 경우 리프레시 토큰도 함께 갱신
      */
-    @PostMapping("/refresh")
+    @PostMapping("/auth/refresh")
     public ResponseEntity<LoginResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 
         LoginResDto loginResDto = authService.refreshToken(refreshToken, response);
@@ -89,7 +89,7 @@ public class MemberController {
      * 액세스 토큰이 만료되었을 때 사용하는 토큰 갱신 API
      * 만료된 액세스 토큰에서 정보를 추출하여 새 토큰 발급
      */
-    @PostMapping("/token/refresh")
+    @PostMapping("/auth/token/refresh")
     public ResponseEntity<LoginResDto> refreshTokenWithAccessToken(@CookieValue(name = "accessToken", required = false) String accessToken,
             @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 

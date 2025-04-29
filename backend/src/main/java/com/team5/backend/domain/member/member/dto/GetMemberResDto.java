@@ -1,6 +1,6 @@
-package com.team5.backend.domain.member.dto;
+package com.team5.backend.domain.member.member.dto;
 
-import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Member;
 import lombok.*;
 
 import java.time.LocalDateTime;

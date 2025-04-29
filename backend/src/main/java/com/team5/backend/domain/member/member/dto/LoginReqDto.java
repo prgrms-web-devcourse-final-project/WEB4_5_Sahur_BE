@@ -1,4 +1,4 @@
-package com.team5.backend.domain.member.dto;
+package com.team5.backend.domain.member.member.dto;
 
 
 import jakarta.validation.constraints.Email;

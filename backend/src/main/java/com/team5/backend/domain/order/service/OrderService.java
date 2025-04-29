@@ -2,8 +2,8 @@ package com.team5.backend.domain.order.service;
 
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
-import com.team5.backend.domain.member.entity.Member;
-import com.team5.backend.domain.member.repository.MemberRepository;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderDetailResDto;
 import com.team5.backend.domain.order.dto.OrderListResDto;
