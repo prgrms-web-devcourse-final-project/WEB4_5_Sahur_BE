@@ -5,4 +5,4 @@ secrets.tf
 
 .terraform.lock.hcl
 terraform.tfstate
-terraform.tfstate.backup
+terraform.tfstate.backupsecrets.tf
