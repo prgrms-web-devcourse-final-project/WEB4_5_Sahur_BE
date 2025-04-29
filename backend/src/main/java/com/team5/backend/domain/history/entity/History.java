@@ -2,6 +2,7 @@ package com.team5.backend.domain.history.entity;
 
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,11 @@ public class History {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "groupBuyId", nullable = false)
     private GroupBuy groupBuy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "orderId", nullable = false)
+    private Order order;
+
 
     @Column(nullable = false)
     private Boolean writable = false; // 작성 가능 여부
