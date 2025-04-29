@@ -1,5 +1,7 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
@@ -31,6 +33,7 @@ public class GroupBuyService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
+    private final CategoryRepository categoryRepository;
 
     // 매일 정각(00:00)에 실행
     @Scheduled(cron = "0 0 0 * * *")
@@ -65,7 +68,7 @@ public class GroupBuyService {
                 .build();
 
         GroupBuy saved = groupBuyRepository.save(groupBuy);
-        return toResponse(saved);
+        return toGroupBuyResDto(saved);
     }
 
     public List<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
@@ -78,7 +81,7 @@ public class GroupBuyService {
         // 페이징과 정렬 적용
         Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
         return pageResult.stream()
-                .map(this::toResponse)
+                .map(this::toGroupBuyResDto)
                 .collect(Collectors.toList());
     }
 
@@ -95,7 +98,7 @@ public class GroupBuyService {
 
     public Optional<GroupBuyResDto> getGroupBuyById(Long id) {
         return groupBuyRepository.findById(id)
-                .map(this::toResponse);
+                .map(this::toGroupBuyResDto);
     }
 
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
@@ -107,7 +110,7 @@ public class GroupBuyService {
                     existing.setDeadline(request.getDeadline());
                     existing.setStatus(request.getStatus());
                     GroupBuy updated = groupBuyRepository.save(existing);
-                    return toResponse(updated);
+                    return toGroupBuyResDto(updated);
                 })
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
@@ -134,7 +137,7 @@ public class GroupBuyService {
 
                     // 수정된 엔티티 저장
                     GroupBuy updated = groupBuyRepository.save(existing);
-                    return toResponse(updated);
+                    return toGroupBuyResDto(updated);
                 })
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
@@ -156,7 +159,7 @@ public class GroupBuyService {
         Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
 
         return pageResult.stream()
-                .map(this::toResponse)
+                .map(this::toGroupBuyResDto)
                 .collect(Collectors.toList());
     }
 
@@ -180,7 +183,7 @@ public class GroupBuyService {
         Page<GroupBuy> pageResult = groupBuyRepository.findByGroupBuyIdIn(groupBuyIds, sortedPageable);
 
         return pageResult.stream()
-                .map(this::toResponse)
+                .map(this::toGroupBuyResDto)
                 .collect(Collectors.toList());
     }
 
@@ -193,7 +196,7 @@ public class GroupBuyService {
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
 
-    private GroupBuyResDto toResponse(GroupBuy groupBuy) {
+    private GroupBuyResDto toGroupBuyResDto(GroupBuy groupBuy) {
         return GroupBuyResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .productId(groupBuy.getProduct().getProductId())
