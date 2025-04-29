@@ -2,7 +2,7 @@ package com.team5.backend.domain.member.member.service;
 
 import com.team5.backend.domain.member.member.dto.LoginReqDto;
 import com.team5.backend.domain.member.member.dto.LoginResDto;
-import com.team5.backend.domain.member.member.dto.TokenInfoDto;
+import com.team5.backend.domain.member.member.dto.TokenInfoReqDto;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.util.JwtUtil;
@@ -209,14 +209,14 @@ public class AuthService {
         }
 
         // 토큰에서 사용자 정보 추출
-        TokenInfoDto tokenInfo = extractTokenInfo(extractedToken);
+        TokenInfoReqDto tokenInfo = extractTokenInfo(extractedToken);
 
         return memberRepository.findByEmail(tokenInfo.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     // 토큰에서 사용자 정보를 추출하는 메서드
-    public TokenInfoDto extractTokenInfo(String token) {
+    public TokenInfoReqDto extractTokenInfo(String token) {
 
         if (jwtUtil.isTokenExpired(token)) {
             throw new RuntimeException("만료된 토큰입니다.");
@@ -225,7 +225,7 @@ public class AuthService {
         String email = jwtUtil.extractEmail(token);
         String role = jwtUtil.extractRole(token);
 
-        return new TokenInfoDto(email, role);
+        return new TokenInfoReqDto(email, role);
     }
 
     // 쿠키 생성 메서드 (만료 시간 설정)

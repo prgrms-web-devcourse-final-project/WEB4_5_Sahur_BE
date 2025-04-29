@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.URL;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateMemberReqDto {
+public class PatchMemberReqDto {
 
     @Email(message = "유효한 이메일 형식이 아닙니다.")
     private String email;

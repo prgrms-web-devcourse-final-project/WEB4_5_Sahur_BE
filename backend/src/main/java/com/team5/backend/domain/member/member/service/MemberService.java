@@ -3,7 +3,7 @@ package com.team5.backend.domain.member.member.service;
 import com.team5.backend.domain.member.member.dto.GetMemberResDto;
 import com.team5.backend.domain.member.member.dto.SignupReqDto;
 import com.team5.backend.domain.member.member.dto.SignupResDto;
-import com.team5.backend.domain.member.member.dto.UpdateMemberReqDto;
+import com.team5.backend.domain.member.member.dto.PatchMemberReqDto;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
@@ -89,46 +89,46 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public GetMemberResDto updateMember(Long memberId, UpdateMemberReqDto updateMemberReqDto) {
+    public GetMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
 
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
 
         // 이메일 변경 시 중복 검사
-        if (updateMemberReqDto.getEmail() != null && !updateMemberReqDto.getEmail().equals(existingMember.getEmail())
-                && memberRepository.existsByEmail(updateMemberReqDto.getEmail())) {
+        if (patchMemberReqDto.getEmail() != null && !patchMemberReqDto.getEmail().equals(existingMember.getEmail())
+                && memberRepository.existsByEmail(patchMemberReqDto.getEmail())) {
             throw new RuntimeException("이미 사용 중인 이메일입니다.");
         }
 
         // 닉네임 변경 시 중복 검사
-        if (updateMemberReqDto.getNickname() != null && !updateMemberReqDto.getNickname().equals(existingMember.getNickname())
-                && memberRepository.existsByNickname(updateMemberReqDto.getNickname())) {
+        if (patchMemberReqDto.getNickname() != null && !patchMemberReqDto.getNickname().equals(existingMember.getNickname())
+                && memberRepository.existsByNickname(patchMemberReqDto.getNickname())) {
             throw new RuntimeException("이미 사용 중인 닉네임입니다.");
         }
 
         // 변경할 필드만 수정
-        if (updateMemberReqDto.getEmail() != null) {
-            existingMember.setEmail(updateMemberReqDto.getEmail());
+        if (patchMemberReqDto.getEmail() != null) {
+            existingMember.setEmail(patchMemberReqDto.getEmail());
         }
 
-        if (updateMemberReqDto.getNickname() != null) {
-            existingMember.setNickname(updateMemberReqDto.getNickname());
+        if (patchMemberReqDto.getNickname() != null) {
+            existingMember.setNickname(patchMemberReqDto.getNickname());
         }
 
-        if (updateMemberReqDto.getName() != null) {
-            existingMember.setName(updateMemberReqDto.getName());
+        if (patchMemberReqDto.getName() != null) {
+            existingMember.setName(patchMemberReqDto.getName());
         }
 
-        if (updateMemberReqDto.getPassword() != null) {
-            existingMember.setPassword(updateMemberReqDto.getPassword());
+        if (patchMemberReqDto.getPassword() != null) {
+            existingMember.setPassword(patchMemberReqDto.getPassword());
         }
 
-        if (updateMemberReqDto.getAddress() != null) {
-            existingMember.setAddress(updateMemberReqDto.getAddress());
+        if (patchMemberReqDto.getAddress() != null) {
+            existingMember.setAddress(patchMemberReqDto.getAddress());
         }
 
-        if (updateMemberReqDto.getImageUrl() != null) {
-            existingMember.setImageUrl(updateMemberReqDto.getImageUrl());
+        if (patchMemberReqDto.getImageUrl() != null) {
+            existingMember.setImageUrl(patchMemberReqDto.getImageUrl());
         }
 
         Member updatedMember = memberRepository.save(existingMember);

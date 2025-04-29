@@ -49,9 +49,9 @@ public class MemberController {
     }
 
     @PutMapping("/members/{memberId}")
-    public ResponseEntity<GetMemberResDto> updateMember(@PathVariable Long memberId, @Valid @RequestBody UpdateMemberReqDto updateMemberReqDto) {
+    public ResponseEntity<GetMemberResDto> updateMember(@PathVariable Long memberId, @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
-        GetMemberResDto updatedMember = memberService.updateMember(memberId, updateMemberReqDto);
+        GetMemberResDto updatedMember = memberService.updateMember(memberId, patchMemberReqDto);
         return ResponseEntity.ok(updatedMember);
     }
 
@@ -112,9 +112,9 @@ public class MemberController {
 
     // 이메일 인증번호 검증
     @PostMapping("/auth/email/verify")
-    public ResponseEntity<String> validateAuthCode(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+    public ResponseEntity<String> validateAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
 
-        boolean isSuccess = mailService.validationAuthCode(emailVerificationRequestDto);
+        boolean isSuccess = mailService.validationAuthCode(emailVerificationReqDto);
 
         return isSuccess ? ResponseEntity.ok("이메일 인증에 성공하였습니다.") :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증에 실패하였습니다.");
