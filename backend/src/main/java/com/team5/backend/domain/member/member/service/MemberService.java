@@ -8,6 +8,7 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,17 @@ import java.util.stream.Collectors;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MailService mailService;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원 생성
     @Transactional
     public SignupResDto signup(SignupReqDto signupReqDto) {
 
+        String email = signupReqDto.getEmail();
+
         // 이메일 중복 검사
-        if (memberRepository.existsByEmail(signupReqDto.getEmail())) {
+        if (memberRepository.existsByEmail(email)) {
             throw new RuntimeException("이미 사용 중인 이메일입니다.");
         }
 
@@ -34,17 +39,30 @@ public class MemberService {
             throw new RuntimeException("이미 사용 중인 닉네임입니다.");
         }
 
+        // 이메일 인증 상태 확인
+        boolean isVerified = mailService.isEmailVerified(email);
+        if (!isVerified) {
+            throw new RuntimeException("이메일 인증이 완료되지 않았습니다.");
+        }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(signupReqDto.getPassword());
+
         Member member = Member.builder()
-                .email(signupReqDto.getEmail())
+                .email(email)
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
-                .password(signupReqDto.getPassword())
+                .password(encodedPassword)
                 .address(signupReqDto.getAddress())
                 .imageUrl(signupReqDto.getImageUrl())
                 .role(Role.USER)
+                .emailVerified(true)  // 이미 인증이 완료된 상태이므로 true로 설정
                 .build();
 
         Member savedMember = memberRepository.save(member);
+
+        // 인증 상태 정보 삭제 (더 이상 필요 없음)
+        mailService.clearEmailVerificationStatus(email);
 
         return SignupResDto.builder()
                 .memberId(savedMember.getMemberId())
@@ -72,6 +90,7 @@ public class MemberService {
     // 회원 정보 수정
     @Transactional
     public GetMemberResDto updateMember(Long memberId, UpdateMemberReqDto updateMemberReqDto) {
+
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
 
@@ -121,9 +140,9 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long memberId) {
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId);
-        }
-        memberRepository.deleteById(memberId);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
+
+        memberRepository.delete(member);
     }
 }
