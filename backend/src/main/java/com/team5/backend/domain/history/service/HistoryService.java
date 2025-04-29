@@ -10,11 +10,11 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,18 +38,17 @@ public class HistoryService {
                 .build();
 
         History savedHistory = historyRepository.save(history);
-        return toResponse(savedHistory);
+        return toHistoryResDto(savedHistory);
     }
 
-    public List<HistoryResDto> getAllHistories() {
-        return historyRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public Page<HistoryResDto> getAllHistories(Pageable pageable) {
+        return historyRepository.findAll(pageable)
+                .map(this::toHistoryResDto);
     }
 
     public Optional<HistoryResDto> getHistoryById(Long id) {
         return historyRepository.findById(id)
-                .map(this::toResponse);
+                .map(this::toHistoryResDto);
     }
 
     public HistoryResDto updateHistory(Long id, HistoryUpdateReqDto request) {
@@ -57,7 +56,7 @@ public class HistoryService {
                 .map(existingHistory -> {
                     existingHistory.setWritable(request.getWritable());
                     History updatedHistory = historyRepository.save(existingHistory);
-                    return toResponse(updatedHistory);
+                    return toHistoryResDto(updatedHistory);
                 })
                 .orElseThrow(() -> new RuntimeException("History not found with id " + id));
     }
@@ -66,7 +65,7 @@ public class HistoryService {
         historyRepository.deleteById(id);
     }
 
-    private HistoryResDto toResponse(History history) {
+    private HistoryResDto toHistoryResDto(History history) {
         return HistoryResDto.builder()
                 .historyId(history.getHistoryId())
                 .memberId(history.getMember().getMemberId())
