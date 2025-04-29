@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.entity;
 
+import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;

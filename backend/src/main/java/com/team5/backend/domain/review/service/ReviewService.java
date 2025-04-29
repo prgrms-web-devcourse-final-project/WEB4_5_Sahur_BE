@@ -1,7 +1,7 @@
 package com.team5.backend.domain.review.service;
 
-import com.team5.backend.domain.member.entity.Member;
-import com.team5.backend.domain.member.repository.MemberRepository;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.dto.ReviewCreateReqDto;

@@ -1,27 +1,15 @@
 package com.team5.backend.domain.order.entity;
 
-import java.time.LocalDateTime;
-
+import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
-import com.team5.backend.domain.member.entity.Member;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.team5.backend.domain.member.member.entity.Member;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter

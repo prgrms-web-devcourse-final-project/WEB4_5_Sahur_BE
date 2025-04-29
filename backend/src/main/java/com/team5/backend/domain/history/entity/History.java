@@ -1,7 +1,7 @@
 package com.team5.backend.domain.history.entity;
 
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
-import com.team5.backend.domain.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;

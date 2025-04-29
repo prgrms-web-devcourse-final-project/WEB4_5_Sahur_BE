@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CategoryResDto {
-    private Integer categoryId;
+    private Long categoryId;
     private Long productId;
     private CategoryType category;
     private KeywordType keyword;

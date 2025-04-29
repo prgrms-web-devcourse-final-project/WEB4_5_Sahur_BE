@@ -41,13 +41,13 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    public CategoryResDto getCategoryById(Integer categoryId) {
+    public CategoryResDto getCategoryById(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));
         return toResponse(category);
     }
 
-    public CategoryResDto updateCategory(Integer categoryId, CategoryUpdateReqDto request) {
+    public CategoryResDto updateCategory(Long categoryId, CategoryUpdateReqDto request) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));
 
@@ -57,7 +57,7 @@ public class CategoryService {
         return toResponse(updated);
     }
 
-    public void deleteCategory(Integer categoryId) {
+    public void deleteCategory(Long categoryId) {
         categoryRepository.deleteById(categoryId);
     }
 
