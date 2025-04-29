@@ -14,10 +14,7 @@ import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -71,18 +68,17 @@ public class GroupBuyService {
         return toGroupBuyResDto(saved);
     }
 
-    public List<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
-        // GroupBuySortField에 따른 정렬 설정
+    public Page<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
         Sort sort = getSortForField(sortField);
-
-        // Pageable에 정렬 적용
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        // 페이징과 정렬 적용
         Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
-        return pageResult.stream()
+
+        List<GroupBuyResDto> content = pageResult.stream()
                 .map(this::toGroupBuyResDto)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
     }
 
     private Sort getSortForField(GroupBuySortField sortField) {
@@ -146,29 +142,27 @@ public class GroupBuyService {
         groupBuyRepository.deleteById(id);
     }
 
-    public List<GroupBuyResDto> getTodayDeadlineGroupBuys(Pageable pageable, GroupBuySortField sortField) {
-        // 오늘 00:00:00 ~ 오늘 23:59:59 구하기
+    public Page<GroupBuyResDto> getTodayDeadlineGroupBuys(Pageable pageable, GroupBuySortField sortField) {
         LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime endOfToday = startOfToday.plusDays(1).minusNanos(1);
 
-        // 정렬 적용
         Sort sort = getSortForField(sortField);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        // deadline이 오늘인 것만 필터링해서 가져오기 (findByDeadlineBetween 사용)
         Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
 
-        return pageResult.stream()
+        List<GroupBuyResDto> content = pageResult.stream()
                 .map(this::toGroupBuyResDto)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
     }
 
-    public List<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
-        // 정렬 설정
+
+    public Page<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
         Sort sort = getSortForField(sortField);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        // 1. memberId로 참여한 groupBuyId 리스트 가져오기
         List<Long> groupBuyIds = historyRepository.findByMemberId(memberId)
                 .stream()
                 .map(history -> history.getGroupBuy().getGroupBuyId())
@@ -176,15 +170,16 @@ public class GroupBuyService {
                 .collect(Collectors.toList());
 
         if (groupBuyIds.isEmpty()) {
-            return List.of(); // 참여한 게 없으면 빈 리스트 반환
+            return Page.empty(sortedPageable);
         }
 
-        // 2. groupBuyId 리스트에 해당하는 GroupBuy 가져오기 (Pageable 사용)
         Page<GroupBuy> pageResult = groupBuyRepository.findByGroupBuyIdIn(groupBuyIds, sortedPageable);
 
-        return pageResult.stream()
+        List<GroupBuyResDto> content = pageResult.stream()
                 .map(this::toGroupBuyResDto)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
     }
 
     public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
