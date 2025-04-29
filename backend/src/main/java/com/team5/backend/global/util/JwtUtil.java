@@ -127,6 +127,11 @@ public class JwtUtil {
         return Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_BLACKLIST_PREFIX + token));
     }
 
+    // 리프레시 토큰 삭제 메서드
+    public void removeRefreshToken(String email) {
+        redisTemplate.delete(REDIS_REFRESH_TOKEN_PREFIX + email);
+    }
+
     // 토큰에서 이메일 추출
     public String extractEmail(String token) {
         return getClaims(token).getSubject();
@@ -184,5 +189,69 @@ public class JwtUtil {
     // 리프레시 토큰 키 값 조회를 위한 메서드
     public String getStoredRefreshToken(String email) {
         return redisTemplate.opsForValue().get(REDIS_REFRESH_TOKEN_PREFIX + email);
+    }
+
+    // 리프레시 토큰 업데이트
+    public void updateRefreshTokenInRedis(String email, String newRefreshToken) {
+
+        redisTemplate.opsForValue().set(
+                REDIS_REFRESH_TOKEN_PREFIX + email,
+                newRefreshToken,
+                refreshTokenExpiration,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    // 토큰에서 만료 시간(Date) 추출
+    public Date extractExpiration(String token) {
+        return getClaims(token).getExpiration();
+    }
+
+    // 만료된 토큰에서도 이메일 추출 (액세스 토큰 갱신에 사용)
+    public String extractEmailIgnoringExpiration(String token) {
+
+        try {
+            return Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .setAllowedClockSkewSeconds(refreshTokenExpiration / 1000) // 충분히 큰 값으로 설정
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 만료된 토큰에서도 memberId 추출
+    public Long extractMemberIdIgnoringExpiration(String token) {
+
+        try {
+            return Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .setAllowedClockSkewSeconds(refreshTokenExpiration / 1000)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get("memberId", Long.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 만료된 토큰에서도 역할 추출
+    public String extractRoleIgnoringExpiration(String token) {
+
+        try {
+            return Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .setAllowedClockSkewSeconds(refreshTokenExpiration / 1000)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

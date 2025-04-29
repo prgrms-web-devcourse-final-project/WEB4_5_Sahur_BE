@@ -73,4 +73,27 @@ public class MemberController {
         authService.logout(request, response);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 리프레시 토큰을 사용하여 액세스 토큰 갱신 API
+     * 필요한 경우 리프레시 토큰도 함께 갱신
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+
+        LoginResDto loginResDto = authService.refreshToken(refreshToken, response);
+        return ResponseEntity.ok(loginResDto);
+    }
+
+    /**
+     * 액세스 토큰이 만료되었을 때 사용하는 토큰 갱신 API
+     * 만료된 액세스 토큰에서 정보를 추출하여 새 토큰 발급
+     */
+    @PostMapping("/token/refresh")
+    public ResponseEntity<LoginResDto> refreshTokenWithAccessToken(@CookieValue(name = "accessToken", required = false) String accessToken,
+            @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+
+        LoginResDto loginResDto = authService.refreshTokenWithAccessToken(accessToken, refreshToken, response);
+        return ResponseEntity.ok(loginResDto);
+    }
 }
