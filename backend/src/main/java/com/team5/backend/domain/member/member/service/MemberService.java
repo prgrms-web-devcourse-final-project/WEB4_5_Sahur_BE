@@ -19,13 +19,16 @@ import java.util.stream.Collectors;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final MailService mailService;
 
     // 회원 생성
     @Transactional
     public SignupResDto signup(SignupReqDto signupReqDto) {
 
+        String email = signupReqDto.getEmail();
+
         // 이메일 중복 검사
-        if (memberRepository.existsByEmail(signupReqDto.getEmail())) {
+        if (memberRepository.existsByEmail(email)) {
             throw new RuntimeException("이미 사용 중인 이메일입니다.");
         }
 
@@ -34,17 +37,27 @@ public class MemberService {
             throw new RuntimeException("이미 사용 중인 닉네임입니다.");
         }
 
+        // 이메일 인증 상태 확인
+        boolean isVerified = mailService.isEmailVerified(email);
+        if (!isVerified) {
+            throw new RuntimeException("이메일 인증이 완료되지 않았습니다.");
+        }
+
         Member member = Member.builder()
-                .email(signupReqDto.getEmail())
+                .email(email)
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(signupReqDto.getPassword())
                 .address(signupReqDto.getAddress())
                 .imageUrl(signupReqDto.getImageUrl())
                 .role(Role.USER)
+                .emailVerified(true)  // 이미 인증이 완료된 상태이므로 true로 설정
                 .build();
 
         Member savedMember = memberRepository.save(member);
+
+        // 인증 상태 정보 삭제 (더 이상 필요 없음)
+        mailService.clearEmailVerificationStatus(email);
 
         return SignupResDto.builder()
                 .memberId(savedMember.getMemberId())

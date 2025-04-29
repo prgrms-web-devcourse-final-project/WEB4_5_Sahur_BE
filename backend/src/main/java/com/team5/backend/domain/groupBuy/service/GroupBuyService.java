@@ -1,5 +1,7 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
@@ -31,6 +33,7 @@ public class GroupBuyService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
+    private final CategoryRepository categoryRepository;
 
     // 매일 정각(00:00)에 실행
     @Scheduled(cron = "0 0 0 * * *")
@@ -166,7 +169,7 @@ public class GroupBuyService {
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         // 1. memberId로 참여한 groupBuyId 리스트 가져오기
-        List<Long> groupBuyIds = historyRepository.findByMemberId(memberId)
+        List<Long> groupBuyIds = historyRepository.findByMemberMemberId(memberId)
                 .stream()
                 .map(history -> history.getGroupBuy().getGroupBuyId())
                 .distinct()
@@ -198,8 +201,8 @@ public class GroupBuyService {
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .productId(groupBuy.getProduct().getProductId())
                 .categoryId(groupBuy.getCategory().getCategoryId())
-                .minParticipants(groupBuy.getTargetParticipants())
-                .currentParticipants(groupBuy.getCurrentParticipantCount())
+                .targetParticipants(groupBuy.getTargetParticipants())
+                .currentParticipantCount(groupBuy.getCurrentParticipantCount())
                 .round(groupBuy.getRound())
                 .deadline(groupBuy.getDeadline())
                 .status(groupBuy.getStatus())

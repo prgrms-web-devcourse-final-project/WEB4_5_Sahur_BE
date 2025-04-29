@@ -2,7 +2,9 @@ package com.team5.backend.domain.member.member.controller;
 
 import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,6 +22,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final AuthService authService;
+    private final MailService mailService;
 
     // 회원 생성
     @PostMapping("/auth/signup")
@@ -95,5 +98,25 @@ public class MemberController {
 
         LoginResDto loginResDto = authService.refreshTokenWithAccessToken(accessToken, refreshToken, response);
         return ResponseEntity.ok(loginResDto);
+    }
+
+    // 이메일 인증번호 전송
+    @GetMapping("/auth/email/send")
+    public ResponseEntity<String> requestAuthCode(String email) throws MessagingException {
+
+        boolean isSend = mailService.sendAuthCode(email);
+
+        return isSend ? ResponseEntity.ok("인증 코드가 전송되었습니다.") :
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 코드 전송이 실패하였습니다.");
+    }
+
+    // 이메일 인증번호 검증
+    @PostMapping("/auth/email/verify")
+    public ResponseEntity<String> validateAuthCode(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+
+        boolean isSuccess = mailService.validationAuthCode(emailVerificationRequestDto);
+
+        return isSuccess ? ResponseEntity.ok("이메일 인증에 성공하였습니다.") :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증에 실패하였습니다.");
     }
 }

@@ -2,7 +2,6 @@ package com.team5.backend.domain.member.member.service;
 
 
 import com.team5.backend.domain.member.member.dto.EmailVerificationRequestDto;
-import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -34,6 +33,9 @@ public class MailService {
 
     // Redis에 키 저장 시 접두어
     private static final String EMAIL_AUTH_PREFIX = "EMAIL_AUTH:";
+
+    // 이메일 인증 성공 정보 저장 필드
+    private static final String EMAIL_VERIFIED_PREFIX = "EMAIL_VERIFIED:";
 
     public String createCode() {
 
@@ -120,20 +122,34 @@ public class MailService {
         // 인증 코드 검증
         if (storedAuthCode != null && storedAuthCode.equals(authCode)) {
 
-            // 인증 성공 시 Member 엔티티의 verified 필드 업데이트
-            Member member = memberRepository.findByEmail(email).orElse(null);
-
-            if (member != null) {
-
-                member.setEmailVerified(true);
-                memberRepository.save(member);
-            }
+            // 인증 성공 시 Redis에 인증 완료 상태 저장 (유효기간 10분)
+            String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
+            values.set(verifiedKey, "true");
+            redisTemplate.expire(verifiedKey, 10, TimeUnit.MINUTES);
 
             // 인증 성공 후 Redis에서 인증 코드 삭제
             redisTemplate.delete(key);
 
             return true;
         }
+
         return false;
+    }
+
+    // 인증 상태 확인
+    public boolean isEmailVerified(String email) {
+
+        ValueOperations<String, String> values = redisTemplate.opsForValue();
+        String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
+        String verified = values.get(verifiedKey);
+
+        return verified != null && verified.equals("true");
+    }
+
+    // 인증 상태 삭제 (회원가입 후 사용)
+    public void clearEmailVerificationStatus(String email) {
+
+        String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
+        redisTemplate.delete(verifiedKey);
     }
 }
