@@ -1,18 +1,25 @@
 package com.team5.backend.domain.groupBuy.service;
 
-import com.team5.backend.domain.category.entity.Category;
-import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
 import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,7 +30,22 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
+    private final HistoryRepository historyRepository;
+
+    // 매일 정각(00:00)에 실행
+    @Scheduled(cron = "0 0 0 * * *")
+    public void updateGroupBuyStatuses() {
+        List<GroupBuy> ongoingGroupBuys = groupBuyRepository.findByStatus(GroupBuyStatus.ONGOING);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (GroupBuy groupBuy : ongoingGroupBuys) {
+            if (groupBuy.getDeadline() != null && now.isAfter(groupBuy.getDeadline())) {
+                groupBuy.setStatus(GroupBuyStatus.CLOSED);
+            }
+        }
+
+        groupBuyRepository.saveAll(ongoingGroupBuys); // 변경된 것들 저장
+    }
 
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
@@ -35,8 +57,8 @@ public class GroupBuyService {
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
                 .category(category)
-                .minParticipants(request.getMinParticipants())
-                .currentParticipants(0) // 처음에는 0명
+                .targetParticipants(request.getTargetParticipants())
+                .currentParticipantCount(0) // 처음에는 0명
                 .round(request.getRound())
                 .deadline(request.getDeadline())
                 .status(GroupBuyStatus.ONGOING) // 기본값 ONGOING
@@ -46,10 +68,29 @@ public class GroupBuyService {
         return toResponse(saved);
     }
 
-    public List<GroupBuyResDto> getAllGroupBuys() {
-        return groupBuyRepository.findAll().stream()
+    public List<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        // GroupBuySortField에 따른 정렬 설정
+        Sort sort = getSortForField(sortField);
+
+        // Pageable에 정렬 적용
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // 페이징과 정렬 적용
+        Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
+        return pageResult.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    private Sort getSortForField(GroupBuySortField sortField) {
+        switch (sortField) {
+            case LATEST:
+                return Sort.by(Sort.Order.desc("createdAt"));
+            case POPULAR:
+                return Sort.by(Sort.Order.desc("product.dibCount"));
+            default:
+                return Sort.unsorted();
+        }
     }
 
     public Optional<GroupBuyResDto> getGroupBuyById(Long id) {
@@ -60,8 +101,8 @@ public class GroupBuyService {
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
-                    existing.setMinParticipants(request.getMinParticipants());
-                    existing.setCurrentParticipants(request.getCurrentParticipants());
+                    existing.setTargetParticipants(request.getTargetParticipants());
+                    existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
                     existing.setRound(request.getRound());
                     existing.setDeadline(request.getDeadline());
                     existing.setStatus(request.getStatus());
@@ -75,11 +116,11 @@ public class GroupBuyService {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
                     // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
-                    if (request.getMinParticipants() != null) {
-                        existing.setMinParticipants(request.getMinParticipants());
+                    if (request.getTargetParticipants() != null) {
+                        existing.setTargetParticipants(request.getTargetParticipants());
                     }
-                    if (request.getCurrentParticipants() != null) {
-                        existing.setCurrentParticipants(request.getCurrentParticipants());
+                    if (request.getCurrentParticipantCount() != null) {
+                        existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
                     }
                     if (request.getRound() != null) {
                         existing.setRound(request.getRound());
@@ -102,13 +143,63 @@ public class GroupBuyService {
         groupBuyRepository.deleteById(id);
     }
 
+    public List<GroupBuyResDto> getTodayDeadlineGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        // 오늘 00:00:00 ~ 오늘 23:59:59 구하기
+        LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
+        LocalDateTime endOfToday = startOfToday.plusDays(1).minusNanos(1);
+
+        // 정렬 적용
+        Sort sort = getSortForField(sortField);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // deadline이 오늘인 것만 필터링해서 가져오기 (findByDeadlineBetween 사용)
+        Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
+
+        return pageResult.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
+        // 정렬 설정
+        Sort sort = getSortForField(sortField);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        // 1. memberId로 참여한 groupBuyId 리스트 가져오기
+        List<Long> groupBuyIds = historyRepository.findByMemberId(memberId)
+                .stream()
+                .map(history -> history.getGroupBuy().getGroupBuyId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (groupBuyIds.isEmpty()) {
+            return List.of(); // 참여한 게 없으면 빈 리스트 반환
+        }
+
+        // 2. groupBuyId 리스트에 해당하는 GroupBuy 가져오기 (Pageable 사용)
+        Page<GroupBuy> pageResult = groupBuyRepository.findByGroupBuyIdIn(groupBuyIds, sortedPageable);
+
+        return pageResult.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
+        return groupBuyRepository.findById(id)
+                .map(groupBuy -> GroupBuyStatusResDto.builder()
+                        .currentParticipantCount(groupBuy.getCurrentParticipantCount())
+                        .status(groupBuy.getStatus())
+                        .build())
+                .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
+    }
+
     private GroupBuyResDto toResponse(GroupBuy groupBuy) {
         return GroupBuyResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .productId(groupBuy.getProduct().getProductId())
-//                .categoryId(groupBuy.getCategory().getCategoryId())
-                .minParticipants(groupBuy.getMinParticipants())
-                .currentParticipants(groupBuy.getCurrentParticipants())
+                .categoryId(groupBuy.getCategory().getCategoryId())
+                .minParticipants(groupBuy.getTargetParticipants())
+                .currentParticipants(groupBuy.getCurrentParticipantCount())
                 .round(groupBuy.getRound())
                 .deadline(groupBuy.getDeadline())
                 .status(groupBuy.getStatus())
