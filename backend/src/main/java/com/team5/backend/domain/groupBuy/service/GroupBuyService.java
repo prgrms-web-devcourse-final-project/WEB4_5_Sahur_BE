@@ -44,7 +44,7 @@ public class GroupBuyService {
             }
         }
 
-        groupBuyRepository.saveAll(ongoingGroupBuys); // 변경된 것들 저장
+        groupBuyRepository.saveAll(ongoingGroupBuys);
     }
 
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
@@ -58,14 +58,14 @@ public class GroupBuyService {
                 .product(product)
                 .category(category)
                 .targetParticipants(request.getTargetParticipants())
-                .currentParticipantCount(0) // 처음에는 0명
+                .currentParticipantCount(0)
                 .round(request.getRound())
                 .deadline(request.getDeadline())
-                .status(GroupBuyStatus.ONGOING) // 기본값 ONGOING
+                .status(GroupBuyStatus.ONGOING)
                 .build();
 
         GroupBuy saved = groupBuyRepository.save(groupBuy);
-        return toGroupBuyResDto(saved);
+        return GroupBuyResDto.fromEntity(saved);
     }
 
     public Page<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
@@ -74,11 +74,7 @@ public class GroupBuyService {
 
         Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
 
-        List<GroupBuyResDto> content = pageResult.stream()
-                .map(this::toGroupBuyResDto)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
+        return pageResult.map(GroupBuyResDto::fromEntity);
     }
 
     private Sort getSortForField(GroupBuySortField sortField) {
@@ -94,7 +90,7 @@ public class GroupBuyService {
 
     public Optional<GroupBuyResDto> getGroupBuyById(Long id) {
         return groupBuyRepository.findById(id)
-                .map(this::toGroupBuyResDto);
+                .map(GroupBuyResDto::fromEntity);
     }
 
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
@@ -106,7 +102,7 @@ public class GroupBuyService {
                     existing.setDeadline(request.getDeadline());
                     existing.setStatus(request.getStatus());
                     GroupBuy updated = groupBuyRepository.save(existing);
-                    return toGroupBuyResDto(updated);
+                    return GroupBuyResDto.fromEntity(updated);
                 })
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
@@ -114,7 +110,6 @@ public class GroupBuyService {
     public GroupBuyResDto patchGroupBuy(Long id, GroupBuyUpdateReqDto request) {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
-                    // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
                     if (request.getTargetParticipants() != null) {
                         existing.setTargetParticipants(request.getTargetParticipants());
                     }
@@ -130,10 +125,8 @@ public class GroupBuyService {
                     if (request.getStatus() != null) {
                         existing.setStatus(request.getStatus());
                     }
-
-                    // 수정된 엔티티 저장
                     GroupBuy updated = groupBuyRepository.save(existing);
-                    return toGroupBuyResDto(updated);
+                    return GroupBuyResDto.fromEntity(updated);
                 })
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
@@ -151,56 +144,31 @@ public class GroupBuyService {
 
         Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
 
-        List<GroupBuyResDto> content = pageResult.stream()
-                .map(this::toGroupBuyResDto)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
+        return pageResult.map(GroupBuyResDto::fromEntity);
     }
 
-
-    public Page<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
-        Sort sort = getSortForField(sortField);
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-
-        List<Long> groupBuyIds = historyRepository.findByMemberId(memberId)
-                .stream()
-                .map(history -> history.getGroupBuy().getGroupBuyId())
-                .distinct()
-                .collect(Collectors.toList());
-
-        if (groupBuyIds.isEmpty()) {
-            return Page.empty(sortedPageable);
-        }
-
-        Page<GroupBuy> pageResult = groupBuyRepository.findByGroupBuyIdIn(groupBuyIds, sortedPageable);
-
-        List<GroupBuyResDto> content = pageResult.stream()
-                .map(this::toGroupBuyResDto)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
-    }
+//    public Page<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
+//        Sort sort = getSortForField(sortField);
+//        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+//
+//        Page<Long> groupBuyIds = historyRepository.findByMemberId(memberId)
+//                .stream()
+//                .map(history -> history.getGroupBuy().getGroupBuyId())
+//                .distinct()
+//                .collect(Collectors.toList());
+//
+//        if (groupBuyIds.isEmpty()) {
+//            return Page.empty(sortedPageable);
+//        }
+//
+//        Page<GroupBuy> pageResult = groupBuyRepository.findByGroupBuyIdIn(groupBuyIds, sortedPageable);
+//
+//        return pageResult.map(GroupBuyResDto::fromEntity);
+//    }
 
     public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
         return groupBuyRepository.findById(id)
-                .map(groupBuy -> GroupBuyStatusResDto.builder()
-                        .currentParticipantCount(groupBuy.getCurrentParticipantCount())
-                        .status(groupBuy.getStatus())
-                        .build())
+                .map(GroupBuyStatusResDto::fromEntity)
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
-    }
-
-    private GroupBuyResDto toGroupBuyResDto(GroupBuy groupBuy) {
-        return GroupBuyResDto.builder()
-                .groupBuyId(groupBuy.getGroupBuyId())
-                .productId(groupBuy.getProduct().getProductId())
-                .categoryId(groupBuy.getCategory().getCategoryId())
-                .targetParticipants(groupBuy.getTargetParticipants())
-                .currentParticipantCount(groupBuy.getCurrentParticipantCount())
-                .round(groupBuy.getRound())
-                .deadline(groupBuy.getDeadline())
-                .status(groupBuy.getStatus())
-                .build();
     }
 }
