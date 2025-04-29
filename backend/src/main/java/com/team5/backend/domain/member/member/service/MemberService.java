@@ -8,6 +8,7 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final MailService mailService;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원 생성
     @Transactional
@@ -43,11 +45,14 @@ public class MemberService {
             throw new RuntimeException("이메일 인증이 완료되지 않았습니다.");
         }
 
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(signupReqDto.getPassword());
+
         Member member = Member.builder()
                 .email(email)
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
-                .password(signupReqDto.getPassword())
+                .password(encodedPassword)
                 .address(signupReqDto.getAddress())
                 .imageUrl(signupReqDto.getImageUrl())
                 .role(Role.USER)
