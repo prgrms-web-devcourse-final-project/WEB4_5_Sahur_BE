@@ -21,35 +21,39 @@ public class AdminService {
     private final ProductRequestRepository productRequestRepository;
     private final GroupBuyRequestRepository groupBuyRequestRepository;
 
-    // ✅ ProductRequest 조회: 상태 있으면 필터링, 없으면 전체 조회 (항상 최신순 정렬)
-    public List<ProductRequestResDto> getProductRequests(Pageable pageable, ProductRequestStatus status) {
+    // ✅ ProductRequest 조회 (Page 반환)
+    public Page<ProductRequestResDto> getProductRequests(Pageable pageable, ProductRequestStatus status) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         Page<ProductRequest> pageResult;
 
-        if (status != null) { // 상태 지정된 경우
+        if (status != null) {
             pageResult = productRequestRepository.findAllByStatus(status, sortedPageable);
-        } else { // 상태 없으면 전체
+        } else {
             pageResult = productRequestRepository.findAll(sortedPageable);
         }
 
-        return pageResult.stream()
+        List<ProductRequestResDto> content = pageResult.stream()
                 .map(this::toProductRequestResponse)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
     }
 
-
-    public List<GroupBuyRequestResDto> getAllGroupBuyRequests(Pageable pageable) {
+    // ✅ GroupBuyRequest 조회 (Page 반환)
+    public Page<GroupBuyRequestResDto> getAllGroupBuyRequests(Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         Page<GroupBuyRequest> pageResult = groupBuyRequestRepository.findAll(sortedPageable);
-        return pageResult.stream()
+
+        List<GroupBuyRequestResDto> content = pageResult.stream()
                 .map(this::toGroupBuyRequestResponse)
                 .collect(Collectors.toList());
-    }
 
+        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
+    }
 
     private ProductRequestResDto toProductRequestResponse(ProductRequest productRequest) {
         return ProductRequestResDto.builder()
