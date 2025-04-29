@@ -6,6 +6,9 @@ import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -35,7 +38,9 @@ public class History {
     @JoinColumn(name = "orderId", nullable = false)
     private Order order;
 
-
     @Column(nullable = false)
     private Boolean writable = false; // 작성 가능 여부
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 }

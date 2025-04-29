@@ -4,6 +4,7 @@ import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -43,6 +44,9 @@ public class GroupBuy {
     @Enumerated(EnumType.STRING)
     @Column
     private GroupBuyStatus status;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
 
 }
