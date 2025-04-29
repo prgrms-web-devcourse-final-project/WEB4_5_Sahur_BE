@@ -6,6 +6,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -30,6 +32,12 @@ public class MailService {
 
     @Value("${spring.mail.properties.auth-code-expiration-millis}")
     private long authCodeExpirationMillis;
+
+    @Value("${email.auth.expiration.seconds}")
+    private long authCodeExpirationSeconds;
+
+    @Value("${email.verified.expiration.minutes}")
+    private long verifiedExpirationMinutes;
 
     // Redis에 키 저장 시 접두어
     private static final String EMAIL_AUTH_PREFIX = "EMAIL_AUTH:";
@@ -79,7 +87,10 @@ public class MailService {
             javaMailSender.send(message); // 메일 발송
             return authCode;
         } catch (MailException e) {
-            return null;
+
+            // 발송 실패시 커스텀 예외 등 처리 로직 필요
+            log.error("메일 발송 실패: " + sendEmail, e);
+            throw new MessagingException("메일 발송 중 오류가 발생했습니다: " + e.getMessage(), e);
         }
     }
 
@@ -102,7 +113,7 @@ public class MailService {
 
             // Redis에 저장하고 만료 시간 설정 (밀리초를 초 단위로 변환)
             values.set(key, authCode);
-            redisTemplate.expire(key, 180, TimeUnit.SECONDS); // 3분
+            redisTemplate.expire(key, authCodeExpirationSeconds, TimeUnit.SECONDS); // 3분
 
             return true;
         }
@@ -125,7 +136,7 @@ public class MailService {
             // 인증 성공 시 Redis에 인증 완료 상태 저장 (유효기간 10분)
             String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
             values.set(verifiedKey, "true");
-            redisTemplate.expire(verifiedKey, 10, TimeUnit.MINUTES);
+            redisTemplate.expire(verifiedKey, verifiedExpirationMinutes, TimeUnit.MINUTES); // 10분
 
             // 인증 성공 후 Redis에서 인증 코드 삭제
             redisTemplate.delete(key);

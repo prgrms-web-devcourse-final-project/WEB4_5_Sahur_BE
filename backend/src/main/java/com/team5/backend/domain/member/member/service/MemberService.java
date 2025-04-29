@@ -90,6 +90,7 @@ public class MemberService {
     // 회원 정보 수정
     @Transactional
     public GetMemberResDto updateMember(Long memberId, UpdateMemberReqDto updateMemberReqDto) {
+
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
 
@@ -139,9 +140,9 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long memberId) {
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId);
-        }
-        memberRepository.deleteById(memberId);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
+
+        memberRepository.delete(member);
     }
 }
