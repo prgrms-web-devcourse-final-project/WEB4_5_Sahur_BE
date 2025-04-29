@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
-    Page<History> findByMemberId(Long memberId, Pageable pageable);
+//    Page<History> findByMemberId(Long memberId, Pageable pageable);
 }
