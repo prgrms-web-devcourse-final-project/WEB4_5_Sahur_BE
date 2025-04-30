@@ -140,7 +140,7 @@ public class AuthService {
     }
 
     // 로그인된 사용자의 정보를 반환하는 메서드
-    public Member getLoggedInMember(String token) {
+    public GetMemberResDto getLoggedInMember(String token) {
 
         // 토큰에서 "Bearer "를 제거
         String extractedToken = token.replace("Bearer ", "");
@@ -161,7 +161,8 @@ public class AuthService {
         TokenInfoResDto tokenInfo = extractTokenInfo(extractedToken);
 
         return memberRepository.findByEmail(tokenInfo.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .map(GetMemberResDto::fromEntity)
+                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 회원입니다."));
     }
 
     // 토큰에서 사용자 정보를 추출하는 메서드

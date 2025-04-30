@@ -11,10 +11,4 @@ public class AuthResDto {
 
     private String accessToken;
     private String refreshToken;
-
-    public AuthResDto(String accessToken) {
-
-        this.accessToken = accessToken;
-        this.refreshToken = accessToken;
-    }
 }

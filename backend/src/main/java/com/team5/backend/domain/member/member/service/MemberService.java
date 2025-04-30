@@ -119,9 +119,10 @@ public class MemberService {
             existingMember.setName(patchMemberReqDto.getName());
         }
 
-        // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(patchMemberReqDto.getPassword());
         if (patchMemberReqDto.getPassword() != null) {
+
+            // 비밀번호 암호화
+            String encodedPassword = passwordEncoder.encode(patchMemberReqDto.getPassword());
             existingMember.setPassword(encodedPassword);
         }
 

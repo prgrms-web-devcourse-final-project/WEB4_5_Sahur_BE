@@ -1,7 +1,6 @@
 package com.team5.backend.domain.member.member.controller;
 
 import com.team5.backend.domain.member.member.dto.*;
-import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
@@ -13,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -37,25 +34,17 @@ public class MemberController {
     @GetMapping("/members/me")
     public ResponseEntity<GetMemberResDto> getMember(@RequestHeader(value = "Authorization", required = false) String token) {
 
-        Member loggedInMember = authService.getLoggedInMember(token);
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
 
         GetMemberResDto memberResDto = memberService.getMemberById(loggedInMember.getMemberId());
         return ResponseEntity.ok(memberResDto);
-    }
-
-    // 회원 전체 조회
-    @GetMapping("/members")
-    public ResponseEntity<List<GetMemberResDto>> getAllMembers() {
-
-        List<GetMemberResDto> members = memberService.getAllMembers();
-        return ResponseEntity.ok(members);
     }
 
     @PatchMapping("/members/modify")
     public ResponseEntity<GetMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token,
                                                         @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
-        Member loggedInMember = authService.getLoggedInMember(token);
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
 
         GetMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
         return ResponseEntity.ok(updatedMember);
@@ -65,7 +54,7 @@ public class MemberController {
     @DeleteMapping("/members/delete")
     public ResponseEntity<Void> deleteMember(@RequestHeader(value = "Authorization", required = false) String token) {
 
-        Member loggedInMember = authService.getLoggedInMember(token);
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
 
         memberService.deleteMember(loggedInMember.getMemberId());
         return ResponseEntity.noContent().build();
@@ -82,9 +71,7 @@ public class MemberController {
     public ResponseEntity<LogoutResDto> logout(HttpServletRequest request, HttpServletResponse response) {
 
         authService.logout(request, response);
-
-        LogoutResDto result = new LogoutResDto("로그아웃이 성공적으로 처리되었습니다.");
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(new LogoutResDto());
     }
 
     /**
@@ -99,7 +86,7 @@ public class MemberController {
     }
 
     // 이메일 인증번호 전송
-    @GetMapping("/auth/email/send")
+    @PostMapping("/auth/email/send")
     public ResponseEntity<String> requestAuthCode(String email) throws MessagingException {
 
         boolean isSend = mailService.sendAuthCode(email);
