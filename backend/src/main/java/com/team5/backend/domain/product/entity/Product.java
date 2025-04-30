@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Product")
+@Table(name = "product")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +18,7 @@ public class Product {
     private Long productId;
 
     @Column(nullable = false)
-    private Long memberId;
+    private Long categoryId;
 
     @Column(nullable = false)
     private String title;
@@ -37,16 +37,6 @@ public class Product {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductStatus status;
-
-    public enum ProductStatus {
-        WAITING,   // 승인 대기
-        APPROVED,  // 승인
-        REJECTED   // 거절
-    }
 
 }
 
