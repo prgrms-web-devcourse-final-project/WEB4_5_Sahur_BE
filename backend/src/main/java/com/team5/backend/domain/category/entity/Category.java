@@ -1,6 +1,5 @@
 package com.team5.backend.domain.category.entity;
 
-import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,10 +15,6 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productId")
-    private Product product;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
