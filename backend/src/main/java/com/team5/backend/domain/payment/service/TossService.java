@@ -88,9 +88,9 @@ public class TossService {
 				.method((String) body.get("method"))
 				.status((String) body.get("status"))
 				.approvedAt((String) body.get("approvedAt"))
-				.cardCompany(card != null ? (String) card.get("company") : null)
-				.cardNumberSuffix(card != null ? (String) card.get("number") : null)
-				.receiptUrl((String) body.get("receiptUrl"))
+				.issuerCode(card != null ? (String) card.get("issuerCode") : null)
+				.acquirerCode(card != null ? (String) card.get("acquirerCode") : null)
+				.cardNumber(card != null ? (String) card.get("number") : null)
 				.build();
 
 		} catch (Exception e) {
