@@ -1,7 +1,7 @@
 package com.team5.backend.domain.member.member.service;
 
 
-import com.team5.backend.domain.member.member.dto.EmailVerificationRequestDto;
+import com.team5.backend.domain.member.member.dto.EmailVerificationReqDto;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -120,10 +120,10 @@ public class MailService {
         return false;
     }
 
-    public boolean validationAuthCode(EmailVerificationRequestDto emailVerificationRequestDto) {
+    public boolean validationAuthCode(EmailVerificationReqDto emailVerificationReqDto) {
 
-        String email = emailVerificationRequestDto.getEmail();
-        String authCode = emailVerificationRequestDto.getAuthCode();
+        String email = emailVerificationReqDto.getEmail();
+        String authCode = emailVerificationReqDto.getAuthCode();
 
         // Redis에서 인증 코드 조회
         ValueOperations<String, String> values = redisTemplate.opsForValue();
