@@ -2,10 +2,7 @@ package com.team5.backend.domain.groupBuy.service;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
+import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
@@ -107,7 +104,7 @@ public class GroupBuyService {
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
 
-    public GroupBuyResDto patchGroupBuy(Long id, GroupBuyUpdateReqDto request) {
+    public GroupBuyResDto patchGroupBuy(Long id, GroupBuyPatchReqDto request) {
         return groupBuyRepository.findById(id)
                 .map(existing -> {
                     if (request.getTargetParticipants() != null) {
