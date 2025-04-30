@@ -73,13 +73,13 @@ public class GroupBuyController {
         return ResponseEntity.ok(status);
     }
 
-//    @GetMapping("/members/{memberId}")
-//    public ResponseEntity<Page<GroupBuyResDto>> getGroupBuysByMemberId(
-//            @PathVariable Long memberId,
-//            @PageableDefault(size = 5) Pageable pageable,
-//            @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
-//
-//        Page<GroupBuyResDto> responses = groupBuyService.getGroupBuysByMemberId(memberId, pageable, sortField);
-//        return ResponseEntity.ok(responses);
-//    }
+    @Operation(summary = "회원별 참여 공동구매 조회", description = "회원이 참여한 공동구매 목록을 조회합니다.")
+    @GetMapping("/members/{memberId}")
+    public ResponseEntity<Page<GroupBuyResDto>> getGroupBuysByMemberId(
+            @Parameter(description = "회원 ID") @PathVariable Long memberId,
+            @PageableDefault(size = 5) Pageable pageable) {
+
+        Page<GroupBuyResDto> responses = groupBuyService.getGroupBuysByMemberId(memberId, pageable);
+        return ResponseEntity.ok(responses);
+    }
 }
