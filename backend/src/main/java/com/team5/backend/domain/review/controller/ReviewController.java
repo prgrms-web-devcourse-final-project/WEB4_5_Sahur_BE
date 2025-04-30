@@ -5,9 +5,11 @@ import com.team5.backend.domain.review.dto.ReviewResDto;
 import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
 import com.team5.backend.domain.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reviews")
@@ -17,33 +19,45 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    public ReviewResDto createReview(@RequestBody ReviewCreateReqDto request) {
-        return reviewService.createReview(request);
+    public ResponseEntity<ReviewResDto> createReview(@RequestBody ReviewCreateReqDto request) {
+        ReviewResDto response = reviewService.createReview(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<ReviewResDto> getAllReviews() {
-        return reviewService.getAllReviews();
+    public ResponseEntity<Page<ReviewResDto>> getAllReviews(
+            @PageableDefault(size = 5) Pageable pageable
+    ) {
+        Page<ReviewResDto> response = reviewService.getAllReviews(pageable);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ReviewResDto getReviewById(@PathVariable Long id) {
+    public ResponseEntity<ReviewResDto> getReviewById(@PathVariable Long id) {
         return reviewService.getReviewById(id)
+                .map(ResponseEntity::ok)
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
 
     @PutMapping("/{id}")
-    public ReviewResDto updateReview(@PathVariable Long id, @RequestBody ReviewUpdateReqDto request) {
-        return reviewService.updateReview(id, request);
+    public ResponseEntity<ReviewResDto> updateReview(
+            @PathVariable Long id,
+            @RequestBody ReviewUpdateReqDto request) {
+        ReviewResDto response = reviewService.updateReview(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
-    public ReviewResDto patchReview(@PathVariable Long id, @RequestBody ReviewUpdateReqDto request) {
-        return reviewService.patchReview(id, request);
+    public ResponseEntity<ReviewResDto> patchReview(
+            @PathVariable Long id,
+            @RequestBody ReviewUpdateReqDto request) {
+        ReviewResDto response = reviewService.patchReview(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReview(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
         reviewService.deleteReview(id);
+        return ResponseEntity.noContent().build();
     }
 }
