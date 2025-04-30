@@ -34,9 +34,10 @@ public class PaymentController {
 		}
 	}
 
-	@GetMapping("/{paymentKey}")
-	public RsData<PaymentResDto> getPaymentInfoByPaymentKey(@PathVariable("paymentKey") String paymentKey) {
+	@GetMapping("/{paymentId}")
+	public RsData<PaymentResDto> getPaymentInfo(@PathVariable("paymentId") String paymentId) {
 		try {
+			String paymentKey = paymentService.getPaymentKey(paymentId);
 			PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
 			return new RsData<>("200", "결제 정보를 불러왔습니다.", dto);
 		} catch (RuntimeException e) {

@@ -31,6 +31,13 @@ public class PaymentService {
 		paymentRepository.save(payment);
 	}
 
+	public String getPaymentKey(String paymentId) {
+		Payment payment = paymentRepository.findById(Long.valueOf(paymentId))
+			.orElseThrow(() -> new IllegalArgumentException("결제를 찾을 수 없습니다."));
+
+		return payment.getPaymentKey();
+	}
+
 	@Transactional(readOnly = true)
 	public List<Payment> getPaymentsByMember(Long memberId) {
 		Member member = memberRepository.findById(memberId)
