@@ -1,8 +1,12 @@
 spring:
+  config:
+    import: application-secret.yml
+
   datasource:
-    url: jdbc:mysql://mysql_1:3306/tung_db
-    username: team05
-    password: "${custom.prod.db.password}"
+    # 추후 RDS 도입 고려
+    url: jdbc:mysql://3.38.104.62:3306/tung_db
+    username: root
+    password: ${custom.db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       auto-commit: false
@@ -31,6 +35,6 @@ logging:
 
 custom:
   site:
-    domain: "${custom.prod.domain}"
-    backUrl: "${custom.prod.backUrl}"
-    frontUrl: "${custom.prod.frontUrl}"
+    domain: ${custom.prod.domain}
+    backUrl: ${custom.prod.backUrl}
+    frontUrl: ${custom.prod.frontUrl}
