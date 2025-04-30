@@ -5,10 +5,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -16,6 +14,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
+import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.global.config.TossPaymentConfig;
 
 import lombok.RequiredArgsConstructor;
@@ -54,6 +53,38 @@ public class TossService {
 		} catch (HttpClientErrorException | HttpServerErrorException | ResourceAccessException e) {
 			// Toss 서버 관련 예외 처리
 			return false;
+		}
+	}
+
+	/**
+	 * paymentKey 이용해 결제 상세 정보 조회 (Toss /payments/{paymentKey})
+	 */
+	public PaymentResDto getPaymentInfoByPaymentKey(String paymentKey) {
+		String url = "https://api.tosspayments.com/v1/payments/" + paymentKey;
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Basic " + encodeSecretKey(tossPaymentConfig.getSecretKey()));
+		HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+		try {
+			ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {});
+			Map<String, Object> body = response.getBody();
+
+			if (body == null) {
+				throw new RuntimeException("응답 body가 null 입니다.");
+			}
+
+			return PaymentResDto.builder()
+				.paymentKey((String) body.get("paymentKey"))
+				.orderId((String) body.get("orderId"))
+				.orderName((String) body.get("orderName"))
+				.totalAmount((Integer) body.get("totalAmount"))
+				.method((String) body.get("method"))
+				.status((String) body.get("status"))
+				.approvedAt((String) body.get("approvedAt"))
+				.build();
+		} catch (Exception e) {
+			throw new RuntimeException("결제 조회 실패: " + e.getMessage());
 		}
 	}
 

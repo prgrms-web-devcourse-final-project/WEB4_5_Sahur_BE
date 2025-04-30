@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
+import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.service.PaymentService;
 import com.team5.backend.domain.payment.service.TossService;
@@ -30,6 +31,16 @@ public class PaymentController {
 			return new RsData<>("200", "결제에 성공했습니다.");
 		} else {
 			return new RsData<>("400-1", "결제에 실패했습니다.");
+		}
+	}
+
+	@GetMapping("/{paymentKey}")
+	public RsData<PaymentResDto> getPaymentInfoByPaymentKey(@PathVariable("paymentKey") String paymentKey) {
+		try {
+			PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
+			return new RsData<>("200", "결제 정보를 불러왔습니다.", dto);
+		} catch (RuntimeException e) {
+			return new RsData<>("404-1", "결제 정보를 찾을 수 없습니다.");
 		}
 	}
 
