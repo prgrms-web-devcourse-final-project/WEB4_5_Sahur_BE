@@ -4,7 +4,7 @@ spring:
 
   datasource:
     # 추후 RDS 도입 고려
-    url: jdbc:mysql://3.38.104.62:3306/tung_db
+    url: jdbc:mysql://api.devapi.store:3306/tung_db
     username: root
     password: ${custom.db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver

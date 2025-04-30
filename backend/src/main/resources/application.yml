@@ -81,7 +81,7 @@ custom:
 
   prod:
     domain: devapi.store
-    backUrl: "https://${custom.prod.domain}"
+    backUrl: "https://api.${custom.prod.domain}"
     frontUrl: "https://www.${custom.prod.domain}"
 
   dev:
