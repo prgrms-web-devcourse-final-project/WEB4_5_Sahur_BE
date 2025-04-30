@@ -71,5 +71,24 @@ class DeliveryServiceTest {
     }
 
 
+    @DisplayName("배송 수정 성공")
+    @Test
+    void update() {
+        // given
+        Long deliveryId = 3L;
+        DeliveryReqDto request = new DeliveryReqDto("서울시 00구", "01012345678", 77777);
+        Order mockOrder = Order.builder().orderId(100L).build();
+        Delivery delivery = Delivery.create(mockOrder, "기존주소", "01011223344", 12345);
+
+        given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
+
+        // when
+        Delivery result = deliveryService.updateDelivery(deliveryId, request);
+
+        // then
+        assertThat(result.getAddress()).isEqualTo("서울시 00구");
+        assertThat(result.getContact()).isEqualTo("01012345678");
+        assertThat(result.getPccc()).isEqualTo(77777);
+    }
 
 }
