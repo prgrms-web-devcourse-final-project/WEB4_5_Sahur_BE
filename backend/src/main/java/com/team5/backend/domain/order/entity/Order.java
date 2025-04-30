@@ -68,6 +68,9 @@ public class Order {
 	}
 
 	public void markAsPaid() {
+		if (this.status != OrderStatus.WAITING) {
+			throw new IllegalStateException("결제는 WAITING 상태에서만 진행할 수 있습니다.");
+		}
 		this.status = OrderStatus.PAID;
 	}
 
