@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -129,5 +130,51 @@ class DeliveryServiceTest {
         assertThat(result.get(0).getAddress()).isEqualTo("서울시 강남구");
         assertThat(result.get(1).getAddress()).isEqualTo("서울시 종로구");
     }
+
+
+    @DisplayName("주문 ID가 존재하지 않으면 배송 생성 실패")
+    @Test
+    void createFail_OrderNotFound() {
+        // given
+        Long orderId = 999L;
+        given(orderRepository.findById(orderId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() ->
+                deliveryService.createDelivery(orderId, new DeliveryReqDto("a", "b", 1))
+        )
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("주문을 찾을 수 없습니다");
+    }
+
+
+    @DisplayName("배송 ID가 존재하지 않으면 배송 수정 실패")
+    @Test
+    void updateFail_DeliveryNotFound() {
+        // given
+        Long deliveryId = 100L;
+        DeliveryReqDto request = new DeliveryReqDto("부산시 00구", "01099998888", 55555);
+        given(deliveryRepository.findById(deliveryId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> deliveryService.updateDelivery(deliveryId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("배송 정보를 찾을 수 없습니다");
+    }
+
+    @DisplayName("주문 ID에 해당하는 배송 정보가 없으면 조회 실패")
+    @Test
+    void getFail_DeliveryNotFound() {
+        // given
+        Long orderId = 200L;
+        given(deliveryRepository.findByOrderOrderId(orderId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> deliveryService.getDeliveryByOrder(orderId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("배송 정보를 찾을 수 없습니다");
+    }
+
+
 
 }
