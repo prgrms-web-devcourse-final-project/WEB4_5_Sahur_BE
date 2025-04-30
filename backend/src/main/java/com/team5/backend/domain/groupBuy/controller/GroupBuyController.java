@@ -1,11 +1,9 @@
 package com.team5.backend.domain.groupBuy.controller;
 
-import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
+import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.service.GroupBuyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,13 +50,13 @@ public class GroupBuyController {
     }
 
     @PutMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> updateGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyUpdateReqDto request) {
+    public ResponseEntity<GroupBuyResDto> updateGroupBuy(@PathVariable Long groupBuyId, @Valid @RequestBody GroupBuyUpdateReqDto request) {
         GroupBuyResDto response = groupBuyService.updateGroupBuy(groupBuyId, request);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyUpdateReqDto request) {
+    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyPatchReqDto request) {
         GroupBuyResDto response = groupBuyService.patchGroupBuy(groupBuyId, request);
         return ResponseEntity.ok(response);
     }
