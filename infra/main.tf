@@ -181,6 +181,17 @@ docker run -d \
   -e TZ=Asia/Seoul \
   mysql:latest
 
+docker run -d \
+  --name mysql_1 \
+  --restart unless-stopped \
+  -v /dockerProjects/mysql_1/volumes/var/lib/mysql:/var/lib/mysql \
+  -v /dockerProjects/mysql_1/volumes/etc/mysql/conf.d:/etc/mysql/conf.d \
+  --network common \
+  -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD= !!tkgnfm05 \
+  -e TZ=Asia/Seoul \
+  mysql:latest
+
 # MySQL 컨테이너가 준비될 때까지 대기
 echo "MySQL이 기동될 때까지 대기 중..."
 until docker exec mysql_1 mysql -uroot -p${var.password_1} -e "SELECT 1" &> /dev/null; do
@@ -194,7 +205,7 @@ CREATE USER 'team05'@'%' IDENTIFIED WITH caching_sha2_password BY '${var.passwor
 
 GRANT ALL PRIVILEGES ON *.* TO 'team05'@'%';
 
-CREATE DATABASE glog_prod;
+CREATE DATABASE tung_db;
 
 FLUSH PRIVILEGES;
 "
