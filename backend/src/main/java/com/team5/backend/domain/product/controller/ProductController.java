@@ -4,6 +4,7 @@ import com.team5.backend.domain.product.dto.ProductCreateReqDto;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductResDto> createProduct(@RequestBody ProductCreateReqDto request) {
+    public ResponseEntity<ProductResDto> createProduct(@RequestBody @Valid ProductCreateReqDto request) {
         ProductResDto response = productService.createProduct(request);
         return ResponseEntity.ok(response);
     }
@@ -36,7 +37,9 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<ProductResDto> updateProduct(@PathVariable Long productId, @RequestBody ProductUpdateReqDto request) {
+    public ResponseEntity<ProductResDto> updateProduct(
+            @PathVariable Long productId,
+            @RequestBody @Valid ProductUpdateReqDto request) {
         ProductResDto response = productService.updateProduct(productId, request);
         return ResponseEntity.ok(response);
     }
