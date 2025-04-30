@@ -1,5 +1,6 @@
 package com.team5.backend.domain.dibs.entity;
 
+import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;

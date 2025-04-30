@@ -144,6 +144,7 @@ public class GroupBuyService {
         return pageResult.map(GroupBuyResDto::fromEntity);
     }
 
+
 //    public Page<GroupBuyResDto> getGroupBuysByMemberId(Long memberId, Pageable pageable, GroupBuySortField sortField) {
 //        Sort sort = getSortForField(sortField);
 //        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -163,9 +164,11 @@ public class GroupBuyService {
 //        return pageResult.map(GroupBuyResDto::fromEntity);
 //    }
 
+
     public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
         return groupBuyRepository.findById(id)
                 .map(GroupBuyStatusResDto::fromEntity)
                 .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
     }
 }
+

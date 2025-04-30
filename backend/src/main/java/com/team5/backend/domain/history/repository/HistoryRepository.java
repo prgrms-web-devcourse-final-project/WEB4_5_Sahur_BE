@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
 //    Page<History> findByMemberId(Long memberId, Pageable pageable);
+
 }
