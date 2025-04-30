@@ -10,12 +10,11 @@ import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,18 +40,20 @@ public class ReviewService {
                 .build();
 
         Review saved = reviewRepository.save(review);
-        return toResponse(saved);
+        return ReviewResDto.fromEntity(saved); // ✅
     }
 
-    public List<ReviewResDto> getAllReviews() {
-        return reviewRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public Page<ReviewResDto> getAllReviews(Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        return reviewRepository.findAll(sortedPageable)
+                .map(ReviewResDto::fromEntity); // ✅
     }
 
     public Optional<ReviewResDto> getReviewById(Long id) {
         return reviewRepository.findById(id)
-                .map(this::toResponse);
+                .map(ReviewResDto::fromEntity); // ✅
     }
 
     public ReviewResDto updateReview(Long id, ReviewUpdateReqDto request) {
@@ -62,7 +63,7 @@ public class ReviewService {
                     existing.setRate(request.getRate());
                     existing.setImageUrl(request.getImageUrl());
                     Review updated = reviewRepository.save(existing);
-                    return toResponse(updated);
+                    return ReviewResDto.fromEntity(updated); // ✅
                 })
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
@@ -70,7 +71,6 @@ public class ReviewService {
     public ReviewResDto patchReview(Long id, ReviewUpdateReqDto request) {
         return reviewRepository.findById(id)
                 .map(existingReview -> {
-                    // 제공된 값만 업데이트 (null 값은 업데이트하지 않음)
                     if (request.getComment() != null) {
                         existingReview.setComment(request.getComment());
                     }
@@ -81,27 +81,13 @@ public class ReviewService {
                         existingReview.setImageUrl(request.getImageUrl());
                     }
 
-                    // 수정된 엔티티 저장
                     Review updatedReview = reviewRepository.save(existingReview);
-                    return toResponse(updatedReview);
+                    return ReviewResDto.fromEntity(updatedReview); // ✅
                 })
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
 
-
     public void deleteReview(Long id) {
         reviewRepository.deleteById(id);
-    }
-
-    private ReviewResDto toResponse(Review review) {
-        return ReviewResDto.builder()
-                .reviewId(review.getReviewId())
-                .memberId(review.getMember().getMemberId())
-                .productId(review.getProduct().getProductId())
-                .comment(review.getComment())
-                .rate(review.getRate())
-                .createdAt(review.getCreatedAt())
-                .imageUrl(review.getImageUrl())
-                .build();
     }
 }
