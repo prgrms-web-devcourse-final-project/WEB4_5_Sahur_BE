@@ -17,6 +17,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -90,5 +92,22 @@ class DeliveryServiceTest {
         assertThat(result.getContact()).isEqualTo("01012345678");
         assertThat(result.getPccc()).isEqualTo(77777);
     }
+
+    @DisplayName("배송 삭제 성공")
+    @Test
+    void delete() {
+        // given
+        Long deliveryId = 4L;
+        Delivery delivery = mock(Delivery.class);
+
+        given(deliveryRepository.findById(deliveryId)).willReturn(Optional.of(delivery));
+
+        // when
+        deliveryService.deleteDelivery(deliveryId);
+
+        // then
+        verify(deliveryRepository).delete(delivery);
+    }
+
 
 }
