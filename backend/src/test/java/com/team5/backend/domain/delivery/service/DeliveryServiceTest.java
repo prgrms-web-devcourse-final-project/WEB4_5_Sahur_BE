@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,5 +110,24 @@ class DeliveryServiceTest {
         verify(deliveryRepository).delete(delivery);
     }
 
+    @DisplayName("배송 전체 조회 성공")
+    @Test
+    void getAll() {
+        // given
+        List<Delivery> list = List.of(
+                Delivery.create(null, "서울시 강남구", "01011112222", 11111),
+                Delivery.create(null, "서울시 종로구", "01033334444", 22222)
+        );
+
+        given(deliveryRepository.findAll()).willReturn(list);
+
+        // when
+        List<Delivery> result = deliveryService.getAllDeliveries();
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getAddress()).isEqualTo("서울시 강남구");
+        assertThat(result.get(1).getAddress()).isEqualTo("서울시 종로구");
+    }
 
 }
