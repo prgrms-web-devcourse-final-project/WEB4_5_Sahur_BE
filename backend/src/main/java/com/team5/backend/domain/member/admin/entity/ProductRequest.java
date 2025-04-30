@@ -40,7 +40,7 @@ public class ProductRequest {
     @Column(nullable = false)
     private String productUrl;
 
-    @Column
+    @Column(nullable = true)
     private String etc;
 
     @CreatedDate
