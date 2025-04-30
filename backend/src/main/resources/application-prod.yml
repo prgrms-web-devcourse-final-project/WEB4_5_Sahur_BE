@@ -13,7 +13,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis_1
       port: 6379
 
   jpa:
