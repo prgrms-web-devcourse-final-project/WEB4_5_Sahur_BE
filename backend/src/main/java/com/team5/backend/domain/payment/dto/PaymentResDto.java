@@ -9,7 +9,7 @@ public class PaymentResDto {
 	private String paymentKey;
 	private String orderId;
 	private String orderName;
-	private Integer totalAmount;
+	private int totalAmount;
 	private String method;      // 결제 수단 (ex. 카드)
 	private String status;      // 결제 상태 (DONE, CANCELED)
 	private String approvedAt;  // 결제 승인 시간
