@@ -15,6 +15,7 @@ spring:
     redis:
       host: redis_1
       port: 6379
+      password: ${custom.redis.password}
 
   jpa:
     hibernate:
