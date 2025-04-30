@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryResDto {
     private Long categoryId;
-    private Long productId;
     private CategoryType category;
     private KeywordType keyword;
     private Integer uid;
@@ -22,7 +21,6 @@ public class CategoryResDto {
     public static CategoryResDto fromEntity(Category category) {
         return CategoryResDto.builder()
                 .categoryId(category.getCategoryId())
-                .productId(category.getProduct().getProductId())
                 .category(category.getCategory())
                 .keyword(category.getKeyword())
                 .uid(category.getUid())
