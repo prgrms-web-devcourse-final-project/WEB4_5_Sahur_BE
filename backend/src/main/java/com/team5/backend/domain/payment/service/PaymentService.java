@@ -64,7 +64,7 @@ public class PaymentService {
 	}
 
 	@Transactional(readOnly = true)
-	public String getPaymentKeyByOrder(String orderId) {
+	public String getPaymentKeyByOrder(Long orderId) {
 		Payment payment = paymentRepository.findByOrderOrderId(orderId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 주문의 결제가 존재하지 않습니다."));
 		return payment.getPaymentKey();

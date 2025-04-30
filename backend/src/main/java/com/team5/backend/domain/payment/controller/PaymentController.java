@@ -49,7 +49,7 @@ public class PaymentController {
 
 	@PostMapping("/{orderId}/cancel")
 	public RsData<?> cancelPayment(
-		@PathVariable("orderId") String orderId,
+		@PathVariable("orderId") Long orderId,
 		@RequestBody @Valid CancelReqDto request
 	) {
 		try {

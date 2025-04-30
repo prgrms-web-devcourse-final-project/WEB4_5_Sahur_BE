@@ -82,7 +82,7 @@ public class OrderController {
 	}
 
 	@GetMapping("/{orderId}/payment")
-	public RsData<PaymentResDto> getPaymentByOrder(@PathVariable String orderId) {
+	public RsData<PaymentResDto> getPaymentByOrder(@PathVariable Long orderId) {
 		try {
 			String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
 			PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
