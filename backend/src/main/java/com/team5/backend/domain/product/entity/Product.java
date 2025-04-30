@@ -1,7 +1,9 @@
 package com.team5.backend.domain.product.entity;
 
+import com.team5.backend.domain.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,8 +19,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
 
-    @Column(nullable = false)
-    private Long categoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryId", nullable = false)
+    private Category category;
 
     @Column(nullable = false)
     private String title;

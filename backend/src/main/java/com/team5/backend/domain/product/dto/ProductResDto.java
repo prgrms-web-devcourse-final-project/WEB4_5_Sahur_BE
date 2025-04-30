@@ -21,7 +21,7 @@ public class ProductResDto {
     public static ProductResDto fromEntity(Product product) {
         return ProductResDto.builder()
                 .productId(product.getProductId())
-                .categoryId(product.getCategoryId())
+                .categoryId(product.getCategory().getCategoryId())
                 .title(product.getTitle())
                 .description(product.getDescription())
                 .imageUrl(product.getImageUrl())

@@ -1,5 +1,7 @@
 package com.team5.backend.domain.product.service;
 
+import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.product.dto.ProductCreateReqDto;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
@@ -17,10 +19,14 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     public ProductResDto createProduct(ProductCreateReqDto request) {
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다."));
+
         Product product = Product.builder()
-                .categoryId(request.getCategoryId())
+                .category(category)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .imageUrl(request.getImageUrl())
