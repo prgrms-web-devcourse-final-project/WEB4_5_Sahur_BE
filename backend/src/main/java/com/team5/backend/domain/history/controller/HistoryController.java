@@ -6,8 +6,8 @@ import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
 import com.team5.backend.domain.history.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +26,8 @@ public class HistoryController {
 
     @GetMapping
     public ResponseEntity<Page<HistoryResDto>> getAllHistories(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "5") int size) {
+            @PageableDefault(size = 5) Pageable pageable) {
 
-        Pageable pageable = PageRequest.of(page, size);
         Page<HistoryResDto> responses = historyService.getAllHistories(pageable);
         return ResponseEntity.ok(responses);
     }

@@ -7,6 +7,7 @@ import com.team5.backend.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,9 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<NotificationResDto>> getAllNotifications(Pageable pageable) {
+    public ResponseEntity<Page<NotificationResDto>> getAllNotifications(
+            @PageableDefault(size = 5) Pageable pageable
+    ) {
         Page<NotificationResDto> response = notificationService.getAllNotifications(pageable);
         return ResponseEntity.ok(response);
     }
