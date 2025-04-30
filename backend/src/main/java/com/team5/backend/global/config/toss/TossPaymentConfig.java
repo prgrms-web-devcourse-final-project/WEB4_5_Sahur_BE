@@ -1,4 +1,4 @@
-package com.team5.backend.global.config;
+package com.team5.backend.global.config.toss;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
