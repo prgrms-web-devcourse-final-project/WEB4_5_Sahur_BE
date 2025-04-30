@@ -22,8 +22,12 @@ public class Payment {
 	@Column(nullable = false, unique = true)
 	private String paymentKey;
 
-	public Payment(Order order, String paymentKey) {
+	private Payment(Order order, String paymentKey) {
 		this.order = order;
 		this.paymentKey = paymentKey;
+	}
+
+	public static Payment create(Order order, String paymentKey) {
+		return new Payment(order, paymentKey);
 	}
 }

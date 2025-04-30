@@ -36,7 +36,7 @@ public class PaymentService {
 		order.markAsPaid();
 
 		// 결제 엔티티 저장
-		Payment payment = new Payment(order, paymentKey);
+		Payment payment = Payment.create(order, paymentKey);
 		paymentRepository.save(payment);
 	}
 
