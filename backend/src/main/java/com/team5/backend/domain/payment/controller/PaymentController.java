@@ -53,7 +53,7 @@ public class PaymentController {
 		@RequestBody @Valid CancelReqDto request
 	) {
 		try {
-			String paymentKey = paymentService.getPaymentByOrder(orderId);
+			String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
 			boolean isCanceled = tossService.cancelPayment(paymentKey, request.getCancelReason());
 
 			if (isCanceled) {
