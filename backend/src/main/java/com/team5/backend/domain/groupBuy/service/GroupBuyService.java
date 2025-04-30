@@ -30,7 +30,7 @@ public class GroupBuyService {
     private final CategoryRepository categoryRepository;
 
     // 매일 정각(00:00)에 실행
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")    
     public void updateGroupBuyStatuses() {
         List<GroupBuy> ongoingGroupBuys = groupBuyRepository.findByStatus(GroupBuyStatus.ONGOING);
         LocalDateTime now = LocalDateTime.now();
