@@ -1,15 +1,16 @@
 package com.team5.backend.domain.order.entity;
 
+import java.time.LocalDateTime;
+
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.member.member.entity.Member;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -64,6 +65,10 @@ public class Order {
 	public void updateQuantityAndPrice(int quantity, int totalPrice) {
 		this.quantity = quantity;
 		this.totalPrice = totalPrice;
+	}
+
+	public void markAsPaid() {
+		this.status = OrderStatus.PAID;
 	}
 
 	public void cancel() {

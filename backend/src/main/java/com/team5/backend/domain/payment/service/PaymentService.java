@@ -32,6 +32,10 @@ public class PaymentService {
 		Order order = orderRepository.findById(Long.valueOf(orderId))
 			.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
 
+		// 주문 상태를 PAID로 변경
+		order.markAsPaid();
+
+		// 결제 엔티티 저장
 		Payment payment = new Payment(order, paymentKey);
 		paymentRepository.save(payment);
 	}
