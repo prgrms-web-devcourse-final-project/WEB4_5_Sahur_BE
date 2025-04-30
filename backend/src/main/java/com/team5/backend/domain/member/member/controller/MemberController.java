@@ -71,10 +71,12 @@ public class MemberController {
     }
 
     @PostMapping("/auth/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LogoutResDto> logout(HttpServletRequest request, HttpServletResponse response) {
 
         authService.logout(request, response);
-        return ResponseEntity.ok().build();
+
+        LogoutResDto result = new LogoutResDto("로그아웃이 성공적으로 처리되었습니다.");
+        return ResponseEntity.ok(result);
     }
 
     /**
