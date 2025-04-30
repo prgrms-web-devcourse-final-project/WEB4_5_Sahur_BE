@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.team5.backend.domain.payment.dto.CancelReqDto;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.entity.Payment;
@@ -45,18 +46,27 @@ public class PaymentController {
 		}
 	}
 
+	@PostMapping("/{orderId}/cancel")
+	public RsData<?> cancelPayment(
+		@PathVariable("orderId") String orderId,
+		@RequestBody @Valid CancelReqDto request
+	) {
+		try {
+			String paymentKey = paymentService.getPaymentByOrder(orderId);
+			boolean isCanceled = tossService.cancelPayment(paymentKey, request.getCancelReason());
+
+			if (isCanceled) {
+				return new RsData<>("200", "결제가 성공적으로 취소되었습니다.");
+			} else {
+				return new RsData<>("400-2", "결제 취소에 실패했습니다.");
+			}
+		} catch (IllegalArgumentException e) {
+			return new RsData<>("404-1", "결제 정보를 찾을 수 없습니다.");
+		}
+	}
+
 	@GetMapping("/members/{memberId}")
 	public List<Payment> getPaymentsByMember(@PathVariable Long memberId) {
 		return paymentService.getPaymentsByMember(memberId);
-	}
-
-	@GetMapping("/orders/{orderId}")
-	public Payment getPaymentByOrder(@PathVariable Long orderId) {
-		return paymentService.getPaymentByOrder(orderId);
-	}
-
-	@DeleteMapping("/{paymentId}")
-	public void cancelPayment(@PathVariable Long paymentId) {
-		paymentService.cancelPayment(paymentId);
 	}
 }

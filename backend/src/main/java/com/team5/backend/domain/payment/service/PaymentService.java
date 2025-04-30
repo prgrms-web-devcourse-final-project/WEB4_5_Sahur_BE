@@ -46,15 +46,9 @@ public class PaymentService {
 	}
 
 	@Transactional(readOnly = true)
-	public Payment getPaymentByOrder(Long orderId) {
-		return paymentRepository.findByOrderOrderId(orderId)
+	public String getPaymentByOrder(String orderId) {
+		Payment payment = paymentRepository.findByOrderOrderId(orderId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 주문의 결제가 존재하지 않습니다."));
-	}
-
-	public void cancelPayment(Long paymentId) {
-		Payment payment = paymentRepository.findById(paymentId)
-			.orElseThrow(() -> new IllegalArgumentException("결제를 찾을 수 없습니다."));
-
-		// 토스 페이먼츠 호출해서 결제 취소 로직 진행
+		return payment.getPaymentKey();
 	}
 }

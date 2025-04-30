@@ -38,13 +38,13 @@ public class TossService {
 		headers.set("Authorization", "Basic " + encodeSecretKey(tossPaymentConfig.getSecretKey()));
 
 		// 요청 본문 설정
-		Map<String, Object> requestBody = new HashMap<>();
-		requestBody.put("paymentKey", request.getPaymentKey());
-		requestBody.put("orderId", request.getOrderId());
-		requestBody.put("amount", request.getAmount());
+		Map<String, Object> body = new HashMap<>();
+		body.put("paymentKey", request.getPaymentKey());
+		body.put("orderId", request.getOrderId());
+		body.put("amount", request.getAmount());
 
 		// HTTP 요청 엔티티 구성
-		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(requestBody, headers);
+		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(body, headers);
 
 		// Toss 서버로 POST 요청
 		try {
@@ -52,6 +52,7 @@ public class TossService {
 			return response.getStatusCode().is2xxSuccessful();
 		} catch (HttpClientErrorException | HttpServerErrorException | ResourceAccessException e) {
 			// Toss 서버 관련 예외 처리
+			System.err.println("Toss 결제 실패: " + e.getMessage());
 			return false;
 		}
 	}
@@ -85,6 +86,30 @@ public class TossService {
 				.build();
 		} catch (Exception e) {
 			throw new RuntimeException("결제 조회 실패: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * 결제 취소 요청 (Toss /payments/{paymentKey}/cancel)
+	 */
+	public boolean cancelPayment(String paymentKey, String cancelReason) {
+		String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Basic " + encodeSecretKey(tossPaymentConfig.getSecretKey()));
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("cancelReason", cancelReason);
+
+		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+		try {
+			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+			return response.getStatusCode().is2xxSuccessful();
+		} catch (HttpClientErrorException | HttpServerErrorException | ResourceAccessException e) {
+			System.err.println("Toss 결제 실패: " + e.getMessage());
+			return false;
 		}
 	}
 
