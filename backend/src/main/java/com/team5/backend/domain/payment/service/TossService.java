@@ -4,9 +4,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -15,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
-import com.team5.backend.global.config.TossPaymentConfig;
+import com.team5.backend.global.config.toss.TossPaymentConfig;
 
 import lombok.RequiredArgsConstructor;
 
@@ -87,6 +89,11 @@ public class TossService {
 		} catch (Exception e) {
 			throw new RuntimeException("결제 조회 실패: " + e.getMessage());
 		}
+	}
+
+	@Async("tossTaskExecutor")
+	public CompletableFuture<PaymentResDto> getPaymentInfoAsync(String paymentKey) {
+		return CompletableFuture.supplyAsync(() -> getPaymentInfoByPaymentKey(paymentKey));
 	}
 
 	/**
