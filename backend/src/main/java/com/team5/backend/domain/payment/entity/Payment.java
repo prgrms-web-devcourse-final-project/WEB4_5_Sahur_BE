@@ -19,15 +19,11 @@ public class Payment {
 	@JoinColumn(name = "orderId", nullable = false)
 	private Order order;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String paymentKey;
 
-	private Payment(Order order, String paymentKey) {
+	public Payment(Order order, String paymentKey) {
 		this.order = order;
 		this.paymentKey = paymentKey;
-	}
-
-	public static Payment create(Order order, String paymentKey) {
-		return new Payment(order, paymentKey);
 	}
 }

@@ -4,24 +4,33 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
+import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.service.PaymentService;
+import com.team5.backend.domain.payment.service.TossService;
+import com.team5.backend.global.dto.RsData;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
 	private final PaymentService paymentService;
+	private final TossService tossService;
 
-	@PostMapping
-	public Payment createPayment(
-		@RequestParam Long orderId,
-		@RequestParam String paymentKey
-	) {
-		return paymentService.createPayment(orderId, paymentKey);
+	@PostMapping("/confirm")
+	public RsData<?> confirmPayment(@RequestBody @Valid ConfirmReqDto request) {
+		boolean isConfirm = tossService.confirmPayment(request);
+
+		if (isConfirm) {
+			paymentService.savePayment(request.getOrderId(), request.getPaymentKey());
+			return new RsData<>("200", "결제에 성공했습니다.");
+		} else {
+			return new RsData<>("400-1", "결제에 실패했습니다.");
+		}
 	}
 
 	@GetMapping("/members/{memberId}")
