@@ -15,6 +15,7 @@ import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
+import com.team5.backend.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,9 +31,9 @@ public class PaymentService {
 
 	public void savePayment(String orderId, String paymentKey) {
 		Order order = orderRepository.findById(Long.valueOf(orderId))
-			.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
+			.orElseThrow(() -> new ServiceException("404-ORDER", "주문을 찾을 수 없습니다."));
 
-		// 주문 상태를 PAID로 변경
+		// 주문 상태를 PAID 변경
 		order.markAsPaid();
 
 		// 결제 엔티티 저장
@@ -42,7 +43,7 @@ public class PaymentService {
 
 	public String getPaymentKey(String paymentId) {
 		Payment payment = paymentRepository.findById(Long.valueOf(paymentId))
-			.orElseThrow(() -> new IllegalArgumentException("결제를 찾을 수 없습니다."));
+			.orElseThrow(() -> new ServiceException("404-PAYMENT", "결제를 찾을 수 없습니다."));
 
 		return payment.getPaymentKey();
 	}
@@ -70,7 +71,7 @@ public class PaymentService {
 	@Transactional(readOnly = true)
 	public String getPaymentKeyByOrder(Long orderId) {
 		Payment payment = paymentRepository.findByOrderOrderId(orderId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 주문의 결제가 존재하지 않습니다."));
+			.orElseThrow(() -> new ServiceException("404-PAYMENT", "해당 주문의 결제가 존재하지 않습니다."));
 		return payment.getPaymentKey();
 	}
 }
