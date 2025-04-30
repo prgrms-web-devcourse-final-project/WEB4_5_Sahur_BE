@@ -1,59 +1,53 @@
 package com.team5.backend.global.exception;
 
-import com.team5.backend.global.app.AppConfig;
+import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<RsData<Empty>> handleCustomException(CustomException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(RsDataUtil.fail(errorCode));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RsData<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-
-        String message = e.getBindingResult().getFieldErrors()
+    public ResponseEntity<RsData<Empty>> handleValidationException(MethodArgumentNotValidException e) {
+        String msg = e.getBindingResult().getFieldErrors()
                 .stream()
-                .map(fe -> fe.getField() + " : " + fe.getCode() + " : "  + fe.getDefaultMessage())
-                .sorted()
-                .collect(Collectors.joining("\n"));
+                .map(error -> error.getField() + " : " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(
-                        new RsData<>(
-                                "400-1",
-                                message
-                        )
-                );
+                .status(CommonErrorCode.VALIDATION_ERROR.getStatus())
+                .body(new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", msg));
     }
-
-    @ResponseStatus
-    @ExceptionHandler(ServiceException.class)
-    public ResponseEntity<RsData<Void>> ServiceExceptionHandle(ServiceException ex) {
-
-        if(AppConfig.isNotProd()) ex.printStackTrace();
-
-        return ResponseEntity
-                .status(ex.getStatusCode())
-                .body(
-                        new RsData<>(
-                                ex.getCode(),
-                                ex.getMsg()
-                        )
-                );
-    }
-
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
-        // 403 Forbidden 상태와 함께 예외 메시지 전송
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    public ResponseEntity<RsData<Empty>> handleAccessDeniedException(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(RsDataUtil.fail(CommonErrorCode.UNAUTHORIZED));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<RsData<Empty>> handleUnexpectedException(Exception ex) {
+        ex.printStackTrace();
+        return ResponseEntity
+                .status(CommonErrorCode.INTERNAL_ERROR.getStatus())
+                .body(RsDataUtil.fail(CommonErrorCode.INTERNAL_ERROR));
     }
 }
