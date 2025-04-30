@@ -11,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -29,23 +26,14 @@ public class AdminService {
                 ? productRequestRepository.findAllByStatus(status, sortedPageable)
                 : productRequestRepository.findAll(sortedPageable);
 
-        List<ProductRequestResDto> content = pageResult.stream()
-                .map(ProductRequestResDto::fromEntity)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
+        return pageResult.map(ProductRequestResDto::fromEntity);
     }
 
     public Page<GroupBuyRequestResDto> getAllGroupBuyRequests(Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        Page<GroupBuyRequest> pageResult = groupBuyRequestRepository.findAll(sortedPageable);
-
-        List<GroupBuyRequestResDto> content = pageResult.stream()
-                .map(GroupBuyRequestResDto::fromEntity)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(content, sortedPageable, pageResult.getTotalElements());
+        return groupBuyRequestRepository.findAll(sortedPageable)
+                .map(GroupBuyRequestResDto::fromEntity);
     }
 }
