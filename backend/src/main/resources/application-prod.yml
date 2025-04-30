@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: application-secret.yml
+
   datasource:
     # 추후 RDS 도입 고려
     url: jdbc:mysql://mysql_1:3306/tung_db
