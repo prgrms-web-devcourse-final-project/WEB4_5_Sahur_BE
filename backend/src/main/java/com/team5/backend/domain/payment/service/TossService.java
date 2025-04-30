@@ -10,14 +10,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.global.config.toss.TossPaymentConfig;
+import com.team5.backend.global.exception.ServiceException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -52,10 +50,8 @@ public class TossService {
 		try {
 			ResponseEntity<String> response = restTemplate.postForEntity(url, httpEntity, String.class);
 			return response.getStatusCode().is2xxSuccessful();
-		} catch (HttpClientErrorException | HttpServerErrorException | ResourceAccessException e) {
-			// Toss 서버 관련 예외 처리
-			System.err.println("Toss 결제 실패: " + e.getMessage());
-			return false;
+		} catch (RestClientException e) {
+			throw new ServiceException("502-TOSS", "Toss 결제 승인 요청에 실패했습니다.");
 		}
 	}
 
@@ -93,8 +89,8 @@ public class TossService {
 				.cardNumber(card != null ? (String) card.get("number") : null)
 				.build();
 
-		} catch (Exception e) {
-			throw new RuntimeException("결제 조회 실패: " + e.getMessage());
+		} catch (RestClientException e) {
+			throw new ServiceException("502-TOSS", "Toss 결제 정보 조회에 실패했습니다.");
 		}
 	}
 
@@ -121,9 +117,8 @@ public class TossService {
 		try {
 			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 			return response.getStatusCode().is2xxSuccessful();
-		} catch (HttpClientErrorException | HttpServerErrorException | ResourceAccessException e) {
-			System.err.println("Toss 결제 실패: " + e.getMessage());
-			return false;
+		} catch (RestClientException e) {
+			throw new ServiceException("502-TOSS", "Toss 결제 취소 요청에 실패했습니다.");
 		}
 	}
 
