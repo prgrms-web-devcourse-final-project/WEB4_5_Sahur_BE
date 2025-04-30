@@ -5,10 +5,11 @@ import com.team5.backend.domain.history.dto.HistoryResDto;
 import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
 import com.team5.backend.domain.history.service.HistoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/histories")
@@ -24,8 +25,10 @@ public class HistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<HistoryResDto>> getAllHistories() {
-        List<HistoryResDto> responses = historyService.getAllHistories();
+    public ResponseEntity<Page<HistoryResDto>> getAllHistories(
+            @PageableDefault(size = 5) Pageable pageable) {
+
+        Page<HistoryResDto> responses = historyService.getAllHistories(pageable);
         return ResponseEntity.ok(responses);
     }
 
