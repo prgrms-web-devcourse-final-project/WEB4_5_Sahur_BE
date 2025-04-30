@@ -1,11 +1,13 @@
 package com.team5.backend.domain.product.entity;
 
+import com.team5.backend.domain.category.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Product")
+@Table(name = "product")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,8 +19,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
 
-    @Column(nullable = false)
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryId", nullable = false)
+    private Category category;
 
     @Column(nullable = false)
     private String title;
@@ -37,16 +40,6 @@ public class Product {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ProductStatus status;
-
-    public enum ProductStatus {
-        WAITING,   // 승인 대기
-        APPROVED,  // 승인
-        REJECTED   // 거절
-    }
 
 }
 
