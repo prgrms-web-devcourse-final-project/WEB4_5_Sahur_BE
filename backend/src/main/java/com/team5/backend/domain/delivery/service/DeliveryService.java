@@ -25,8 +25,8 @@ public class DeliveryService {
 		Delivery delivery = Delivery.create(
 			order,
 			request.getAddress(),
-			request.getPccc(),
-			request.getContact()
+			request.getContact(),
+			request.getPccc()
 		);
 		return deliveryRepository.save(delivery);
 	}

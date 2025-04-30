@@ -51,6 +51,25 @@ class DeliveryServiceTest {
         assertThat(result.getPccc()).isEqualTo(12345);
     }
 
+    @DisplayName("배송 단건 조회 성공")
+    @Test
+    void getByOrderId() {
+        // given
+        Long orderId = 2L;
+        Order mockOrder = Order.builder().orderId(orderId).build();
+        Delivery delivery = Delivery.create(mockOrder, "서울시 어쩌구", "01012345678",12345);
+
+        given(deliveryRepository.findByOrderOrderId(orderId)).willReturn(Optional.of(delivery));
+
+        // when
+        Delivery result = deliveryService.getDeliveryByOrder(orderId);
+
+        // then
+        assertThat(result.getAddress()).isEqualTo("서울시 어쩌구");
+        assertThat(result.getContact()).isEqualTo("01012345678");
+        assertThat(result.getPccc()).isEqualTo(12345);
+    }
+
 
 
 }
