@@ -77,6 +77,9 @@ public class TossService {
 				throw new RuntimeException("응답 body가 null 입니다.");
 			}
 
+			// 카드 정보가 포함된 경우 파싱
+			Map<String, Object> card = (Map<String, Object>) body.get("card");
+
 			return PaymentResDto.builder()
 				.paymentKey((String) body.get("paymentKey"))
 				.orderId((String) body.get("orderId"))
@@ -85,7 +88,11 @@ public class TossService {
 				.method((String) body.get("method"))
 				.status((String) body.get("status"))
 				.approvedAt((String) body.get("approvedAt"))
+				.cardCompany(card != null ? (String) card.get("company") : null)
+				.cardNumberSuffix(card != null ? (String) card.get("number") : null)
+				.receiptUrl((String) body.get("receiptUrl"))
 				.build();
+
 		} catch (Exception e) {
 			throw new RuntimeException("결제 조회 실패: " + e.getMessage());
 		}
