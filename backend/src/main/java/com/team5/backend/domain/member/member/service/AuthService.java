@@ -1,8 +1,6 @@
 package com.team5.backend.domain.member.member.service;
 
-import com.team5.backend.domain.member.member.dto.LoginReqDto;
-import com.team5.backend.domain.member.member.dto.LoginResDto;
-import com.team5.backend.domain.member.member.dto.TokenInfoReqDto;
+import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.util.JwtUtil;
@@ -83,7 +81,7 @@ public class AuthService {
 
     // 토큰 갱신 메서드
     @Transactional
-    public LoginResDto refreshToken(String refreshToken, HttpServletResponse response) {
+    public AuthResDto refreshToken(String refreshToken, HttpServletResponse response) {
 
         // 리프레시 토큰 유효성 검증
         if (jwtUtil.isTokenExpired(refreshToken) || jwtUtil.isTokenBlacklisted(refreshToken)) {
@@ -122,12 +120,12 @@ public class AuthService {
             jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
         }
 
-        return new LoginResDto(newAccessToken, newRefreshToken, memberId);
+        return new AuthResDto(newAccessToken, newRefreshToken);
     }
 
     // 액세스 토큰이 만료된 이후
     @Transactional
-    public LoginResDto refreshTokenWithAccessToken(String accessToken, String refreshToken, HttpServletResponse response) {
+    public AuthResDto refreshTokenWithAccessToken(String accessToken, String refreshToken, HttpServletResponse response) {
 
         // 리프레시 토큰 유효성 검증
         if (jwtUtil.isTokenExpired(refreshToken) || jwtUtil.isTokenBlacklisted(refreshToken)) {
@@ -172,7 +170,7 @@ public class AuthService {
             jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
         }
 
-        return new LoginResDto(newAccessToken, newRefreshToken, memberId);
+        return new AuthResDto(newAccessToken, newRefreshToken);
     }
 
     // 리프레시 토큰 갱신 필요 여부 확인
@@ -209,14 +207,14 @@ public class AuthService {
         }
 
         // 토큰에서 사용자 정보 추출
-        TokenInfoReqDto tokenInfo = extractTokenInfo(extractedToken);
+        TokenInfoResDto tokenInfo = extractTokenInfo(extractedToken);
 
         return memberRepository.findByEmail(tokenInfo.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     // 토큰에서 사용자 정보를 추출하는 메서드
-    public TokenInfoReqDto extractTokenInfo(String token) {
+    public TokenInfoResDto extractTokenInfo(String token) {
 
         if (jwtUtil.isTokenExpired(token)) {
             throw new RuntimeException("만료된 토큰입니다.");
@@ -225,7 +223,7 @@ public class AuthService {
         String email = jwtUtil.extractEmail(token);
         String role = jwtUtil.extractRole(token);
 
-        return new TokenInfoReqDto(email, role);
+        return new TokenInfoResDto(email, role);
     }
 
     // 쿠키 생성 메서드 (만료 시간 설정)

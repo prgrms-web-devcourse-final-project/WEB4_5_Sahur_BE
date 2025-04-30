@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponseDto {
+public class AuthResDto {
 
     private String accessToken;
     private String refreshToken;
 
-    public AuthResponseDto(String accessToken) {
+    public AuthResDto(String accessToken) {
 
         this.accessToken = accessToken;
         this.refreshToken = accessToken;

@@ -82,10 +82,10 @@ public class MemberController {
      * 필요한 경우 리프레시 토큰도 함께 갱신
      */
     @PostMapping("/auth/refresh")
-    public ResponseEntity<LoginResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<AuthResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 
-        LoginResDto loginResDto = authService.refreshToken(refreshToken, response);
-        return ResponseEntity.ok(loginResDto);
+        AuthResDto authResDto = authService.refreshToken(refreshToken, response);
+        return ResponseEntity.ok(authResDto);
     }
 
     /**
@@ -93,11 +93,11 @@ public class MemberController {
      * 만료된 액세스 토큰에서 정보를 추출하여 새 토큰 발급
      */
     @PostMapping("/auth/token/refresh")
-    public ResponseEntity<LoginResDto> refreshTokenWithAccessToken(@CookieValue(name = "accessToken", required = false) String accessToken,
-            @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<AuthResDto> refreshTokenWithAccessToken(@CookieValue(name = "accessToken", required = false) String accessToken,
+                                                                  @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 
-        LoginResDto loginResDto = authService.refreshTokenWithAccessToken(accessToken, refreshToken, response);
-        return ResponseEntity.ok(loginResDto);
+        AuthResDto authResDto = authService.refreshTokenWithAccessToken(accessToken, refreshToken, response);
+        return ResponseEntity.ok(authResDto);
     }
 
     // 이메일 인증번호 전송

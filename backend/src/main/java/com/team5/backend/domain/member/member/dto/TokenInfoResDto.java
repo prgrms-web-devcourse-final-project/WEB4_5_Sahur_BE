@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TokenInfoReqDto {
+public class TokenInfoResDto {
 
     private String email;
     private String role;
