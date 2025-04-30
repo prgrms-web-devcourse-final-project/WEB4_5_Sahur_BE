@@ -123,55 +123,6 @@ public class AuthService {
         return new AuthResDto(newAccessToken, newRefreshToken);
     }
 
-    // 액세스 토큰이 만료된 이후
-    @Transactional
-    public AuthResDto refreshTokenWithAccessToken(String accessToken, String refreshToken, HttpServletResponse response) {
-
-        // 리프레시 토큰 유효성 검증
-        if (jwtUtil.isTokenExpired(refreshToken) || jwtUtil.isTokenBlacklisted(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
-        }
-
-        // 액세스 토큰에서 사용자 정보 추출 (만료된 토큰에서도 정보 추출 가능)
-        String email = jwtUtil.extractEmailIgnoringExpiration(accessToken);
-        Long memberId = jwtUtil.extractMemberIdIgnoringExpiration(accessToken);
-        String role = jwtUtil.extractRoleIgnoringExpiration(accessToken);
-
-        // 리프레시 토큰에서 추출한 이메일과 액세스 토큰의 이메일 비교
-        String refreshTokenEmail = jwtUtil.extractEmail(refreshToken);
-        if (!email.equals(refreshTokenEmail)) {
-            throw new RuntimeException("토큰 정보가 일치하지 않습니다.");
-        }
-
-        // Redis에 저장된 리프레시 토큰과 비교
-        if (!jwtUtil.validateRefreshTokenInRedis(email, refreshToken)) {
-            throw new RuntimeException("저장된 토큰이 일치하지 않습니다.");
-        }
-
-        // 새로운 액세스 토큰 생성
-        String newAccessToken = jwtUtil.generateAccessToken(memberId, email, role);
-
-        // 쿠키에 새 액세스 토큰 저장
-        int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
-        addCookie(response, "accessToken", newAccessToken, accessTokenMaxAge);
-
-        // 리프레시 토큰 갱신 필요 여부 확인
-        String newRefreshToken = refreshToken;
-
-        if (isRefreshTokenNeedsRenewal(refreshToken)) {
-            // 새로운 리프레시 토큰 생성
-            newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
-
-            // 쿠키에 새 리프레시 토큰 저장
-            int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
-            addCookie(response, "refreshToken", newRefreshToken, refreshTokenMaxAge);
-
-            // Redis에 저장된 리프레시 토큰 업데이트
-            jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
-        }
-
-        return new AuthResDto(newAccessToken, newRefreshToken);
-    }
 
     // 리프레시 토큰 갱신 필요 여부 확인
     private boolean isRefreshTokenNeedsRenewal(String refreshToken) {

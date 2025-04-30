@@ -1,6 +1,7 @@
 package com.team5.backend.domain.member.member.controller;
 
 import com.team5.backend.domain.member.member.dto.*;
+import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
@@ -33,10 +34,12 @@ public class MemberController {
     }
 
     // 회원 조회
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<GetMemberResDto> getMember(@PathVariable Long memberId) {
+    @GetMapping("/members/me")
+    public ResponseEntity<GetMemberResDto> getMember(@RequestHeader(value = "Authorization", required = false) String token) {
 
-        GetMemberResDto memberResDto = memberService.getMemberById(memberId);
+        Member loggedInMember = authService.getLoggedInMember(token);
+
+        GetMemberResDto memberResDto = memberService.getMemberById(loggedInMember.getMemberId());
         return ResponseEntity.ok(memberResDto);
     }
 
@@ -48,18 +51,23 @@ public class MemberController {
         return ResponseEntity.ok(members);
     }
 
-    @PatchMapping("/members/{memberId}")
-    public ResponseEntity<GetMemberResDto> updateMember(@PathVariable Long memberId, @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
+    @PatchMapping("/members/modify")
+    public ResponseEntity<GetMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token,
+                                                        @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
-        GetMemberResDto updatedMember = memberService.updateMember(memberId, patchMemberReqDto);
+        Member loggedInMember = authService.getLoggedInMember(token);
+
+        GetMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
         return ResponseEntity.ok(updatedMember);
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/members/{memberId}")
-    public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
+    @DeleteMapping("/members/delete")
+    public ResponseEntity<Void> deleteMember(@RequestHeader(value = "Authorization", required = false) String token) {
 
-        memberService.deleteMember(memberId);
+        Member loggedInMember = authService.getLoggedInMember(token);
+
+        memberService.deleteMember(loggedInMember.getMemberId());
         return ResponseEntity.noContent().build();
     }
 
@@ -87,18 +95,6 @@ public class MemberController {
     public ResponseEntity<AuthResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 
         AuthResDto authResDto = authService.refreshToken(refreshToken, response);
-        return ResponseEntity.ok(authResDto);
-    }
-
-    /**
-     * 액세스 토큰이 만료되었을 때 사용하는 토큰 갱신 API
-     * 만료된 액세스 토큰에서 정보를 추출하여 새 토큰 발급
-     */
-    @PostMapping("/auth/token/refresh")
-    public ResponseEntity<AuthResDto> refreshTokenWithAccessToken(@CookieValue(name = "accessToken", required = false) String accessToken,
-                                                                  @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
-
-        AuthResDto authResDto = authService.refreshTokenWithAccessToken(accessToken, refreshToken, response);
         return ResponseEntity.ok(authResDto);
     }
 
