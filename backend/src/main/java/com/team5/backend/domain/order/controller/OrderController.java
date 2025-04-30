@@ -83,12 +83,8 @@ public class OrderController {
 
 	@GetMapping("/{orderId}/payment")
 	public RsData<PaymentResDto> getPaymentByOrder(@PathVariable Long orderId) {
-		try {
-			String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
-			PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
-			return new RsData<>("200", "결제 정보를 조회했습니다.", dto);
-		} catch (IllegalArgumentException e) {
-			return new RsData<>("404-1", "해당 주문의 결제 정보를 찾을 수 없습니다.");
-		}
+		String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
+		PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
+		return new RsData<>("200", "결제 정보를 조회했습니다.", dto);
 	}
 }
