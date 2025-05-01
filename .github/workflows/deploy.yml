@@ -68,7 +68,7 @@ jobs:
 
       - name: export image name
         id: export_image
-        run: echo "image_name=app250417" >> $GITHUB_OUTPUT
+        run: echo "image_name=tung_app" >> $GITHUB_OUTPUT
 
       - name: 빌드 앤 푸시
         uses: docker/build-push-action@v3
