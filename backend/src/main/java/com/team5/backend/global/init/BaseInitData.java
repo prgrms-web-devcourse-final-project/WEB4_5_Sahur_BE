@@ -1,9 +1,6 @@
-
 package com.team5.backend.global.init;
 
-import com.team5.backend.domain.category.entity.Category;
-import com.team5.backend.domain.category.entity.CategoryType;
-import com.team5.backend.domain.category.entity.KeywordType;
+import com.team5.backend.domain.category.entity.*;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
@@ -39,14 +36,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.team5.backend.domain.category.entity.CategoryType.*;
 
 @Component
 @RequiredArgsConstructor
-public class BaseInitData{
+public class BaseInitData {
 
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
@@ -125,19 +121,34 @@ public class BaseInitData{
                 .role(Role.USER)
                 .build());
 
-        // 카테고리 생성
+        // 카테고리 3개 미리 생성
         Category food = categoryRepository.save(Category.builder()
-                .category(FOOD).
-                build());
-        Category digitalAppliance = categoryRepository.save(Category.builder().category(DIGITAL_APPLIANCE).build());
-        Category beauty = categoryRepository.save(Category.builder().category(BEAUTY).build());
+                .category(FOOD)
+                .keyword(KeywordType.DEFAULT)
+                .uid(101).build());
 
-        List<CategoryType> categoryTypes = List.of(FOOD, DIGITAL_APPLIANCE, BEAUTY);
+        Category digital = categoryRepository.save(Category.builder()
+                .category(DIGITAL_APPLIANCE)
+                .keyword(KeywordType.DEFAULT)
+                .uid(102).build());
+
+        Category beauty = categoryRepository.save(Category.builder()
+                .category(BEAUTY)
+                .keyword(KeywordType.DEFAULT)
+                .uid(103).build());
+
+        Map<CategoryType, Category> categoryMap = Map.of(
+                FOOD, food,
+                DIGITAL_APPLIANCE, digital,
+                BEAUTY, beauty
+        );
+
         List<Product> allProducts = new ArrayList<>();
         List<GroupBuy> allGroupBuys = new ArrayList<>();
 
-        // 각 카테고리에 상품 5개씩 + GroupBuy 1개씩 생성
-        for (CategoryType categoryType : categoryTypes) {
+        // 각 카테고리에 상품 5개씩 + GroupBuy 생성
+        for (CategoryType categoryType : categoryMap.keySet()) {
+            Category category = categoryMap.get(categoryType);
             for (int i = 1; i <= 5; i++) {
                 Product product = productRepository.save(Product.builder()
                         .title(categoryType.name() + " 상품 " + i)
@@ -145,18 +156,11 @@ public class BaseInitData{
                         .imageUrl("http://example.com/" + categoryType.name().toLowerCase() + "/" + i + ".jpg")
                         .description(categoryType.name() + " 상품 " + i + " 설명입니다.")
                         .dibCount(0L)
+                        .category(category)
+                        .createdAt(LocalDateTime.now())
                         .build());
                 allProducts.add(product);
 
-                // 해당 상품의 카테고리 엔티티 생성 및 저장
-                Category category = categoryRepository.save(Category.builder()
-                        .product(product)
-                        .category(categoryType)
-                        .keyword(KeywordType.DEFAULT)
-                        .uid(100 + i)
-                        .build());
-
-                // GroupBuy 생성
                 GroupBuy groupBuy = groupBuyRepository.save(GroupBuy.builder()
                         .product(product)
                         .category(category)
@@ -165,12 +169,13 @@ public class BaseInitData{
                         .round(1)
                         .deadline(LocalDateTime.now().plusDays(5))
                         .status(GroupBuyStatus.ONGOING)
+                        .createdAt(LocalDateTime.now())
                         .build());
                 allGroupBuys.add(groupBuy);
             }
         }
 
-        // 각 상품마다 리뷰어 3명이 리뷰 작성
+        // 리뷰 작성
         List<Member> reviewers = List.of(reviewer1, reviewer2, reviewer3);
         for (Product product : allProducts) {
             for (Member reviewer : reviewers) {
@@ -184,15 +189,16 @@ public class BaseInitData{
             }
         }
 
-        // 기본 사용자 찜 3개 (앞의 3개 상품)
+        // 찜 등록
         for (int i = 0; i < 3; i++) {
             dibsRepository.save(Dibs.builder()
                     .member(defaultUser)
                     .product(allProducts.get(i))
+                    .status(false)
                     .build());
         }
 
-        // 알림 3개
+        // 알림 등록
         for (int i = 1; i <= 3; i++) {
             notificationRepository.save(Notification.builder()
                     .member(defaultUser)
@@ -205,36 +211,32 @@ public class BaseInitData{
                     .build());
         }
 
-        // 참여 기록 1개 (첫 번째 groupBuy 기준)
-        historyRepository.save(History.builder()
-                .member(defaultUser)
-                .product(allProducts.get(0))
-                .groupBuy(allGroupBuys.get(0))
-                .writable(true)
-                .build());
-
-        // 주문 1개
+        // 주문
         Order order = orderRepository.save(Order.builder()
                 .member(defaultUser)
+                .groupBuy(allGroupBuys.get(0))
                 .status(OrderStatus.PAID)
                 .totalPrice(allProducts.get(0).getPrice())
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        // 배송 1개
-        Delivery delivery = Delivery.create(order,
-                "서울시 테스트구 테스트동",
-                1234,
-                "010-1234-5678");
-        deliveryRepository.save(delivery);
+        // 히스토리
+        historyRepository.save(History.builder()
+                .member(defaultUser)
+                .product(allProducts.get(0))
+                .groupBuy(allGroupBuys.get(0))
+                .order(order)
+                .writable(true)
+                .build());
 
-        // 결제 내역 1개
-        Payment payment = Payment.create(
-                order,
-                "payment-001");
-        paymentRepository.save(payment);
+        // 배송
+        deliveryRepository.save(Delivery.create(order,
+                "서울시 테스트구 테스트동", 1234, "010-1234-5678"));
 
-        // 상품 요청 1개
+        // 결제
+        paymentRepository.save(Payment.create(order, "payment-001"));
+
+        // 상품 요청
         productRequestRepository.save(ProductRequest.builder()
                 .member(defaultUser)
                 .category(food)
@@ -244,11 +246,10 @@ public class BaseInitData{
                 .status(ProductRequestStatus.WAITING)
                 .build());
 
-        // 공동구매 요청 1개
+        // 공동구매 요청
         groupBuyRequestRepository.save(GroupBuyRequest.builder()
                 .product(allProducts.get(1))
                 .member(defaultUser)
                 .build());
     }
 }
-
