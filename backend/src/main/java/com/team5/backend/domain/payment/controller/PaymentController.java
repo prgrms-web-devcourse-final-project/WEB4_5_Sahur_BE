@@ -32,7 +32,7 @@ public class PaymentController {
 	}
 
 	@GetMapping("/{paymentId}")
-	public RsData<PaymentResDto> getPaymentInfo(@PathVariable("paymentId") String paymentId) {
+	public RsData<PaymentResDto> getPaymentInfo(@PathVariable("paymentId") Long paymentId) {
 		String paymentKey = paymentService.getPaymentKey(paymentId);
 		PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
 		return new RsData<>("200", "결제 정보를 불러왔습니다.", dto);

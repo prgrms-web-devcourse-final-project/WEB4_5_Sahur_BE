@@ -14,7 +14,7 @@ public class ConfirmReqDto {
 	private String paymentKey;
 
 	@NotBlank(message = "orderId는 필수입니다.")
-	private String orderId;
+	private Long orderId;
 
 	@NotNull(message = "amount는 필수입니다.")
 	@Min(value = 100, message = "amount는 최소 100원 이상이어야 합니다.")
