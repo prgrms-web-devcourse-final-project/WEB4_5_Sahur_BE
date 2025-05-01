@@ -67,7 +67,6 @@ class GroupBuyServiceTest {
                 .category(null)
                 .keyword(KeywordType.DEFAULT)
                 .uid(101)
-                .product(testProduct)
                 .build();
 
         groupBuys = List.of(
