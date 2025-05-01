@@ -51,4 +51,9 @@ public class Member {
 
     @Column(name = "emailVerified", nullable = false)
     private Boolean emailVerified;
+
+    // 프로필 이미지 업데이트
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

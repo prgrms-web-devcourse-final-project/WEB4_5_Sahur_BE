@@ -48,6 +48,9 @@ dependencies {
 
     // 이메일 전송
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Oauth2
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 tasks.named('test') {
