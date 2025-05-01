@@ -13,7 +13,7 @@ spring:
 
   data:
     redis:
-      host: redis_1
+      host: api.devapi.store
       port: 6379
       password: ${custom.db.password}
 
