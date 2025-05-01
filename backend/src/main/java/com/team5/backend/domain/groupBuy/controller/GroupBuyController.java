@@ -19,7 +19,7 @@ public class GroupBuyController {
     private final GroupBuyService groupBuyService;
 
     @PostMapping
-    public ResponseEntity<GroupBuyResDto> createGroupBuy(@RequestBody GroupBuyCreateReqDto request) {
+    public ResponseEntity<GroupBuyResDto> createGroupBuy(@RequestBody @Valid GroupBuyCreateReqDto request) {
         GroupBuyResDto response = groupBuyService.createGroupBuy(request);
         return ResponseEntity.ok(response);
     }
