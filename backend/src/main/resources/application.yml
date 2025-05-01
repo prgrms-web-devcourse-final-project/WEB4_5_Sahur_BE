@@ -89,7 +89,3 @@ custom:
     domain: localhost
     backUrl: "http://${custom.dev.domain}:${server.port}"
     frontUrl: "http://${custom.dev.domain}:3000"
-
-toss:
-  client-key: "test_ck_5OWRapdA8dP5dB4NPlyB8o1zEqZK"
-  secret-key: "test_sk_0RnYX2w532MB1mZpel9K8NeyqApQ"
