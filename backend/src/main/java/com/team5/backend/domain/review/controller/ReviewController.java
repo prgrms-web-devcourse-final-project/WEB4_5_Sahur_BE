@@ -1,6 +1,7 @@
 package com.team5.backend.domain.review.controller;
 
 import com.team5.backend.domain.review.dto.ReviewCreateReqDto;
+import com.team5.backend.domain.review.dto.ReviewPatchReqDto;
 import com.team5.backend.domain.review.dto.ReviewResDto;
 import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
 import com.team5.backend.domain.review.service.ReviewService;
@@ -64,7 +65,7 @@ public class ReviewController {
     @PatchMapping("/{id}")
     public ResponseEntity<ReviewResDto> patchReview(
             @Parameter(description = "리뷰 ID") @PathVariable Long id,
-            @RequestBody ReviewUpdateReqDto request
+            @RequestBody ReviewPatchReqDto request
     ) {
         ReviewResDto response = reviewService.patchReview(id, request);
         return ResponseEntity.ok(response);

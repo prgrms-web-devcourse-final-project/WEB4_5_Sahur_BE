@@ -5,6 +5,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.dto.ReviewCreateReqDto;
+import com.team5.backend.domain.review.dto.ReviewPatchReqDto;
 import com.team5.backend.domain.review.dto.ReviewResDto;
 import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
 import com.team5.backend.domain.review.entity.Review;
@@ -83,7 +84,7 @@ public class ReviewService {
     /**
      * 리뷰 수정 (일부 필드)
      */
-    public ReviewResDto patchReview(Long id, ReviewUpdateReqDto request) {
+    public ReviewResDto patchReview(Long id, ReviewPatchReqDto request) {
         return reviewRepository.findById(id)
                 .map(existingReview -> {
                     if (request.getComment() != null) {
