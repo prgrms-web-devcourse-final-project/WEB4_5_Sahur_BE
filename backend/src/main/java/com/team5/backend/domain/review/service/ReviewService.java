@@ -102,7 +102,43 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
 
+    /**
+     * 리뷰 삭제
+     */
     public void deleteReview(Long id) {
         reviewRepository.deleteById(id);
+    }
+
+    /**
+     * 특정 상품(productId)의 리뷰 목록 조회
+     * @param productId 상품 ID
+     * @param pageable 페이징 및 정렬 정보
+     * @param sortBy "latest" 또는 "rate"
+     */
+    public Page<ReviewResDto> getReviewsByProductId(Long productId, Pageable pageable, String sortBy) {
+        Sort sort;
+        if ("rate".equalsIgnoreCase(sortBy)) {
+            sort = Sort.by(Sort.Order.desc("rate")); // 평점순
+        } else {
+            sort = Sort.by(Sort.Order.desc("createdAt")); // 기본은 최신순
+        }
+
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        return reviewRepository.findByProduct_ProductId(productId, sortedPageable)
+                .map(ReviewResDto::fromEntity);
+    }
+
+    /**
+     * 특정 회원(memberId)이 작성한 리뷰 목록 조회
+     * @param memberId 회원 ID
+     * @param pageable 페이징 정보 (기본 정렬: 최신순)
+     */
+    public Page<ReviewResDto> getReviewsByMemberId(Long memberId, Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+        return reviewRepository.findByMember_MemberId(memberId, sortedPageable)
+                .map(ReviewResDto::fromEntity);
     }
 }
