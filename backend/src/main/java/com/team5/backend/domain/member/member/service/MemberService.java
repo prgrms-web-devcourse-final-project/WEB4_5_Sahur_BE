@@ -1,5 +1,6 @@
 package com.team5.backend.domain.member.member.service;
 
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.dto.GetMemberResDto;
 import com.team5.backend.domain.member.member.dto.SignupReqDto;
 import com.team5.backend.domain.member.member.dto.SignupResDto;
@@ -7,7 +8,13 @@ import com.team5.backend.domain.member.member.dto.PatchMemberReqDto;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.product.dto.ProductResDto;
+import com.team5.backend.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +29,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+
+    private final HistoryRepository historyRepository;
 
     // 회원 생성
     @Transactional
@@ -147,5 +156,12 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
 
         memberRepository.delete(member);
+    }
+
+    public Page<ProductResDto> getReviewableProductsByMember(Long memberId, Pageable pageable) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        return historyRepository.findWritableProductsByMemberId(memberId, sortedPageable)
+                .map(ProductResDto::fromEntity);
     }
 }
