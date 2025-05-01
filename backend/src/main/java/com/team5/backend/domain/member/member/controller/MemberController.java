@@ -87,21 +87,23 @@ public class MemberController {
 
     // 이메일 인증번호 전송
     @PostMapping("/auth/email/send")
-    public ResponseEntity<String> requestAuthCode(String email) throws MessagingException {
+    public ResponseEntity<EmailResDto> requestAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
 
-        boolean isSend = mailService.sendAuthCode(email);
+        EmailResDto response = mailService.sendAuthCode(emailSendReqDto);
 
-        return isSend ? ResponseEntity.ok("인증 코드가 전송되었습니다.") :
-                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 코드 전송이 실패하였습니다.");
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     // 이메일 인증번호 검증
     @PostMapping("/auth/email/verify")
-    public ResponseEntity<String> validateAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
+    public ResponseEntity<EmailResDto> validateAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
 
-        boolean isSuccess = mailService.validationAuthCode(emailVerificationReqDto);
+        EmailResDto response = mailService.validationAuthCode(emailVerificationReqDto);
 
-        return isSuccess ? ResponseEntity.ok("이메일 인증에 성공하였습니다.") :
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증에 실패하였습니다.");
+        return response.isSuccess()
+                ? ResponseEntity.ok(response)
+                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

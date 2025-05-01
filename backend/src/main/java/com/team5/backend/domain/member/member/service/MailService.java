@@ -1,6 +1,8 @@
 package com.team5.backend.domain.member.member.service;
 
 
+import com.team5.backend.domain.member.member.dto.EmailResDto;
+import com.team5.backend.domain.member.member.dto.EmailSendReqDto;
 import com.team5.backend.domain.member.member.dto.EmailVerificationReqDto;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
@@ -95,7 +97,9 @@ public class MailService {
     }
 
     @Transactional
-    public boolean sendAuthCode(String email) throws MessagingException {
+    public EmailResDto sendAuthCode(EmailSendReqDto emailSendReqDto) throws MessagingException {
+
+        String email = emailSendReqDto.getEmail();
 
         // 기존에 저장된 인증 코드가 있으면 삭제
         String key = EMAIL_AUTH_PREFIX + email;
@@ -115,12 +119,19 @@ public class MailService {
             values.set(key, authCode);
             redisTemplate.expire(key, authCodeExpirationSeconds, TimeUnit.SECONDS); // 3분
 
-            return true;
+            return EmailResDto.builder()
+                    .success(true)
+                    .message("인증 코드가 전송되었습니다.")
+                    .build();
         }
-        return false;
+
+        return EmailResDto.builder()
+                .success(false)
+                .message("인증 코드 전송이 실패하였습니다.")
+                .build();
     }
 
-    public boolean validationAuthCode(EmailVerificationReqDto emailVerificationReqDto) {
+    public EmailResDto validationAuthCode(EmailVerificationReqDto emailVerificationReqDto) {
 
         String email = emailVerificationReqDto.getEmail();
         String authCode = emailVerificationReqDto.getAuthCode();
@@ -133,7 +144,7 @@ public class MailService {
         // 인증 코드 검증
         if (storedAuthCode != null && storedAuthCode.equals(authCode)) {
 
-            // 인증 성공 시 Redis에 인증 완료 상태 저장 (유효기간 10분)
+            // 인증 성공 시 Redis에 인증 완료 상태 저장
             String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
             values.set(verifiedKey, "true");
             redisTemplate.expire(verifiedKey, verifiedExpirationMinutes, TimeUnit.MINUTES); // 10분
@@ -141,10 +152,16 @@ public class MailService {
             // 인증 성공 후 Redis에서 인증 코드 삭제
             redisTemplate.delete(key);
 
-            return true;
+            return EmailResDto.builder()
+                    .success(true)
+                    .message("이메일 인증에 성공하였습니다.")
+                    .build();
         }
 
-        return false;
+        return EmailResDto.builder()
+                .success(false)
+                .message("이메일 인증에 실패하였습니다.")
+                .build();
     }
 
     // 인증 상태 확인
