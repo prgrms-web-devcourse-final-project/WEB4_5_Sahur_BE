@@ -51,6 +51,7 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        history.setWritable(false);
         Review saved = reviewRepository.save(review);
         return ReviewResDto.fromEntity(saved);
     }
@@ -115,6 +116,9 @@ public class ReviewService {
      * 리뷰 삭제
      */
     public void deleteReview(Long id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
+        review.getHistory().setWritable(true);
         reviewRepository.deleteById(id);
     }
 
