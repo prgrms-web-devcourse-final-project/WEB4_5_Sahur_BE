@@ -47,7 +47,7 @@ public class NotificationController {
                 .orElseThrow(() -> new RuntimeException("Notification not found with id " + id));
     }
 
-    @Operation(summary = "알림 읽음 상태 수정 (전체)", description = "알림의 읽음 상태를 전체 수정합니다.")
+    @Operation(summary = "알림 수정 (전체)", description = "알림을 수정합니다.")
     @PutMapping("/{id}")
     public ResponseEntity<NotificationResDto> updateNotification(
             @Parameter(description = "알림 ID") @PathVariable Long id,
