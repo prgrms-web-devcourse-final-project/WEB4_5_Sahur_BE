@@ -1,5 +1,6 @@
 package com.team5.backend.domain.review.entity;
 
+import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
@@ -29,6 +30,10 @@ public class Review {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "historyId", nullable = false)
+    private History history;
 
     @Column(length = 255)
     private String comment = "";
