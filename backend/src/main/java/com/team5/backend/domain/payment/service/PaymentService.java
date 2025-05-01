@@ -9,13 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
-import com.team5.backend.global.exception.ServiceException;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,12 +26,11 @@ public class PaymentService {
 
 	private final PaymentRepository paymentRepository;
 	private final OrderRepository orderRepository;
-	private final MemberRepository memberRepository;
 	private final TossService tossService;
 
-	public void savePayment(String orderId, String paymentKey) {
-		Order order = orderRepository.findById(Long.valueOf(orderId))
-			.orElseThrow(() -> new ServiceException("404-ORDER", "주문을 찾을 수 없습니다."));
+	public void savePayment(Long orderId, String paymentKey) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new CustomException(PaymentErrorCode.ORDER_NOT_FOUND));
 
 		// 주문 상태를 PAID 변경
 		order.markAsPaid();
@@ -41,10 +40,9 @@ public class PaymentService {
 		paymentRepository.save(payment);
 	}
 
-	public String getPaymentKey(String paymentId) {
-		Payment payment = paymentRepository.findById(Long.valueOf(paymentId))
-			.orElseThrow(() -> new ServiceException("404-PAYMENT", "결제를 찾을 수 없습니다."));
-
+	public String getPaymentKey(Long paymentId) {
+		Payment payment = paymentRepository.findById(paymentId)
+			.orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND));
 		return payment.getPaymentKey();
 	}
 
@@ -71,7 +69,7 @@ public class PaymentService {
 	@Transactional(readOnly = true)
 	public String getPaymentKeyByOrder(Long orderId) {
 		Payment payment = paymentRepository.findByOrderOrderId(orderId)
-			.orElseThrow(() -> new ServiceException("404-PAYMENT", "해당 주문의 결제가 존재하지 않습니다."));
+			.orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND_BY_ORDER));
 		return payment.getPaymentKey();
 	}
 }

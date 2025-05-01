@@ -10,12 +10,14 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.*;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.global.config.toss.TossPaymentConfig;
-import com.team5.backend.global.exception.ServiceException;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -51,7 +53,7 @@ public class TossService {
 			ResponseEntity<String> response = restTemplate.postForEntity(url, httpEntity, String.class);
 			return response.getStatusCode().is2xxSuccessful();
 		} catch (RestClientException e) {
-			throw new ServiceException("502-TOSS", "Toss 결제 승인 요청에 실패했습니다.");
+			throw new CustomException(PaymentErrorCode.TOSS_CONFIRM_FAILED);
 		}
 	}
 
@@ -69,8 +71,8 @@ public class TossService {
 			ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url, HttpMethod.GET, entity, new ParameterizedTypeReference<>() {});
 			Map<String, Object> body = response.getBody();
 
-			if (body == null) {
-				throw new RuntimeException("응답 body가 null 입니다.");
+			if (!response.getStatusCode().is2xxSuccessful() || body == null) {
+				throw new CustomException(PaymentErrorCode.TOSS_FETCH_FAILED);
 			}
 
 			// 카드 정보가 포함된 경우 파싱
@@ -90,7 +92,7 @@ public class TossService {
 				.build();
 
 		} catch (RestClientException e) {
-			throw new ServiceException("502-TOSS", "Toss 결제 정보 조회에 실패했습니다.");
+			throw new CustomException(PaymentErrorCode.TOSS_FETCH_FAILED);
 		}
 	}
 
@@ -118,7 +120,7 @@ public class TossService {
 			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 			return response.getStatusCode().is2xxSuccessful();
 		} catch (RestClientException e) {
-			throw new ServiceException("502-TOSS", "Toss 결제 취소 요청에 실패했습니다.");
+			throw new CustomException(PaymentErrorCode.TOSS_CANCEL_FAILED);
 		}
 	}
 
