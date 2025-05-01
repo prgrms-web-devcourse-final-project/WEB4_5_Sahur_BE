@@ -15,7 +15,7 @@ public class ConfirmReqDto {
 	@NotBlank(message = "paymentKey는 필수입니다.")
 	private String paymentKey;
 
-	@NotBlank(message = "orderId는 필수입니다.")
+	@NotNull(message = "orderId는 필수입니다.")
 	private Long orderId;
 
 	@NotNull(message = "amount는 필수입니다.")
