@@ -126,7 +126,7 @@ public class ReviewService {
 
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        return reviewRepository.findByProduct_ProductId(productId, sortedPageable)
+        return reviewRepository.findByProductId(productId, sortedPageable)
                 .map(ReviewResDto::fromEntity);
     }
 
@@ -139,7 +139,7 @@ public class ReviewService {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        return reviewRepository.findByMember_MemberId(memberId, sortedPageable)
+        return reviewRepository.findByMemberId(memberId, sortedPageable)
                 .map(ReviewResDto::fromEntity);
     }
 }
