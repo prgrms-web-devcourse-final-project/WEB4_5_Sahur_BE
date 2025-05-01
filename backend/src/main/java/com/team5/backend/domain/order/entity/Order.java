@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.OrderErrorCode;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -58,19 +60,22 @@ public class Order {
 			.build();
 	}
 
-	public void updateQuantityAndPrice(int quantity, int totalPrice) {
+	public void updateOrderInfo(int quantity, int totalPrice) {
 		this.quantity = quantity;
 		this.totalPrice = totalPrice;
 	}
 
 	public void markAsPaid() {
 		if (this.status != OrderStatus.BEFOREPAID) {
-			throw new IllegalStateException("결제는 WAITING 상태에서만 진행할 수 있습니다.");
+			throw new CustomException(OrderErrorCode.INVALID_ORDER_STATUS);
 		}
 		this.status = OrderStatus.PAID;
 	}
 
-	public void cancel() {
+	public void markAsCanceled() {
+		if (this.status == OrderStatus.CANCELED) {
+			throw new CustomException(OrderErrorCode.ORDER_ALREADY_CANCELED);
+		}
 		this.status = OrderStatus.CANCELED;
 	}
 }
