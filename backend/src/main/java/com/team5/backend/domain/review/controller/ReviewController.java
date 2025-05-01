@@ -81,7 +81,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "상품별 리뷰 조회", description = "상품 ID로 리뷰들을 조회하며, 최신순 또는 평점순으로 정렬할 수 있습니다.")
-    @GetMapping("/product/{productId}")
+    @GetMapping("/product/{productId}/list")
     public ResponseEntity<Page<ReviewResDto>> getReviewsByProductId(
             @Parameter(description = "상품 ID") @PathVariable Long productId,
             @Parameter(description = "정렬 기준 (latest 또는 rate)") @RequestParam(defaultValue = "latest") String sortBy,
@@ -92,7 +92,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "회원별 리뷰 조회", description = "회원 ID로 작성한 리뷰들을 최신순으로 조회합니다.")
-    @GetMapping("/member/{memberId}")
+    @GetMapping("/member/{memberId}/list")
     public ResponseEntity<Page<ReviewResDto>> getReviewsByMemberId(
             @Parameter(description = "회원 ID") @PathVariable Long memberId,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 5) Pageable pageable
