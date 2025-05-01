@@ -26,8 +26,8 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
-    private final HistoryRepository historyRepository;
     private final CategoryRepository categoryRepository;
+    // TODO : 커스텀 예외 처리 적용 필요
 
     // 매일 정각(00:00)에 실행
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")    
