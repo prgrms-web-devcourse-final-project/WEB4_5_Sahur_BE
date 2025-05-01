@@ -1,7 +1,9 @@
 package com.team5.backend.domain.order.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,8 +39,11 @@ public class OrderController {
 	}
 
 	@GetMapping
-	public List<OrderListResDto> getOrders() {
-		return orderService.getOrders();
+	public RsData<Page<OrderListResDto>> getOrders(
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		Page<OrderListResDto> orders = orderService.getOrders(pageable);
+		return new RsData<>("200", "주문 목록 조회에 성공했습니다.", orders);
 	}
 
 	@GetMapping("/{orderId}")

@@ -1,5 +1,10 @@
 package com.team5.backend.domain.order.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -10,11 +15,8 @@ import com.team5.backend.domain.order.dto.OrderListResDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -40,11 +42,9 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<OrderListResDto> getOrders() {
-		return orderRepository.findAll()
-				.stream()
-				.map(OrderListResDto::from)
-				.toList();
+	public Page<OrderListResDto> getOrders(Pageable pageable) {
+		return orderRepository.findAll(pageable)
+			.map(OrderListResDto::from);
 	}
 
 	@Transactional(readOnly = true)
