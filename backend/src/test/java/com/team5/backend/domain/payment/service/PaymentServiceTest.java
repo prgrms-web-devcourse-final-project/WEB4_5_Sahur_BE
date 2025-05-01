@@ -46,8 +46,6 @@ class PaymentServiceTest {
 		when(paymentRepository.save(any(Payment.class))).thenReturn(null);
 
 		paymentService.savePayment(orderId, paymentKey);
-		System.out.println(">>> 저장된 주문 키: " + orderId);
-		System.out.println(">>> 저장된 결제 키: " + paymentKey);
 
 		verify(order).markAsPaid();
 		verify(paymentRepository).save(any(Payment.class));
@@ -60,7 +58,6 @@ class PaymentServiceTest {
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> paymentService.savePayment(99L, "abc"));
-		System.out.println(">>> 에러 내용: " + e);
 
 		assertEquals(PaymentErrorCode.ORDER_NOT_FOUND, e.getErrorCode());
 	}
@@ -74,7 +71,6 @@ class PaymentServiceTest {
 		when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(payment));
 
 		String result = paymentService.getPaymentKey(paymentId);
-		System.out.println(">>> 반환된 결제 키: " + result);
 
 		assertEquals("key-123", result);
 	}
@@ -86,7 +82,6 @@ class PaymentServiceTest {
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> paymentService.getPaymentKey(100L));
-		System.out.println(">>> 에러 내용: " + e);
 
 		assertEquals(PaymentErrorCode.PAYMENT_NOT_FOUND, e.getErrorCode());
 	}
@@ -100,7 +95,6 @@ class PaymentServiceTest {
 		when(paymentRepository.findByOrderOrderId(orderId)).thenReturn(Optional.of(payment));
 
 		String result = paymentService.getPaymentKeyByOrder(orderId);
-		System.out.println(">>> 반환된 결제 키: " + result);
 
 		assertEquals("order-key", result);
 	}
@@ -112,7 +106,6 @@ class PaymentServiceTest {
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> paymentService.getPaymentKeyByOrder(123L));
-		System.out.println(">>> 에러 내용: " + e);
 
 		assertEquals(PaymentErrorCode.PAYMENT_NOT_FOUND_BY_ORDER, e.getErrorCode());
 	}

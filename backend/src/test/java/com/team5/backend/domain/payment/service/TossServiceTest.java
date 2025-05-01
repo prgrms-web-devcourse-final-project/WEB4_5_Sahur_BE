@@ -53,7 +53,6 @@ class TossServiceTest {
 			.thenReturn(new ResponseEntity<>("OK", HttpStatus.OK));
 
 		boolean result = tossService.confirmPayment(request);
-		System.out.println(">>> 결과: " + result);
 
 		assertTrue(result);
 	}
@@ -68,7 +67,6 @@ class TossServiceTest {
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> tossService.confirmPayment(request));
-		System.out.println(">>> 에러 내용: " + e);
 
 		assertEquals(PaymentErrorCode.TOSS_CONFIRM_FAILED, e.getErrorCode());
 	}
@@ -102,7 +100,6 @@ class TossServiceTest {
 		).thenReturn(response);
 
 		PaymentResDto result = tossService.getPaymentInfoByPaymentKey(paymentKey);
-		System.out.println(">>> 결과: " + result);
 
 		assertEquals("pay-123", result.getPaymentKey());
 		assertEquals("Test Order", result.getOrderName());
@@ -121,7 +118,6 @@ class TossServiceTest {
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> tossService.getPaymentInfoByPaymentKey("invalid-key"));
-		System.out.println(">>> 에러 내용: " + e);
 
 		assertEquals(PaymentErrorCode.TOSS_FETCH_FAILED, e.getErrorCode());
 	}
@@ -134,7 +130,6 @@ class TossServiceTest {
 			.thenReturn(new ResponseEntity<>("OK", HttpStatus.OK));
 
 		boolean result = tossService.cancelPayment("payKey", "사용자 요청");
-		System.out.println(">>> 결과: " + result);
 
 		assertTrue(result);
 	}
@@ -147,7 +142,6 @@ class TossServiceTest {
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> tossService.cancelPayment("payKey", "사유"));
-		System.out.println(">>> 에러 내용: " + e);
 
 		assertEquals(PaymentErrorCode.TOSS_CANCEL_FAILED, e.getErrorCode());
 	}
