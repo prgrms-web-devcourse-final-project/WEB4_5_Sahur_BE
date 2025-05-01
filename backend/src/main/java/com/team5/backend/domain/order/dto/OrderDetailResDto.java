@@ -1,53 +1,40 @@
 package com.team5.backend.domain.order.dto;
 
+import java.time.LocalDateTime;
+
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
+
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Builder
 public class OrderDetailResDto {
 
 	private Long orderId;
+	private Long memberId;
+	private String nickname;
 	private Long groupId;
 	private String productTitle;
 	private String productImage;
-	private Long memberId;
-	private String nickname;
 	private Integer totalPrice;
-	private Integer quantity;
 	private OrderStatus status;
-	private LocalDateTime orderedAt;
-	private Integer shippingNumber;
-	private DeliveryInfo delivery;
-
-	@Getter
-	@Builder
-	public static class DeliveryInfo {
-		private String address;
-		private String contact;
-	}
+	private Integer quantity;
+	private LocalDateTime createdAt;
 
 	public static OrderDetailResDto from(Order order) {
 		return OrderDetailResDto.builder()
-				.orderId(order.getOrderId())
-				.groupId(order.getGroupBuy().getGroupBuyId())
-				.productTitle(order.getGroupBuy().getProduct().getTitle())
-				.productImage(order.getGroupBuy().getProduct().getImageUrl())
-				.memberId(order.getMember().getMemberId())
-				.nickname(order.getMember().getNickname())
-				.totalPrice(order.getTotalPrice())
-				.quantity(order.getQuantity())
-				.status(order.getStatus())
-				.orderedAt(order.getCreatedAt())
-				.shippingNumber(order.getShipping())
-				.delivery(DeliveryInfo.builder()
-						.address(order.getDelivery().getAddress())
-						.contact(order.getDelivery().getContact())
-						.build())
-				.build();
+			.orderId(order.getOrderId())
+			.memberId(order.getMember().getMemberId())
+			.nickname(order.getMember().getNickname())
+			.groupId(order.getGroupBuy().getGroupBuyId())
+			.productTitle(order.getGroupBuy().getProduct().getTitle())
+			.productImage(order.getGroupBuy().getProduct().getImageUrl())
+			.totalPrice(order.getTotalPrice())
+			.status(order.getStatus())
+			.quantity(order.getQuantity())
+			.createdAt(order.getCreatedAt())
+			.build();
 	}
 }

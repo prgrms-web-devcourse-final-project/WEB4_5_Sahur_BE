@@ -12,24 +12,22 @@ import lombok.Getter;
 @Builder
 public class OrderCreateResDto {
 	private Long orderId;
-	private Long groupId;
 	private Long memberId;
+	private Long groupId;
 	private Integer totalPrice;
-	private LocalDateTime createdAt;
-	private Integer quantity;
 	private OrderStatus status;
-	private Integer shipping;
+	private Integer quantity;
+	private LocalDateTime createdAt;
 
 	public static OrderCreateResDto from(Order order) {
 		return OrderCreateResDto.builder()
 			.orderId(order.getOrderId())
-			.groupId(order.getGroupBuy().getGroupBuyId())
 			.memberId(order.getMember().getMemberId())
+			.groupId(order.getGroupBuy().getGroupBuyId())
 			.totalPrice(order.getTotalPrice())
-			.createdAt(order.getCreatedAt())
-			.quantity(order.getQuantity())
 			.status(order.getStatus())
-			.shipping(order.getShipping())
+			.quantity(order.getQuantity())
+			.createdAt(order.getCreatedAt())
 			.build();
 	}
 }
