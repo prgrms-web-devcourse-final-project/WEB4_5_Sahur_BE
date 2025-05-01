@@ -1,5 +1,7 @@
 package com.team5.backend.domain.review.service;
 
+import com.team5.backend.domain.history.entity.History;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
@@ -24,6 +26,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
+    private final HistoryRepository historyRepository;
     // TODO : 커스텀 예외 처리 적용 필요
 
 
@@ -35,10 +38,13 @@ public class ReviewService {
                 .orElseThrow(() -> new RuntimeException("Member not found"));
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
+        History history = historyRepository.findById(request.getHistoryId())
+                .orElseThrow(() -> new RuntimeException("History not found"));
 
         Review review = Review.builder()
                 .member(member)
                 .product(product)
+                .history(history)
                 .comment(request.getComment())
                 .rate(request.getRate())
                 .imageUrl(request.getImageUrl())
