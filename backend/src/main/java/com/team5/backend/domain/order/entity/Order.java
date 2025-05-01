@@ -2,9 +2,12 @@ package com.team5.backend.domain.order.entity;
 
 import java.time.LocalDateTime;
 
-import com.team5.backend.domain.delivery.entity.Delivery;
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.OrderErrorCode;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,7 +32,7 @@ public class Order {
 	private Member member;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "groupId", nullable = false)
+	@JoinColumn(name = "groupBuyId", nullable = false)
 	private GroupBuy groupBuy;
 
 	@Column(nullable = false)
@@ -42,39 +45,37 @@ public class Order {
 	@Column(nullable = false)
 	private Integer quantity;
 
-	@Column
-	private Integer shipping;
-
+	@CreationTimestamp
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
-	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private Delivery delivery;
-
-	public static Order create(Member member, GroupBuy groupBuy, Integer totalPrice, Integer quantity) {
+	public static Order create(Member member, GroupBuy groupBuy, Integer quantity) {
+		int totalPrice = groupBuy.getProduct().getPrice() * quantity;
 		return Order.builder()
 			.member(member)
 			.groupBuy(groupBuy)
 			.totalPrice(totalPrice)
-			.status(OrderStatus.WAITING)
+			.status(OrderStatus.BEFOREPAID)
 			.quantity(quantity)
-			.createdAt(LocalDateTime.now())
 			.build();
 	}
 
-	public void updateQuantityAndPrice(int quantity, int totalPrice) {
+	public void updateOrderInfo(int quantity, int totalPrice) {
 		this.quantity = quantity;
 		this.totalPrice = totalPrice;
 	}
 
 	public void markAsPaid() {
-		if (this.status != OrderStatus.WAITING) {
-			throw new IllegalStateException("결제는 WAITING 상태에서만 진행할 수 있습니다.");
+		if (this.status != OrderStatus.BEFOREPAID) {
+			throw new CustomException(OrderErrorCode.INVALID_ORDER_STATUS);
 		}
 		this.status = OrderStatus.PAID;
 	}
 
-	public void cancel() {
+	public void markAsCanceled() {
+		if (this.status == OrderStatus.CANCELED) {
+			throw new CustomException(OrderErrorCode.ORDER_ALREADY_CANCELED);
+		}
 		this.status = OrderStatus.CANCELED;
 	}
 }
