@@ -8,6 +8,7 @@ import com.team5.backend.domain.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +27,7 @@ public class ReviewController {
     @Operation(summary = "리뷰 생성", description = "회원이 특정 상품에 대해 리뷰를 작성합니다.")
     @PostMapping
     public ResponseEntity<ReviewResDto> createReview(
-            @RequestBody ReviewCreateReqDto request
+            @RequestBody @Valid ReviewCreateReqDto request
     ) {
         ReviewResDto response = reviewService.createReview(request);
         return ResponseEntity.ok(response);
@@ -55,7 +56,7 @@ public class ReviewController {
     @PutMapping("/{id}")
     public ResponseEntity<ReviewResDto> updateReview(
             @Parameter(description = "리뷰 ID") @PathVariable Long id,
-            @RequestBody ReviewUpdateReqDto request
+            @RequestBody @Valid ReviewUpdateReqDto request
     ) {
         ReviewResDto response = reviewService.updateReview(id, request);
         return ResponseEntity.ok(response);
