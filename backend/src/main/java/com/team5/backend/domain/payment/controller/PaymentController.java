@@ -26,7 +26,10 @@ public class PaymentController {
 
 	@PostMapping("/confirm")
 	public RsData<?> confirmPayment(@RequestBody @Valid ConfirmReqDto request) {
-		tossService.confirmPayment(request);
+		boolean confirmed = tossService.confirmPayment(request);
+		if (!confirmed) {
+			return new RsData<>("400", "결제에 실패했습니다.");
+		}
 		paymentService.savePayment(request.getOrderId(), request.getPaymentKey());
 		return new RsData<>("200", "결제에 성공했습니다.");
 	}
@@ -44,7 +47,10 @@ public class PaymentController {
 		@RequestBody @Valid CancelReqDto request
 	) {
 		String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
-		tossService.cancelPayment(paymentKey, request.getCancelReason());
+		boolean success = tossService.cancelPayment(paymentKey, request.getCancelReason());
+		if (!success) {
+			return new RsData<>("400", "결제 취소에 실패했습니다.");
+		}
 		return new RsData<>("200", "결제가 성공적으로 취소되었습니다.");
 	}
 
