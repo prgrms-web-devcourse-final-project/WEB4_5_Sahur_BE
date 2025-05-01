@@ -9,10 +9,7 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderDetailResDto;
-import com.team5.backend.domain.order.dto.OrderListResDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 
@@ -51,31 +48,22 @@ public class OrderService {
 	public OrderDetailResDto getOrderDetail(Long orderId) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
-
 		return OrderDetailResDto.from(order);
 	}
 
-	public Order updateOrder(Long orderId, OrderUpdateReqDto request) {
+	public OrderUpdateResDto updateOrder(Long orderId, OrderUpdateReqDto request) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
 
 		Integer newTotalPrice = order.getGroupBuy().getProduct().getPrice() * request.getQuantity();
 		order.updateQuantityAndPrice(request.getQuantity(), newTotalPrice);
 
-		if (request.getDelivery() != null) {
-			order.getDelivery().updateAddressAndContact(
-					request.getDelivery().getAddress(),
-					request.getDelivery().getContact()
-			);
-		}
-
-		return order;
+		return OrderUpdateResDto.from(order);
 	}
 
 	public void cancelOrder(Long orderId) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다."));
-
 		order.cancel();
 	}
 }

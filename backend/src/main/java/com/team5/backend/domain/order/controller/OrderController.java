@@ -56,8 +56,7 @@ public class OrderController {
 			@PathVariable Long orderId,
 			@RequestBody OrderUpdateReqDto request
 	) {
-		Order order = orderService.updateOrder(orderId, request);
-		return OrderUpdateResDto.from(order);
+		return orderService.updateOrder(orderId, request);
 	}
 
 	@DeleteMapping("/{orderId}")
