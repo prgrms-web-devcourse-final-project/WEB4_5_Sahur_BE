@@ -31,9 +31,7 @@ public class OrderService {
 		GroupBuy groupBuy = groupBuyRepository.findById(request.getGroupBuyId())
 				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 공동구매입니다."));
 
-		Integer totalPrice = groupBuy.getProduct().getPrice() * request.getQuantity();
-
-		Order order = Order.create(member, groupBuy, totalPrice, request.getQuantity());
+		Order order = Order.create(member, groupBuy, request.getQuantity());
 
 		return orderRepository.save(order);
 	}

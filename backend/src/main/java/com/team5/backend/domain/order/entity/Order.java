@@ -47,7 +47,8 @@ public class Order {
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
-	public static Order create(Member member, GroupBuy groupBuy, Integer totalPrice, Integer quantity) {
+	public static Order create(Member member, GroupBuy groupBuy, Integer quantity) {
+		int totalPrice = groupBuy.getProduct().getPrice() * quantity;
 		return Order.builder()
 			.member(member)
 			.groupBuy(groupBuy)
