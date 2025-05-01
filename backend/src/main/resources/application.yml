@@ -42,6 +42,12 @@ spring:
         use_sql_comments: true
         default_batch_fetch_size: 100
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${custom.db.password}
+
 #  security:
 #    oauth2:
 #      client:
@@ -69,6 +75,17 @@ logging:
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
-toss:
-  client-key: "test_ck_5OWRapdA8dP5dB4NPlyB8o1zEqZK"
-  secret-key: "test_sk_0RnYX2w532MB1mZpel9K8NeyqApQ"
+custom:
+  site:
+    backUrl: "${custom.dev.backUrl}"
+    frontUrl: "${custom.dev.frontUrl}"
+
+  prod:
+    domain: devapi.store
+    backUrl: "https://api.${custom.prod.domain}"
+    frontUrl: "https://www.${custom.prod.domain}"
+
+  dev:
+    domain: localhost
+    backUrl: "http://${custom.dev.domain}:${server.port}"
+    frontUrl: "http://${custom.dev.domain}:3000"
