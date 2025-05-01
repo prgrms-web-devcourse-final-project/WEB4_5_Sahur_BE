@@ -2,7 +2,9 @@ package com.team5.backend.domain.member.member.controller;
 
 import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -11,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -20,6 +20,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final AuthService authService;
+    private final MailService mailService;
 
     // 회원 생성
     @PostMapping("/auth/signup")
@@ -30,33 +31,32 @@ public class MemberController {
     }
 
     // 회원 조회
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<GetMemberResDto> getMember(@PathVariable Long memberId) {
+    @GetMapping("/members/me")
+    public ResponseEntity<GetMemberResDto> getMember(@RequestHeader(value = "Authorization", required = false) String token) {
 
-        GetMemberResDto memberResDto = memberService.getMemberById(memberId);
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
+
+        GetMemberResDto memberResDto = memberService.getMemberById(loggedInMember.getMemberId());
         return ResponseEntity.ok(memberResDto);
     }
 
-    // 회원 전체 조회
-    @GetMapping("/members")
-    public ResponseEntity<List<GetMemberResDto>> getAllMembers() {
+    @PatchMapping("/members/modify")
+    public ResponseEntity<GetMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token,
+                                                        @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
-        List<GetMemberResDto> members = memberService.getAllMembers();
-        return ResponseEntity.ok(members);
-    }
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
 
-    @PutMapping("/members/{memberId}")
-    public ResponseEntity<GetMemberResDto> updateMember(@PathVariable Long memberId, @Valid @RequestBody UpdateMemberReqDto updateMemberReqDto) {
-
-        GetMemberResDto updatedMember = memberService.updateMember(memberId, updateMemberReqDto);
+        GetMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
         return ResponseEntity.ok(updatedMember);
     }
 
     // 회원 탈퇴
-    @DeleteMapping("/members/{memberId}")
-    public ResponseEntity<Void> deleteMember(@PathVariable Long memberId) {
+    @DeleteMapping("/members/delete")
+    public ResponseEntity<Void> deleteMember(@RequestHeader(value = "Authorization", required = false) String token) {
 
-        memberService.deleteMember(memberId);
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
+
+        memberService.deleteMember(loggedInMember.getMemberId());
         return ResponseEntity.noContent().build();
     }
 
@@ -68,10 +68,10 @@ public class MemberController {
     }
 
     @PostMapping("/auth/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<LogoutResDto> logout(HttpServletRequest request, HttpServletResponse response) {
 
         authService.logout(request, response);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new LogoutResDto());
     }
 
     /**
@@ -79,21 +79,29 @@ public class MemberController {
      * 필요한 경우 리프레시 토큰도 함께 갱신
      */
     @PostMapping("/auth/refresh")
-    public ResponseEntity<LoginResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    public ResponseEntity<AuthResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
 
-        LoginResDto loginResDto = authService.refreshToken(refreshToken, response);
-        return ResponseEntity.ok(loginResDto);
+        AuthResDto authResDto = authService.refreshToken(refreshToken, response);
+        return ResponseEntity.ok(authResDto);
     }
 
-    /**
-     * 액세스 토큰이 만료되었을 때 사용하는 토큰 갱신 API
-     * 만료된 액세스 토큰에서 정보를 추출하여 새 토큰 발급
-     */
-    @PostMapping("/auth/token/refresh")
-    public ResponseEntity<LoginResDto> refreshTokenWithAccessToken(@CookieValue(name = "accessToken", required = false) String accessToken,
-            @CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+    // 이메일 인증번호 전송
+    @PostMapping("/auth/email/send")
+    public ResponseEntity<String> requestAuthCode(String email) throws MessagingException {
 
-        LoginResDto loginResDto = authService.refreshTokenWithAccessToken(accessToken, refreshToken, response);
-        return ResponseEntity.ok(loginResDto);
+        boolean isSend = mailService.sendAuthCode(email);
+
+        return isSend ? ResponseEntity.ok("인증 코드가 전송되었습니다.") :
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("인증 코드 전송이 실패하였습니다.");
+    }
+
+    // 이메일 인증번호 검증
+    @PostMapping("/auth/email/verify")
+    public ResponseEntity<String> validateAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
+
+        boolean isSuccess = mailService.validationAuthCode(emailVerificationReqDto);
+
+        return isSuccess ? ResponseEntity.ok("이메일 인증에 성공하였습니다.") :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증에 실패하였습니다.");
     }
 }

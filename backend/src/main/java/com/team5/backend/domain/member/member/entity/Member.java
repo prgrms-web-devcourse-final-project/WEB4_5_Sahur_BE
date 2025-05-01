@@ -48,4 +48,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+
+    @Column(name = "emailVerified", nullable = false)
+    private Boolean emailVerified;
 }

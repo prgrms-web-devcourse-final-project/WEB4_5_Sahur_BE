@@ -1,20 +1,15 @@
 package com.team5.backend.domain.groupBuy.controller;
 
-import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
-import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
-import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.service.GroupBuyService;
-import lombok.Getter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/groupBuy")
@@ -30,24 +25,20 @@ public class GroupBuyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GroupBuyResDto>> getAllGroupBuys(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "5") int size,
+    public ResponseEntity<Page<GroupBuyResDto>> getAllGroupBuys(
+            @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        List<GroupBuyResDto> responses = groupBuyService.getAllGroupBuys(pageable, sortField);
+        Page<GroupBuyResDto> responses = groupBuyService.getAllGroupBuys(pageable, sortField);
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/closing")
-    public ResponseEntity<List<GroupBuyResDto>> getClosingGroupBuys(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "5") int size,
+    public ResponseEntity<Page<GroupBuyResDto>> getClosingGroupBuys(
+            @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        List<GroupBuyResDto> responses = groupBuyService.getTodayDeadlineGroupBuys(pageable, sortField);
+        Page<GroupBuyResDto> responses = groupBuyService.getTodayDeadlineGroupBuys(pageable, sortField);
         return ResponseEntity.ok(responses);
     }
 
@@ -59,13 +50,13 @@ public class GroupBuyController {
     }
 
     @PutMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> updateGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyUpdateReqDto request) {
+    public ResponseEntity<GroupBuyResDto> updateGroupBuy(@PathVariable Long groupBuyId, @Valid @RequestBody GroupBuyUpdateReqDto request) {
         GroupBuyResDto response = groupBuyService.updateGroupBuy(groupBuyId, request);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{groupBuyId}")
-    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyUpdateReqDto request) {
+    public ResponseEntity<GroupBuyResDto> patchGroupBuy(@PathVariable Long groupBuyId, @RequestBody GroupBuyPatchReqDto request) {
         GroupBuyResDto response = groupBuyService.patchGroupBuy(groupBuyId, request);
         return ResponseEntity.ok(response);
     }
@@ -82,16 +73,13 @@ public class GroupBuyController {
         return ResponseEntity.ok(status);
     }
 
-    @GetMapping("/members/{memberId}")
-    public ResponseEntity<List<GroupBuyResDto>> getGroupBuysByMemberId(
-            @PathVariable Long memberId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "5") int size,
-            @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
-
-        Pageable pageable = PageRequest.of(page, size);
-        List<GroupBuyResDto> responses = groupBuyService.getGroupBuysByMemberId(memberId, pageable, sortField);
-        return ResponseEntity.ok(responses);
-    }
-
+//    @GetMapping("/members/{memberId}")
+//    public ResponseEntity<Page<GroupBuyResDto>> getGroupBuysByMemberId(
+//            @PathVariable Long memberId,
+//            @PageableDefault(size = 5) Pageable pageable,
+//            @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
+//
+//        Page<GroupBuyResDto> responses = groupBuyService.getGroupBuysByMemberId(memberId, pageable, sortField);
+//        return ResponseEntity.ok(responses);
+//    }
 }
