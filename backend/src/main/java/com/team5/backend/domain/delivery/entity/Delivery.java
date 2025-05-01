@@ -1,15 +1,14 @@
 package com.team5.backend.domain.delivery.entity;
 
 import com.team5.backend.domain.order.entity.Order;
-
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Delivery {
 
 	@Id
@@ -28,15 +27,15 @@ public class Delivery {
 	@Column(nullable = false, length = 20)
 	private String contact;
 
-	private Delivery(Order order, String address, Integer pccc, String contact) {
+	private Delivery(Order order, String address, String contact, Integer pccc) {
 		this.order = order;
 		this.address = address;
-		this.pccc = pccc;
 		this.contact = contact;
+		this.pccc = pccc;
 	}
 
-	public static Delivery create(Order order, String address, Integer pccc, String contact) {
-		return new Delivery(order, address, pccc, contact);
+	public static Delivery create(Order order, String address, String contact, Integer pccc) {
+		return new Delivery(order, address, contact, pccc);
 	}
 
 	public void updateDeliveryInfo(String address, String contact, Integer pccc) {
