@@ -19,6 +19,7 @@ import com.team5.backend.domain.payment.service.PaymentService;
 import com.team5.backend.domain.payment.service.TossService;
 import com.team5.backend.global.dto.RsData;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,30 +34,33 @@ public class OrderController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public OrderCreateResDto createOrder(@RequestBody OrderCreateReqDto request) {
+	public RsData<OrderCreateResDto> createOrder(@RequestBody OrderCreateReqDto request) {
 		Order order = orderService.createOrder(request);
-		return OrderCreateResDto.from(order);
+		return new RsData<>("201", "주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
 	}
 
 	@GetMapping
 	public RsData<Page<OrderListResDto>> getOrders(
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<OrderListResDto> orders = orderService.getOrders(pageable);
-		return new RsData<>("200", "주문 목록 조회에 성공했습니다.", orders);
+		Page<OrderListResDto> orderDtos = orderService.getOrders(pageable)
+			.map(OrderListResDto::from);
+		return new RsData<>("200", "주문 목록 조회에 성공했습니다.", orderDtos);
 	}
 
 	@GetMapping("/{orderId}")
-	public OrderDetailResDto getOrderDetail(@PathVariable Long orderId) {
-		return orderService.getOrderDetail(orderId);
+	public RsData<OrderDetailResDto> getOrderDetail(@PathVariable Long orderId) {
+		Order order = orderService.getOrderDetail(orderId);
+		return new RsData<>("200", "주문 상세 조회에 성공했습니다.", OrderDetailResDto.from(order));
 	}
 
 	@PatchMapping("/{orderId}")
-	public OrderUpdateResDto updateOrder(
+	public RsData<OrderUpdateResDto> updateOrder(
 			@PathVariable Long orderId,
 			@RequestBody OrderUpdateReqDto request
 	) {
-		return orderService.updateOrder(orderId, request);
+		Order order = orderService.updateOrder(orderId, request);
+		return new RsData<>("200", "주문 정보가 수정되었습니다.", OrderUpdateResDto.from(order));
 	}
 
 	@DeleteMapping("/{orderId}")
@@ -67,22 +71,18 @@ public class OrderController {
 
 	@PostMapping("/{orderId}/delivery")
 	@ResponseStatus(HttpStatus.CREATED)
-	public DeliveryResDto createDelivery(
-			@PathVariable Long orderId,
-			@RequestBody DeliveryReqDto request
+	public RsData<DeliveryResDto> createDelivery(
+		@PathVariable Long orderId,
+		@RequestBody @Valid DeliveryReqDto request
 	) {
-		if (orderId == null) {
-			throw new IllegalArgumentException("orderId는 필수 입력값입니다.");
-		}
-
 		Delivery delivery = deliveryService.createDelivery(orderId, request);
-		return DeliveryResDto.from(delivery);
+		return new RsData<>("201", "배송 정보가 생성되었습니다.", DeliveryResDto.from(delivery));
 	}
 
 	@GetMapping("/{orderId}/delivery")
-	public DeliveryResDto getDeliveryByOrder(@PathVariable Long orderId) {
+	public RsData<DeliveryResDto> getDeliveryByOrder(@PathVariable Long orderId) {
 		Delivery delivery = deliveryService.getDeliveryByOrder(orderId);
-		return DeliveryResDto.from(delivery);
+		return new RsData<>("200", "배송 정보를 조회했습니다.", DeliveryResDto.from(delivery));
 	}
 
 	@GetMapping("/{orderId}/payment")

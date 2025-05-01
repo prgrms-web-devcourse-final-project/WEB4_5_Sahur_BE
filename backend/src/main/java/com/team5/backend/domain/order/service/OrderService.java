@@ -38,26 +38,24 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderListResDto> getOrders(Pageable pageable) {
-		return orderRepository.findAll(pageable)
-			.map(OrderListResDto::from);
+	public Page<Order> getOrders(Pageable pageable) {
+		return orderRepository.findAll(pageable);
 	}
 
 	@Transactional(readOnly = true)
-	public OrderDetailResDto getOrderDetail(Long orderId) {
-		Order order = orderRepository.findById(orderId)
-				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
-		return OrderDetailResDto.from(order);
+	public Order getOrderDetail(Long orderId) {
+		return orderRepository.findWithDetailsById(orderId)
+			.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 	}
 
-	public OrderUpdateResDto updateOrder(Long orderId, OrderUpdateReqDto request) {
+	public Order updateOrder(Long orderId, OrderUpdateReqDto request) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 
 		Integer newTotalPrice = order.getGroupBuy().getProduct().getPrice() * request.getQuantity();
 		order.updateOrderInfo(request.getQuantity(), newTotalPrice);
 
-		return OrderUpdateResDto.from(order);
+		return order;
 	}
 
 	public void cancelOrder(Long orderId) {
