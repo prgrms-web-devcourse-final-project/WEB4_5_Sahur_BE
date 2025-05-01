@@ -26,6 +26,7 @@ public class GroupBuyService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final HistoryRepository historyRepository;
     // TODO : 커스텀 예외 처리 적용 필요
 
     /**
