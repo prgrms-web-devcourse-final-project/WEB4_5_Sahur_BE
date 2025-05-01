@@ -1,7 +1,4 @@
 spring:
-  config:
-    import: application-secret.yml
-
   datasource:
     url: jdbc:mysql://${custom.db.host}:3306/tung_db
     username: root
@@ -12,7 +9,7 @@ spring:
 
   data:
     redis:
-      host: api.devapi.store
+      host: redis_1
       port: 6379
       password: ${custom.db.password}
     elasticsearch:
