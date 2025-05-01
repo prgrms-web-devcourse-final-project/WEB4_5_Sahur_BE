@@ -148,7 +148,7 @@ class ReviewServiceTest {
         Page<Review> reviewPage = new PageImpl<>(List.of(r3, r2, r1)); // 최신순으로 정렬된 결과
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Order.desc("createdAt")));
 
-        when(reviewRepository.findByProductId(eq(1L), any(Pageable.class))).thenReturn(reviewPage);
+        when(reviewRepository.findByProductProductId(eq(1L), any(Pageable.class))).thenReturn(reviewPage);
 
         Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, "latest");
 
@@ -170,7 +170,7 @@ class ReviewServiceTest {
         Page<Review> reviewPage = new PageImpl<>(List.of(r3, r2, r1)); // 평점순으로 정렬된 결과
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Order.desc("rate")));
 
-        when(reviewRepository.findByProductId(eq(1L), any(Pageable.class))).thenReturn(reviewPage);
+        when(reviewRepository.findByProductProductId(eq(1L), any(Pageable.class))).thenReturn(reviewPage);
 
         Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, "rate");
 
@@ -184,7 +184,7 @@ class ReviewServiceTest {
     void getReviewsByMemberId() {
         Pageable pageable = PageRequest.of(0, 5);
         Page<Review> page = new PageImpl<>(List.of(review));
-        when(reviewRepository.findByMemberId(eq(1L), any(Pageable.class))).thenReturn(page);
+        when(reviewRepository.findByMemberMemberId(eq(1L), any(Pageable.class))).thenReturn(page);
 
         Page<ReviewResDto> result = reviewService.getReviewsByMemberId(1L, pageable);
         assertEquals(1, result.getTotalElements());
