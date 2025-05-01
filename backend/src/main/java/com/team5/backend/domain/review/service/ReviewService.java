@@ -24,6 +24,9 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
 
+    /**
+     * 리뷰 생성
+     */
     public ReviewResDto createReview(ReviewCreateReqDto request) {
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new RuntimeException("Member not found"));
@@ -40,22 +43,31 @@ public class ReviewService {
                 .build();
 
         Review saved = reviewRepository.save(review);
-        return ReviewResDto.fromEntity(saved); // ✅
+        return ReviewResDto.fromEntity(saved);
     }
 
+    /**
+     * 전체 리뷰 목록 조회 (최신순 정렬)
+     */
     public Page<ReviewResDto> getAllReviews(Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         return reviewRepository.findAll(sortedPageable)
-                .map(ReviewResDto::fromEntity); // ✅
+                .map(ReviewResDto::fromEntity);
     }
 
+    /**
+     * 리뷰 ID로 단건 조회
+     */
     public Optional<ReviewResDto> getReviewById(Long id) {
         return reviewRepository.findById(id)
-                .map(ReviewResDto::fromEntity); // ✅
+                .map(ReviewResDto::fromEntity);
     }
 
+    /**
+     * 리뷰 수정 (전체 필드)
+     */
     public ReviewResDto updateReview(Long id, ReviewUpdateReqDto request) {
         return reviewRepository.findById(id)
                 .map(existing -> {
@@ -63,11 +75,14 @@ public class ReviewService {
                     existing.setRate(request.getRate());
                     existing.setImageUrl(request.getImageUrl());
                     Review updated = reviewRepository.save(existing);
-                    return ReviewResDto.fromEntity(updated); // ✅
+                    return ReviewResDto.fromEntity(updated);
                 })
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
 
+    /**
+     * 리뷰 수정 (일부 필드)
+     */
     public ReviewResDto patchReview(Long id, ReviewUpdateReqDto request) {
         return reviewRepository.findById(id)
                 .map(existingReview -> {
@@ -82,7 +97,7 @@ public class ReviewService {
                     }
 
                     Review updatedReview = reviewRepository.save(existingReview);
-                    return ReviewResDto.fromEntity(updatedReview); // ✅
+                    return ReviewResDto.fromEntity(updatedReview);
                 })
                 .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
     }
