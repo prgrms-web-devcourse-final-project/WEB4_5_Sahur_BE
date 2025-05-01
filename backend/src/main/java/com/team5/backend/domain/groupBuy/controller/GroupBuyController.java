@@ -25,8 +25,8 @@ public class GroupBuyController {
 
     @Operation(summary = "공동구매 생성", description = "신규 공동구매를 생성합니다.")
     @PostMapping
-    public ResponseEntity<GroupBuyResDto> createGroupBuy(
-            @RequestBody GroupBuyCreateReqDto request) {
+
+    public ResponseEntity<GroupBuyResDto> createGroupBuy(@RequestBody @Valid GroupBuyCreateReqDto request) {
         GroupBuyResDto response = groupBuyService.createGroupBuy(request);
         return ResponseEntity.ok(response);
     }

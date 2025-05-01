@@ -25,8 +25,9 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
-    private final HistoryRepository historyRepository;
     private final CategoryRepository categoryRepository;
+    private final HistoryRepository historyRepository;
+    // TODO : 커스텀 예외 처리 적용 필요
 
     /**
      * 매일 자정(00:00)에 마감일이 지난 공동구매의 상태를 CLOSED로 변경
