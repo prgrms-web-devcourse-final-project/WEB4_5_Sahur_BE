@@ -5,6 +5,7 @@ import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
+
 import com.team5.backend.domain.delivery.service.DeliveryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,7 +104,6 @@ class DeliveryControllerTest {
                 .andExpect(jsonPath("$.shipping").value("34343"));
     }
 
-
     @DisplayName("배송 수정 API")
     @Test
     void updateDelivery() throws Exception {
@@ -124,6 +124,7 @@ class DeliveryControllerTest {
                 .pccc(12345)
                 .status(DeliveryStatus.PREPARING)
                 .shipping("12345")
+
                 .build();
 
         given(deliveryService.updateDelivery(eq(deliveryId), any()))

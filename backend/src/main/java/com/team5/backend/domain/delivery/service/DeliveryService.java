@@ -29,8 +29,6 @@ public class DeliveryService {
 			request.getContact(),
             request.getStatus(),
             request.getShipping()
-
-
 		);
 		return deliveryRepository.save(delivery);
 	}

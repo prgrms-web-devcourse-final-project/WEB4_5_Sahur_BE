@@ -64,14 +64,13 @@ class DeliveryServiceTest {
         assertThat(result.getShipping()).isEqualTo("12345");
     }
 
-
     @DisplayName("배송 단건 조회 성공")
     @Test
     void getByOrderId() {
         // given
         Long orderId = 2L;
         Order mockOrder = Order.builder().orderId(orderId).build();
-
+      
         Delivery delivery = Delivery.create(
                 mockOrder,
                 "서울시 어쩌구",
@@ -92,6 +91,7 @@ class DeliveryServiceTest {
         assertThat(result.getContact()).isEqualTo("01012345678");
         assertThat(result.getStatus()).isEqualTo(DeliveryStatus.PREPARING);
         assertThat(result.getShipping()).isEqualTo("12345");
+
     }
 
 
@@ -129,6 +129,7 @@ class DeliveryServiceTest {
         assertThat(result.getContact()).isEqualTo("01012345678");
         assertThat(result.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
         assertThat(result.getShipping()).isEqualTo("98765");
+
     }
 
     @DisplayName("배송 삭제 성공")
@@ -174,6 +175,7 @@ class DeliveryServiceTest {
         assertThat(result.get(1).getContact()).isEqualTo("01033334444");
         assertThat(result.get(1).getStatus()).isEqualTo(DeliveryStatus.INDELIVERY);
         assertThat(result.get(1).getShipping()).isEqualTo("0002");
+
     }
 
 
@@ -183,7 +185,7 @@ class DeliveryServiceTest {
         // given
         Long orderId = 999L;
         given(orderRepository.findById(orderId)).willReturn(Optional.empty());
-
+      
         DeliveryReqDto request = new DeliveryReqDto(
                 "서울시 00구",
                 12345,
@@ -210,6 +212,7 @@ class DeliveryServiceTest {
                 DeliveryStatus.INDELIVERY,
                 "12121"
         );
+
         given(deliveryRepository.findById(deliveryId)).willReturn(Optional.empty());
 
         // when & then

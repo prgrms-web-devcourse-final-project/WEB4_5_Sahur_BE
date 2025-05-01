@@ -8,7 +8,6 @@ import lombok.*;
 import org.hibernate.validator.constraints.URL;
 
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignupReqDto {

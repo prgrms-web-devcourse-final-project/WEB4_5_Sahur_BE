@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailVerificationRequestDto {
+public class EmailVerificationReqDto {
 
     @Email(message = "올바른 이메일 형식을 입력해주세요.")
     @NotBlank(message = "이메일은 필수 입력값입니다.")

@@ -37,7 +37,6 @@ public class Delivery {
 	private Delivery(Order order, String address, Integer pccc, String contact, DeliveryStatus status, String shipping) {
 		this.order = order;
 		this.address = address;
-		this.pccc = pccc;
 		this.contact = contact;
 		this.status = status;
 		this.shipping = shipping;

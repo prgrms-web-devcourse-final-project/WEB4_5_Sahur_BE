@@ -69,3 +69,6 @@ logging:
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
+toss:
+  client-key: "test_ck_5OWRapdA8dP5dB4NPlyB8o1zEqZK"
+  secret-key: "test_sk_0RnYX2w532MB1mZpel9K8NeyqApQ"
