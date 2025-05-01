@@ -43,7 +43,7 @@ public class Delivery {
 		this.shipping = shipping;
 	}
 
-	public static Delivery create(Order order, String address, String contact, Integer pccc, DeliveryStatus status, String shipping) {
+	public static Delivery create(Order order, String address, Integer pccc, String contact, DeliveryStatus status, String shipping) {
 		return new Delivery(order, address, pccc, contact, status, shipping);
 	}
 
