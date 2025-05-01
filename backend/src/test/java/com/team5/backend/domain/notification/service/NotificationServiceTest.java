@@ -138,7 +138,7 @@ class NotificationServiceTest {
     @DisplayName("회원별 알림 조회")
     void getNotificationsByMemberId() {
         Pageable pageable = PageRequest.of(0, 5);
-        when(notificationRepository.findByMemberId(eq(1L), any(Pageable.class)))
+        when(notificationRepository.findByMemberMemberId(eq(1L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(notification)));
 
         Page<NotificationResDto> result = notificationService.getNotificationsByMemberId(1L, pageable);
