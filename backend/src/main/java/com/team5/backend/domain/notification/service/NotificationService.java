@@ -77,6 +77,9 @@ public class NotificationService {
         return notificationRepository.findById(id)
                 .map(existing -> {
                     existing.setRead(request.getRead());
+                    existing.setTitle(request.getTitle());
+                    existing.setMessage(request.getMessage());
+                    existing.setUrl(request.getUrl());
                     Notification updated = notificationRepository.save(existing);
                     return NotificationResDto.fromEntity(updated);
                 })
