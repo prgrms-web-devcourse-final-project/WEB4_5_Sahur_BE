@@ -4,12 +4,12 @@ on:
   push:
     paths:
       - '.github/workflows/**'
-      - 'src/**'
-      - 'build.gradle'
-      - 'settings.gradle'
-      - 'Dockerfile'
+      - 'backend/src/**'
+      - 'backend/build.gradle.kts'
+      - 'backend/settings.gradle.kts'
+      - 'backend/Dockerfile'
     branches:
-      - deploy
+      - main
 
 jobs:
   makeTagAndRelease:
@@ -48,7 +48,7 @@ jobs:
       - name: application-secret.yml 생성
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
-        run: echo "$APPLICATION_SECRET" > src/main/resources/application-secret.yml
+        run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
 
       - name: Docker Buildx 설치
         uses: docker/setup-buildx-action@v2
@@ -68,7 +68,7 @@ jobs:
 
       - name: export image name
         id: export_image
-        run: echo "image_name=tung_app" >> $GITHUB_OUTPUT
+        run: echo "image_name=app250417" >> $GITHUB_OUTPUT
 
       - name: 빌드 앤 푸시
         uses: docker/build-push-action@v3
