@@ -62,4 +62,11 @@ public class DibsService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteByProductAndMember(Long productId, Long memberId) {
+        Dibs dibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(productId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 관심상품이 존재하지 않습니다."));
+        dibsRepository.delete(dibs);
+    }
+
+
 }
