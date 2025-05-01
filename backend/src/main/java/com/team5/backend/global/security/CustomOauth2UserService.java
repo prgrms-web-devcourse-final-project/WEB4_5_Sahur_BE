@@ -38,14 +38,21 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         String accessToken = userRequest.getAccessToken().getTokenValue();
         System.out.println("Access Token: " + accessToken);
 
-        if (userRequest.getClientRegistration().getRegistrationId().equals("google")) {
-            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
-        } else if (userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
-            oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
-        } else if (userRequest.getClientRegistration().getRegistrationId().equals("kakao")) {
-            oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
-        } else {
-            log.info("error");
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+
+        switch (registrationId) {
+            case "google":
+                oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+                break;
+            case "naver":
+                oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+                break;
+            case "kakao":
+                oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+                break;
+            default:
+                log.info("error");
+                break;
         }
 
         String randomPassword = generateRandomPassword(15);  // 15자리 랜덤 비밀번호 생성
