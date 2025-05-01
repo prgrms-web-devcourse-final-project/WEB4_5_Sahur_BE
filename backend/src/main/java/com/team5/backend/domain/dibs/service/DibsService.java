@@ -33,16 +33,15 @@ public class DibsService {
         Dibs dibs = Dibs.builder()
                 .member(member)
                 .product(product)
-                .status(true)
                 .build();
 
         Dibs saved = dibsRepository.save(dibs);
-        return toResponse(saved);
+        return DibsResDto.fromEntity(saved);
     }
 
     public List<DibsResDto> getAllDibs() {
         return dibsRepository.findAll().stream()
-                .map(this::toResponse)
+                .map(DibsResDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -50,12 +49,4 @@ public class DibsService {
         dibsRepository.deleteById(dibsId);
     }
 
-    private DibsResDto toResponse(Dibs dibs) {
-        return DibsResDto.builder()
-                .dibsId(dibs.getDibsId())
-                .memberId(dibs.getMember().getMemberId())
-                .productId(dibs.getProduct().getProductId())
-                .status(dibs.getStatus())
-                .build();
-    }
 }
