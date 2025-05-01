@@ -1,7 +1,6 @@
 package com.team5.backend.domain.notification.controller;
 
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
-import com.team5.backend.domain.notification.dto.NotificationPatchReqDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.service.NotificationService;

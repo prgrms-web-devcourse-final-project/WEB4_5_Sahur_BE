@@ -3,7 +3,6 @@ package com.team5.backend.domain.notification.service;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
-import com.team5.backend.domain.notification.dto.NotificationPatchReqDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.entity.Notification;
