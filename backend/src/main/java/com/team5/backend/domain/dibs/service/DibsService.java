@@ -9,6 +9,8 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,6 +49,17 @@ public class DibsService {
 
     public void deleteDibs(Long dibsId) {
         dibsRepository.deleteById(dibsId);
+    }
+
+    public Page<DibsResDto> getPagedDibsByMemberId(Long memberId, Pageable pageable) {
+        return dibsRepository.findByMember_MemberId(memberId, pageable)
+                .map(DibsResDto::fromEntity);
+    }
+
+    public List<DibsResDto> getAllDibsByMemberId(Long memberId) {
+        return dibsRepository.findByMember_MemberId(memberId).stream()
+                .map(DibsResDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
 }
