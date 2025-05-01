@@ -119,7 +119,7 @@ public class NotificationService {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        return notificationRepository.findByMemberId(memberId, sortedPageable)
+        return notificationRepository.findByMemberMemberId(memberId, sortedPageable)
                 .map(NotificationResDto::fromEntity);
     }
 }
