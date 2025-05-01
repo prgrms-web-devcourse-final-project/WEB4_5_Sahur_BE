@@ -14,7 +14,7 @@ public class OrderListResDto {
 	private Long orderId;
 	private Long memberId;
 	private String nickname;
-	private Long groupId;
+	private Long groupBuyId;
 	private String productTitle;
 	private Integer totalPrice;
 	private OrderStatus status;
@@ -26,7 +26,7 @@ public class OrderListResDto {
 			.orderId(order.getOrderId())
 			.memberId(order.getMember().getMemberId())
 			.nickname(order.getMember().getNickname())
-			.groupId(order.getGroupBuy().getGroupBuyId())
+			.groupBuyId(order.getGroupBuy().getGroupBuyId())
 			.productTitle(order.getGroupBuy().getProduct().getTitle())
 			.totalPrice(order.getTotalPrice())
 			.status(order.getStatus())

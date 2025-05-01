@@ -13,7 +13,7 @@ import lombok.Getter;
 public class OrderCreateResDto {
 	private Long orderId;
 	private Long memberId;
-	private Long groupId;
+	private Long groupBuyId;
 	private Integer totalPrice;
 	private OrderStatus status;
 	private Integer quantity;
@@ -23,7 +23,7 @@ public class OrderCreateResDto {
 		return OrderCreateResDto.builder()
 			.orderId(order.getOrderId())
 			.memberId(order.getMember().getMemberId())
-			.groupId(order.getGroupBuy().getGroupBuyId())
+			.groupBuyId(order.getGroupBuy().getGroupBuyId())
 			.totalPrice(order.getTotalPrice())
 			.status(order.getStatus())
 			.quantity(order.getQuantity())

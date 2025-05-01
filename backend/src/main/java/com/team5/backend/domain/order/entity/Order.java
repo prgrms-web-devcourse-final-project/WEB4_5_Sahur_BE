@@ -32,7 +32,7 @@ public class Order {
 	private Member member;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "groupId", nullable = false)
+	@JoinColumn(name = "groupBuyId", nullable = false)
 	private GroupBuy groupBuy;
 
 	@Column(nullable = false)
