@@ -83,6 +83,7 @@ public class BaseInitData implements CommandLineRunner {
                     .build();
             memberRepository.save(member);
 
+
             // Category
             Category category = Category.builder()
                     .category(CategoryType.DIGITAL_APPLIANCE)
@@ -90,6 +91,7 @@ public class BaseInitData implements CommandLineRunner {
                     .uid(1)
                     .build();
             categoryRepository.save(category);
+
 
             // Product
             Product product = Product.builder()
@@ -101,6 +103,7 @@ public class BaseInitData implements CommandLineRunner {
                     .createdAt(LocalDateTime.now())
                     .build();
             productRepository.save(product);
+
 
             // Product Request
             ProductRequest request = ProductRequest.builder()
@@ -118,7 +121,6 @@ public class BaseInitData implements CommandLineRunner {
             // GroupBuy
             GroupBuy groupBuy = GroupBuy.builder()
                     .product(product)
-                    .category(category)
                     .targetParticipants(10)
                     .currentParticipantCount(1)
                     .round(1)
@@ -126,13 +128,6 @@ public class BaseInitData implements CommandLineRunner {
                     .status(GroupBuyStatus.ONGOING)
                     .build();
             groupBuyRepository.save(groupBuy);
-
-            // GroupBuyRequest
-            GroupBuyRequest groupBuyRequest = GroupBuyRequest.builder()
-                    .product(product)
-                    .member(member)
-                    .build();
-            groupBuyRequestRepository.save(groupBuyRequest);
 
 
             // Order
@@ -176,12 +171,14 @@ public class BaseInitData implements CommandLineRunner {
 
             deliveryRepository.save(delivery);
 
+
             // Dibs
             Dibs dibs = Dibs.builder()
                     .member(member)
                     .product(product)
                     .build();
             dibsRepository.save(dibs);
+
 
             // History
             History history = History.builder()
