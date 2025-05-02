@@ -6,6 +6,7 @@ import com.team5.backend.domain.dibs.dto.DibsResDto;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
@@ -251,5 +252,43 @@ class DibsServiceTest {
         assertEquals(200L, result.getProductId());
     }
 
+    @Test
+    @DisplayName("다른 회원이 동일한 상품 찜 가능")
+    void createDibs_DifferentMember() {
+        // given
+        Member anotherMember = Member.builder()
+                .memberId(2L)
+                .nickname("다른 사용자")
+                .email("another@example.com")
+                .name("홍길동")
+                .password("password1234")
+                .address("서울시 마포구")
+                .role(Role.USER)
+                .emailVerified(true)
+                .build();
+
+        DibsCreateReqDto dto = DibsCreateReqDto.builder()
+                .memberId(2L)
+                .productId(100L)
+                .build();
+
+        when(memberRepository.findById(2L)).thenReturn(Optional.of(anotherMember));
+        when(productRepository.findById(100L)).thenReturn(Optional.of(product));
+        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(100L, 2L))
+                .thenReturn(Optional.empty());
+        when(dibsRepository.save(any())).thenReturn(Dibs.builder()
+                .dibsId(3L)
+                .member(anotherMember)
+                .product(product)
+                .build());
+
+        // when
+        DibsResDto result = dibsService.createDibs(dto);
+
+        // then
+        assertEquals(3L, result.getDibsId());
+        assertEquals(2L, result.getMemberId());
+        assertEquals(100L, result.getProductId());
+    }
 
 }
