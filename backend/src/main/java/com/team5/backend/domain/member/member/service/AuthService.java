@@ -58,17 +58,26 @@ public class AuthService {
 
     // 로그아웃 메서드
     @Transactional
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
+    public void logout(String token, HttpServletResponse response) {
 
-        // 액세스 토큰을 쿠키에서 추출
-        String accessToken = extractCookieValue(request, "accessToken");
+        String accessToken = token;
 
-        if (accessToken == null) {
+        if (accessToken == null || accessToken.isEmpty()) {
             throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
         }
 
-        // 토큰에서 사용자 이메일 추출
+        // Bearer 접두사가 있는 경우 제거
+        if (accessToken.startsWith("Bearer ")) {
+            accessToken = accessToken.substring(7);
+        }
+
+        // 토큰에서 이메일 추출
         String email = jwtUtil.extractEmail(accessToken);
+
+        // 토큰 유효성 검증
+        if (!jwtUtil.validateToken(accessToken, email)) {
+            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
+        }
 
         // 토큰 블랙리스트에 추가하여 무효화
         jwtUtil.addToBlacklist(accessToken);
@@ -76,7 +85,6 @@ public class AuthService {
         // Redis에서 리프레시 토큰 삭제
         jwtUtil.removeRefreshToken(email);
 
-        // 쿠키 제거
         addCookie(response, "accessToken", "", 0);
         addCookie(response, "refreshToken", "", 0);
     }

@@ -8,6 +8,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     private final HistoryRepository historyRepository;
 
@@ -137,11 +139,17 @@ public class MemberService {
 
     // 회원 삭제
     @Transactional
-    public void deleteMember(Long memberId) {
+    public void deleteMember(String token, HttpServletResponse response) {
 
-        Member member = memberRepository.findById(memberId)
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
+
+        Member member = memberRepository.findById(loggedInMember.getMemberId())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        // 회원 데이터 삭제 전에 로그아웃 처리
+        authService.logout(token, response);
+
+        // 회원 데이터 삭제
         memberRepository.delete(member);
     }
 

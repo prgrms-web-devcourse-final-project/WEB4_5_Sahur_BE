@@ -6,7 +6,6 @@ import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
 import com.team5.backend.global.dto.RsData;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,12 +50,10 @@ public class MemberController {
 
     // 회원 탈퇴
     @DeleteMapping("/members/delete")
-    public RsData<Void> deleteMember(@RequestHeader(value = "Authorization", required = false) String token) {
+    public RsData<Void> deleteMember(@RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
 
-        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
-        memberService.deleteMember(loggedInMember.getMemberId());
-
-        return new RsData<>("200", "회원 탈퇴가 완료되었습니다.", null);
+        memberService.deleteMember(token, response);
+        return new RsData<>("200", "로그아웃 및 회원 탈퇴가 완료되었습니다.", null);
     }
 
     // 로그인
@@ -69,9 +66,10 @@ public class MemberController {
 
     // 로그아웃
     @PostMapping("/auth/logout")
-    public RsData<LogoutResDto> logout(HttpServletRequest request, HttpServletResponse response) {
+    public RsData<LogoutResDto> logout(@RequestHeader(value = "Authorization", required = false) String token,
+                                       HttpServletResponse response) {
 
-        authService.logout(request, response);
+        authService.logout(token, response);
         return new RsData<>("200", "로그아웃에 성공했습니다.", new LogoutResDto());
     }
 
