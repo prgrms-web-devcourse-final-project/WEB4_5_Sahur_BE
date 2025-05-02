@@ -4,14 +4,22 @@ import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
+import com.team5.backend.domain.product.dto.ProductResDto;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.data.domain.Pageable;
+
+
 
 @RestController
 @RequestMapping("/api/v1")
@@ -103,5 +111,16 @@ public class MemberController {
 
         return isSuccess ? ResponseEntity.ok("이메일 인증에 성공하였습니다.") :
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일 인증에 실패하였습니다.");
+    }
+
+    @Operation(summary = "리뷰 가능한 상품 목록 조회", description = "현재 로그인한 사용자가 리뷰를 작성할 수 있는 상품 목록을 조회합니다.")
+    @GetMapping("/members/reviewable-products")
+    public ResponseEntity<Page<ProductResDto>> getReviewableProductsByMember(
+            @Parameter(description = "Access Token (Bearer 포함)", required = true)
+            @RequestHeader(value = "Authorization") String token,
+            @Parameter(description = "페이지 정보") @PageableDefault(size = 5) Pageable pageable) {
+
+        Page<ProductResDto> products = memberService.getReviewableProductsByMember(token, pageable);
+        return ResponseEntity.ok(products);
     }
 }
