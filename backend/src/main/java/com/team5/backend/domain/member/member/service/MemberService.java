@@ -163,7 +163,10 @@ public class MemberService {
                 .map(ProductResDto::fromEntity);
     }
 
-    // 비밀번호 재설정
+    /**
+     * 비밀번호 재설정
+     * TODO: 추가적인 검증 기능 필요(이메일을 알고있는 다른 유저가 비밀번호를 변경하려하는 경우 등)
+     */
     @Transactional
     public PasswordResetResDto resetPassword(PasswordResetReqDto passwordResetReqDto) {
 

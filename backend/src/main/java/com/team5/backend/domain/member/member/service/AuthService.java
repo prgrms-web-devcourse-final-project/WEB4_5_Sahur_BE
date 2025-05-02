@@ -186,7 +186,8 @@ public class AuthService {
         cookie.setPath("/");
         cookie.setMaxAge(maxAge); // 만료 시간 설정
         cookie.setHttpOnly(true); // 자바스크립트에서 접근 불가
-//        cookie.setSecure(true); // HTTPS 환경에서만 사용 가능
+        cookie.setSecure(true); // HTTPS 환경에서만 사용 가능
+        cookie.setAttribute("SameSite", "None");
 
         response.addCookie(cookie);
     }

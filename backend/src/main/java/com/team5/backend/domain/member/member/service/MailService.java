@@ -126,7 +126,6 @@ public class MailService {
 
         // 기존에 저장된 인증 코드가 있으면 삭제
         String key = EMAIL_AUTH_PREFIX + email;
-
         if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
             redisTemplate.delete(key);
         }
@@ -135,28 +134,21 @@ public class MailService {
             // 새로운 인증 코드 발송
             String authCode = sendSimpleMessage(email);
 
-            if (authCode != null) {
-                // Redis에 인증 코드 저장 (만료 시간 설정)
-                ValueOperations<String, String> values = redisTemplate.opsForValue();
-
-                // Redis에 저장하고 만료 시간 설정 (밀리초를 초 단위로 변환)
-                values.set(key, authCode);
-                redisTemplate.expire(key, authCodeExpirationSeconds, TimeUnit.SECONDS); // 3분
-
-                return EmailResDto.builder()
-                        .success(true)
-                        .message("인증 코드가 전송되었습니다.")
-                        .build();
-            }
+            // Redis에 인증 코드 저장(만료 시간 설정)
+            ValueOperations<String, String> values = redisTemplate.opsForValue();
+            values.set(key, authCode);
+            redisTemplate.expire(key, authCodeExpirationSeconds, TimeUnit.SECONDS); // 3분
 
             return EmailResDto.builder()
-                    .success(false)
-                    .message("인증 코드 전송이 실패하였습니다.")
+                    .success(true)
+                    .message("인증 코드가 전송되었습니다.")
                     .build();
-        } catch (MailException e) {
-
+        } catch (MailException | MessagingException e) {
             log.error("인증번호 메일 발송 실패: " + email, e);
-            throw new MessagingException("메일 발송 중 오류가 발생했습니다: " + e.getMessage(), e);
+            return EmailResDto.builder()
+                    .success(false)
+                    .message("이메일 주소가 유효하지 않거나 메일 서버에 문제가 발생했습니다.")
+                    .build();
         }
     }
 

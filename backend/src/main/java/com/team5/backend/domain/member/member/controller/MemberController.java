@@ -88,26 +88,23 @@ public class MemberController {
 
     // 이메일 인증번호 전송
     @PostMapping("/auth/email/send")
-    public ResponseEntity<EmailResDto> requestAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
+    public RsData<EmailResDto> requestAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
 
         EmailResDto response = mailService.sendAuthCode(emailSendReqDto);
 
-        return response.isSuccess()
-                ? ResponseEntity.ok(response)
-                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        if (response.isSuccess()) return new RsData<>("200-1", "인증번호가 이메일로 전송되었습니다.", response);
+        else return new RsData<>("400-1", "이메일 인증번호 전송에 실패했습니다.", response);
     }
 
     // 이메일 인증번호 검증
     @PostMapping("/auth/email/verify")
-    public ResponseEntity<EmailResDto> validateAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
+    public RsData<EmailResDto> validateAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
 
         EmailResDto response = mailService.validationAuthCode(emailVerificationReqDto);
 
-        return response.isSuccess()
-                ? ResponseEntity.ok(response)
-                : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        if (response.isSuccess()) return new RsData<>("200-1", "인증이 완료되었습니다.", response);
+        else return new RsData<>("400-1", "인증번호가 유효하지 않거나 만료되었습니다.", response);
     }
-
     // 비밀번호 재설정 이메일 인증번호 전송
     @PostMapping("/auth/password/email/send")
     public RsData<EmailResDto> requestPasswordResetAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
