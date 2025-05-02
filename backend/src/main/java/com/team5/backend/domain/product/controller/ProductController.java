@@ -1,15 +1,20 @@
 package com.team5.backend.domain.product.controller;
 
-import com.team5.backend.domain.product.dto.ProductCreateReqDto;
-import com.team5.backend.domain.product.dto.ProductResDto;
-import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
-import com.team5.backend.domain.product.service.ProductService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.team5.backend.domain.product.dto.ProductCreateReqDto;
+import com.team5.backend.domain.product.dto.ProductResDto;
+import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
+import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.service.ProductService;
+import com.team5.backend.global.dto.RsData;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -25,9 +30,17 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResDto>> getAllProducts() {
-        List<ProductResDto> responses = productService.getAllProducts();
-        return ResponseEntity.ok(responses);
+    public RsData<List<ProductResDto>> getAllProducts(
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false) String keyword
+    ) {
+        List<Product> products = productService.getAllProducts(category, keyword);
+        List<ProductResDto> response = products.stream()
+            .map(ProductResDto::fromEntity)
+            .collect(Collectors.toList());
+
+        String msg = response.isEmpty() ? "조회된 상품이 없습니다." : "상품 목록을 조회했습니다.";
+        return new RsData<>("200", msg, response);
     }
 
     @GetMapping("/{productId}")

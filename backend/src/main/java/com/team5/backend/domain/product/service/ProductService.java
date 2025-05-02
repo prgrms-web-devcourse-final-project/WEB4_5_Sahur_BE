@@ -1,5 +1,11 @@
 package com.team5.backend.domain.product.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.product.dto.ProductCreateReqDto;
@@ -7,12 +13,8 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +41,15 @@ public class ProductService {
         return ProductResDto.fromEntity(savedProduct);
     }
 
-    public List<ProductResDto> getAllProducts() {
-        return productRepository.findAll()
-                .stream()
-                .map(ProductResDto::fromEntity)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<Product> getAllProducts(String category, String keyword) {
+        if (category != null) {
+            return productRepository.findByCategory_Category(category);
+        } else if (keyword != null) {
+            return productRepository.findByCategory_Keyword(keyword);
+        } else {
+            return productRepository.findAll();
+        }
     }
 
     public ProductResDto getProductById(Long productId) {
@@ -69,5 +75,4 @@ public class ProductService {
     public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
-
 }
