@@ -186,4 +186,26 @@ class DibsServiceTest {
         assertEquals("해당 관심상품이 존재하지 않습니다.", e.getMessage());
     }
 
+    @Test
+    @DisplayName("찜 등록 중 중복 요청(빠른 더블클릭) 시 예외 발생")
+    void createDibs_DuplicateDibs() {
+        // given
+        DibsCreateReqDto dto = DibsCreateReqDto.builder()
+                .memberId(1L)
+                .productId(100L)
+                .build();
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(productRepository.findById(100L)).thenReturn(Optional.of(product));
+        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(100L, 1L))
+                .thenReturn(Optional.of(dibs));
+
+        // when & then
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> {
+            dibsService.createDibs(dto);
+        });
+
+        assertEquals("이미 찜한 상품입니다.", e.getMessage());
+    }
+
 }
