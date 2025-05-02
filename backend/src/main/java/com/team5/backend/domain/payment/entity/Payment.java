@@ -19,7 +19,7 @@ public class Payment {
 	@JoinColumn(name = "orderId", nullable = false)
 	private Order order;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String paymentKey;
 
 	private Payment(Order order, String paymentKey) {

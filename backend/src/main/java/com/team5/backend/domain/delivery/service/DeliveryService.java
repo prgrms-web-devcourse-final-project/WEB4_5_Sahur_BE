@@ -1,15 +1,15 @@
 package com.team5.backend.domain.delivery.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +25,10 @@ public class DeliveryService {
 		Delivery delivery = Delivery.create(
 			order,
 			request.getAddress(),
-			request.getPccc(),
-			request.getContact()
+            request.getPccc(),
+			request.getContact(),
+            request.getStatus(),
+            request.getShipping()
 		);
 		return deliveryRepository.save(delivery);
 	}
@@ -42,8 +44,10 @@ public class DeliveryService {
 			.orElseThrow(() -> new IllegalArgumentException("배송 정보를 찾을 수 없습니다."));
 		delivery.updateDeliveryInfo(
 			request.getAddress(),
+			request.getPccc(),
 			request.getContact(),
-			request.getPccc()
+            request.getStatus(),
+            request.getShipping()
 		);
 		return delivery;
 	}
@@ -52,5 +56,10 @@ public class DeliveryService {
 		Delivery delivery = deliveryRepository.findById(deliveryId)
 			.orElseThrow(() -> new IllegalArgumentException("배송 정보를 찾을 수 없습니다."));
 		deliveryRepository.delete(delivery);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Delivery> getAllDeliveries() {
+		return deliveryRepository.findAll();
 	}
 }
