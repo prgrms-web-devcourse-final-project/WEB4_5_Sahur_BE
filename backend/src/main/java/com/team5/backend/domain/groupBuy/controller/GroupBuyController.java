@@ -99,6 +99,7 @@ public class GroupBuyController {
     @Operation(summary = "회원별 참여 공동구매 조회", description = "회원이 참여한 공동구매 목록을 조회합니다.")
     @GetMapping("/members")
     public ResponseEntity<Page<GroupBuyResDto>> getGroupBuysByMemberId(
+            @Parameter(description = "Access Token (Bearer 포함)", required = true)
             @RequestHeader(value = "Authorization", required = false) String token,
             @PageableDefault(size = 5) Pageable pageable) {
 
