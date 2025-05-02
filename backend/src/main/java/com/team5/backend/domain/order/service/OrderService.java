@@ -59,7 +59,7 @@ public class OrderService {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 
-		Integer newTotalPrice = order.getGroupBuy().getProduct().getPrice() * request.getQuantity();
+		Integer newTotalPrice = order.getProduct().getPrice() * request.getQuantity();
 		order.updateOrderInfo(request.getQuantity(), newTotalPrice);
 
 		return order;
