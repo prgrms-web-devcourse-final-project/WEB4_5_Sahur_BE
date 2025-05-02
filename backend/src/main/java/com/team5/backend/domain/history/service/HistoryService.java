@@ -11,6 +11,8 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.HistoryErrorCode;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -38,23 +40,23 @@ public class HistoryService {
         String rawToken = token.replace("Bearer ", "");
 
         if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new RuntimeException("로그아웃된 토큰입니다.");
+            throw new CustomException(HistoryErrorCode.TOKEN_BLACKLISTED);
         }
 
         if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new RuntimeException("유효하지 않은 토큰입니다.");
+            throw new CustomException(HistoryErrorCode.TOKEN_INVALID);
         }
 
         Long memberId = jwtUtil.extractMemberId(rawToken);
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.MEMBER_NOT_FOUND));
 
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.PRODUCT_NOT_FOUND));
 
         GroupBuy groupBuy = groupBuyRepository.findById(request.getGroupBuyId())
-                .orElseThrow(() -> new RuntimeException("GroupBuy not found"));
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.GROUP_BUY_NOT_FOUND));
 
         History history = History.builder()
                 .member(member)
@@ -100,7 +102,7 @@ public class HistoryService {
                     History updated = historyRepository.save(existing);
                     return HistoryResDto.fromEntity(updated);
                 })
-                .orElseThrow(() -> new RuntimeException("History not found with id " + id));
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
     }
 
     /**
