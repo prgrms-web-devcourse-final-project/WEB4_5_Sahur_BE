@@ -130,7 +130,6 @@ jobs:
             docker stop "$NEXT" 2>/dev/null
             docker rm "$NEXT" 2>/dev/null
             docker run -d \
-              -v $VOLUME \
               --network $NETWORK \
               --name "$NEXT" \
               -p "$NEXT_PORT":8080 \
