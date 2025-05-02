@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.team5.backend.domain.order.entity.Order;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-	@EntityGraph(attributePaths = {"member", "groupBuy", "groupBuy.product"})
+	@EntityGraph(attributePaths = {"member", "groupBuy", "product"})
 	Page<Order> findAll(Pageable pageable);
 
-	@EntityGraph(attributePaths = {"member", "groupBuy", "groupBuy.product"})
+	@EntityGraph(attributePaths = {"member", "groupBuy", "product"})
 	Optional<Order> findWithDetailsByOrderId(Long orderId);
 }

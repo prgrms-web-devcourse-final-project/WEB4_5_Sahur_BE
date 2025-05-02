@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 
@@ -35,6 +36,10 @@ public class Order {
 	@JoinColumn(name = "groupBuyId", nullable = false)
 	private GroupBuy groupBuy;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "productId", nullable = false)
+	private Product product;
+
 	@Column(nullable = false)
 	private Integer totalPrice;
 
@@ -49,11 +54,12 @@ public class Order {
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
-	public static Order create(Member member, GroupBuy groupBuy, Integer quantity) {
-		int totalPrice = groupBuy.getProduct().getPrice() * quantity;
+	public static Order create(Member member, GroupBuy groupBuy, Product product, Integer quantity) {
+		int totalPrice = product.getPrice() * quantity;
 		return Order.builder()
 			.member(member)
 			.groupBuy(groupBuy)
+			.product(product)
 			.totalPrice(totalPrice)
 			.status(OrderStatus.BEFOREPAID)
 			.quantity(quantity)
