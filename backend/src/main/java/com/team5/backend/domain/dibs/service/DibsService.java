@@ -41,16 +41,6 @@ public class DibsService {
         return DibsResDto.fromEntity(saved);
     }
 
-    public List<DibsResDto> getAllDibs() {
-        return dibsRepository.findAll().stream()
-                .map(DibsResDto::fromEntity)
-                .collect(Collectors.toList());
-    }
-
-    public void deleteDibs(Long dibsId) {
-        dibsRepository.deleteById(dibsId);
-    }
-
     public Page<DibsResDto> getPagedDibsByMemberId(Long memberId, Pageable pageable) {
         return dibsRepository.findByMember_MemberId(memberId, pageable)
                 .map(DibsResDto::fromEntity);
