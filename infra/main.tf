@@ -7,14 +7,12 @@ terraform {
   }
 }
 
-# AWS 설정 시작
+# AWS 설정
 provider "aws" {
   region = var.region
 }
-# AWS 설정 끝
 
-
-# VPC 설정 시작
+# VPC 설정
 resource "aws_vpc" "team05-vpc" {
   cidr_block = "10.0.0.0/16"
 
@@ -26,19 +24,49 @@ resource "aws_vpc" "team05-vpc" {
   }
 }
 
-# Subnet 설정 시작
-resource "aws_subnet" "team05-subnet" {
+# 퍼블릭 Subnet 설정
+resource "aws_subnet" "team05-subnet_app" {
   vpc_id                  = aws_vpc.team05-vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.region}a"
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.prefix}-subnet"
+    Name = "${var.prefix}-subnet-1"
+  }
+}
+
+# 프라이빗 Subnet 설정
+resource "aws_subnet" "team05-subnet_db" {
+  vpc_id                  = aws_vpc.team05-vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "${var.region}b"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "${var.prefix}-subnet-2"
+  }
+}
+
+# Elastic IP (퍼블릭 IP) 생성 - 프라이빗 서브넷에서 외부로 가기위함
+resource "aws_eip" "team05-eip" {
+  domain = "vpc"
+  tags = {
+    Name = "${var.prefix}-eip"
   }
 }
 
 
+# NAT 게이트웨이 생성
+resource "aws_nat_gateway" "team05-nat" {
+  allocation_id = aws_eip.team05-eip.id
+  subnet_id     = aws_subnet.team05-subnet_app.id #퍼블릭 서브넷
+  tags = {
+    Name = "${var.prefix}-nat"
+  }
+}
+
+# 인터넷 게이트웨이 생성
 resource "aws_internet_gateway" "team05-igw" {
   vpc_id = aws_vpc.team05-vpc.id
 
@@ -47,6 +75,7 @@ resource "aws_internet_gateway" "team05-igw" {
   }
 }
 
+# 퍼블릭 라우팅 테이블
 resource "aws_route_table" "team05-rt" {
   vpc_id = aws_vpc.team05-vpc.id
 
@@ -60,9 +89,29 @@ resource "aws_route_table" "team05-rt" {
   }
 }
 
-resource "aws_route_table_association" "team05-association" {
-  subnet_id      = aws_subnet.team05-subnet.id
+# 프라이빗 라우팅 테이블
+resource "aws_route_table" "team05-private-rt" {
+  vpc_id = aws_vpc.team05-vpc.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.team05-nat.id
+  }
+
+  tags = {
+    Name = "${var.prefix}-private-rt"
+  }
+}
+# 퍼블릭 라우팅 테이블 연결
+resource "aws_route_table_association" "team05-app-association" {
+  subnet_id      = aws_subnet.team05-subnet_app.id
   route_table_id = aws_route_table.team05-rt.id
+}
+
+# 프라이빗 라우팅 테이블 연결
+resource "aws_route_table_association" "team05-db-association" {
+  subnet_id      = aws_subnet.team05-subnet_db.id
+  route_table_id = aws_route_table.team05-private-rt.id
 }
 
 resource "aws_security_group" "team05-sg" {
@@ -130,7 +179,7 @@ resource "aws_iam_instance_profile" "team05-instance-profile" {
 }
 
 locals {
-  ec2_user_data_base = <<-END_OF_FILE
+  ec2_user_mysql = <<-END_OF_FILE
 #!/bin/bash
 # 가상 메모리 4GB 설정
 sudo dd if=/dev/zero of=/swapfile bs=128M count=32
@@ -146,28 +195,6 @@ systemctl start docker
 
 # 도커 네트워크 생성
 docker network create common
-
-# nginx 설치
-docker run -d \
-  --name npm_1 \
-  --restart unless-stopped \
-  --network common \
-  -p 80:80 \
-  -p 443:443 \
-  -p 81:81 \
-  -e TZ=Asia/Seoul \
-  -v /dockerProjects/npm_1/volumes/data:/data \
-  -v /dockerProjects/npm_1/volumes/etc/letsencrypt:/etc/letsencrypt \
-  jc21/nginx-proxy-manager:latest
-
-# redis 설치
-docker run -d \
-  --name=redis_1 \
-  --restart unless-stopped \
-  --network common \
-  -p 6379:6379 \
-  -e TZ=Asia/Seoul \
-  redis --requirepass ${var.password_1}
 
 # mysql 설치
 docker run -d \
@@ -199,6 +226,106 @@ CREATE DATABASE tung_db;
 FLUSH PRIVILEGES;
 "
 
+END_OF_FILE
+}
+
+locals {
+  ec2_user_base = <<-END_OF_FILE
+#!/bin/bash
+# 가상 메모리 4GB 설정
+sudo dd if=/dev/zero of=/swapfile bs=128M count=32
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo sh -c 'echo "/swapfile swap swap defaults 0 0" >> /etc/fstab'
+
+# 도커 설치 및 실행/활성화
+yum install docker -y
+systemctl enable docker
+systemctl start docker
+
+# 도커 네트워크 생성
+docker network create common
+
+# nginx 설치
+docker run -d \
+  --name npm_1 \
+  --restart unless-stopped \
+  --network common \
+  -p 80:80 \
+  -p 443:443 \
+  -p 81:81 \
+  -e TZ=Asia/Seoul \
+  -v /dockerProjects/npm_1/volumes/data:/data \
+  -v /dockerProjects/npm_1/volumes/etc/letsencrypt:/etc/letsencrypt \
+  jc21/nginx-proxy-manager:latest
+
+# ha proxy 설치
+## 설정파일을 위한 디렉토리 생성
+mkdir -p /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/lua
+
+cat << 'EOF' > /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/lua/retry_on_502_504.lua
+core.register_action("retry_on_502_504", { "http-res" }, function(txn)
+  local status = txn.sf:status()
+  if status == 502 or status == 504 then
+    txn:Done()
+  end
+end)
+EOF
+
+## ha proxy 설정파일 생성
+echo -e "
+global
+    lua-load /usr/local/etc/haproxy/lua/retry_on_502_504.lua
+
+resolvers docker
+    nameserver dns1 127.0.0.11:53
+    resolve_retries       3
+    timeout retry         1s
+    hold valid            10s
+
+defaults
+    mode http
+    timeout connect 5s
+    timeout client 60s
+    timeout server 60s
+
+frontend http_front
+    bind *:80
+    acl host_app1 hdr_beg(host) -i api.devapi.store
+
+    use_backend http_back_1 if host_app1
+
+backend http_back_1
+    balance roundrobin
+    option httpchk GET /actuator/health
+    default-server inter 2s rise 1 fall 1 init-addr last,libc,none resolvers docker
+    option redispatch
+    http-response lua.retry_on_502_504
+
+    server app_server_1_1 app1_1:8080 check
+    server app_server_1_2 app1_2:8080 check
+" > /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/haproxy.cfg
+
+docker run \
+  -d \
+  --network common \
+  -p 8090:80 \
+  -v /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy:/usr/local/etc/haproxy \
+  -e TZ=Asia/Seoul \
+  --name ha_proxy_1 \
+  haproxy
+
+# redis 설치
+docker run -d \
+  --name=redis_1 \
+  --restart unless-stopped \
+  --network common \
+  -p 6379:6379 \
+  -e TZ=Asia/Seoul \
+  redis --requirepass ${var.password_1}
+
+# ec2 생성 시 깃허브 자동 로그인, 깃 액션 이미지를 가져오기 위함
 echo "${var.github_access_token_1}" | docker login ghcr.io -u ${var.github_access_token_1_owner} --password-stdin
 
 END_OF_FILE
@@ -229,14 +356,14 @@ data "aws_ami" "latest_amazon_linux" {
   }
 }
 
-# EC2 인스턴스 생성
+# EC2 main 인스턴스 생성
 resource "aws_instance" "team05-main" {
   # 사용할 AMI ID
   ami = data.aws_ami.latest_amazon_linux.id
   # EC2 인스턴스 유형
   instance_type = "t3.micro"
   # 사용할 서브넷 ID
-  subnet_id = aws_subnet.team05-subnet.id
+  subnet_id = aws_subnet.team05-subnet_app.id
   # 적용할 보안 그룹 ID
   vpc_security_group_ids = [aws_security_group.team05-sg.id]
   # 퍼블릭 IP 연결 설정
@@ -247,7 +374,7 @@ resource "aws_instance" "team05-main" {
 
   # 인스턴스에 태그 설정
   tags = {
-    Name = "${var.prefix}-ec2"
+    Name = "${var.prefix}-main"
   }
 
   # 루트 볼륨 설정
@@ -257,6 +384,38 @@ resource "aws_instance" "team05-main" {
   }
 
   user_data = <<-EOF
-${local.ec2_user_data_base}
+${local.ec2_user_base}
+EOF
+}
+
+# EC2 db 인스턴스 생성
+resource "aws_instance" "team05-db" {
+  # 사용할 AMI ID
+  ami = data.aws_ami.latest_amazon_linux.id
+  # EC2 인스턴스 유형
+  instance_type = "t3.micro"
+  # 사용할 서브넷 ID
+  subnet_id = aws_subnet.team05-subnet_db.id
+  # 적용할 보안 그룹 ID
+  vpc_security_group_ids = [aws_security_group.team05-sg.id]
+  # 퍼블릭 IP 연결 설정
+  associate_public_ip_address = false
+
+  # 인스턴스에 IAM 역할 연결
+  iam_instance_profile = aws_iam_instance_profile.team05-instance-profile.name
+
+  # 인스턴스에 태그 설정
+  tags = {
+    Name = "${var.prefix}-db"
+  }
+
+  # 루트 볼륨 설정
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 12 # 볼륨 크기를 12GB로 설정
+  }
+
+  user_data = <<-EOF
+${local.ec2_user_mysql}
 EOF
 }
