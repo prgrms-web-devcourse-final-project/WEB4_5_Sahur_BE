@@ -5,10 +5,12 @@ import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.delivery.entity.Delivery;
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
@@ -21,8 +23,10 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.entity.Notification;
+import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
 import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
@@ -110,70 +114,66 @@ public class BaseInitData implements CommandLineRunner {
                     .build();
             productRequestRepository.save(request);
 
-            // Order
-            Order order = Order.builder()
-                    .member(member)
-                    .product(product)
-                    .productUid(1L)
-                    .totalPrice(999000)
-                    .status("ORDERED")
-                    .quantity(1)
-                    .createAt(LocalDateTime.now())
-                    .build();
-            orderRepository.save(order);
-
-            // Payment
-            Payment payment = Payment.create(
-                    order,
-                    member.getEmail(),
-                    "CREDIT_CARD",
-                    999000,
-                    "PAYMENT_COMPLETED",
-                    LocalDateTime.now()
-            );
-            paymentRepository.save(payment);
 
             // GroupBuy
             GroupBuy groupBuy = GroupBuy.builder()
-                    .productId(product.getId())
-                    .memberId(member.getId())
+                    .product(product)
+                    .category(category)
                     .targetParticipants(10)
-                    .currentParticipantsCount(1)
+                    .currentParticipantCount(1)
                     .round(1)
                     .deadline(LocalDateTime.now().plusDays(7))
-                    .status("OPEN")
-                    .createdAt(LocalDateTime.now())
+                    .status(GroupBuyStatus.ONGOING)
                     .build();
             groupBuyRepository.save(groupBuy);
 
             // GroupBuyRequest
             GroupBuyRequest groupBuyRequest = GroupBuyRequest.builder()
-                    .groupBuyId(groupBuy.getId())
-                    .productId(product.getId())
-                    .memberId(member.getId())
-                    .createdAt(LocalDateTime.now())
+                    .product(product)
+                    .member(member)
                     .build();
             groupBuyRequestRepository.save(groupBuyRequest);
 
+
+            // Order
+            Order order = Order.builder()
+                    .member(member)
+                    .groupBuy(groupBuy)
+                    .product(product)
+                    .quantity(1)
+                    .totalPrice(999000)
+                    .status(OrderStatus.BEFOREPAID)
+                    .build();
+            orderRepository.save(order);
+
+
+            // Payment
+            Payment payment = Payment.create(order, "fake-payment-key-1234");
+            paymentRepository.save(payment);
+
+
             // Notification
             Notification notification = Notification.builder()
-                    .memberId(member.getId())
-                    .type("ORDER")
+                    .member(member)
+                    .type(NotificationType.ORDER)
                     .title("주문이 완료되었습니다.")
                     .message("주문하신 상품이 곧 배송됩니다.")
-                    .url("/orders/" + order.getId())
+                    .url("/orders/" + order.getOrderId())
                     .read(false)
-                    .createdAt(LocalDateTime.now())
                     .build();
             notificationRepository.save(notification);
+
 
             // Delivery
             Delivery delivery = Delivery.builder()
                     .order(order)
                     .address(member.getAddress())
-                    .status("SHIPPING")
+                    .pccc(null)                                        // 선택적 필드라면 null 허용
+                    .contact("010-1234-5678")                          // 테스트용 연락처
+                    .status(DeliveryStatus.PREPARING)                   // 배송 초기 단계
                     .shipping("우체국택배")
                     .build();
+
             deliveryRepository.save(delivery);
 
             // Dibs
