@@ -53,13 +53,11 @@ public class GroupBuyController {
         return RsDataUtil.success("오늘 마감 공동구매 조회 성공", responses);
     }
 
-    @Operation(summary = "공동구매 상세 조회", description = "특정 ID의 공동구매 상세 정보를 조회합니다.")
     @GetMapping("/{groupBuyId}")
     public RsData<GroupBuyResDto> getGroupBuyById(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
-        return groupBuyService.getGroupBuyById(groupBuyId)
-                .map(data -> RsDataUtil.success("공동구매 단건 조회 성공", data))
-                .orElseThrow(() -> new RuntimeException("공동구매를 찾을 수 없습니다."));
+        GroupBuyResDto data = groupBuyService.getGroupBuyById(groupBuyId); // Optional 제거
+        return RsDataUtil.success("공동구매 단건 조회 성공", data);
     }
 
     @Operation(summary = "공동구매 수정", description = "전체 필드를 수정합니다.")
