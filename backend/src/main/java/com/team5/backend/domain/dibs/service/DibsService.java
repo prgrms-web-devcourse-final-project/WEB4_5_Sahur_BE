@@ -32,6 +32,9 @@ public class DibsService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
+        dibsRepository.findByProduct_ProductIdAndMember_MemberId(product.getProductId(), member.getMemberId())
+                .ifPresent(dibs -> { throw new IllegalStateException("이미 찜한 상품입니다."); });
+
         Dibs dibs = Dibs.builder()
                 .member(member)
                 .product(product)
