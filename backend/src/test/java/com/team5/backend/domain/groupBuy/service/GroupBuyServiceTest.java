@@ -12,6 +12,7 @@ import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ class GroupBuyServiceTest {
     @Mock private ProductRepository productRepository;
     @Mock private HistoryRepository historyRepository;
     @Mock private CategoryRepository categoryRepository;
+    @Mock private JwtUtil jwtUtil;
 
     @InjectMocks
     private GroupBuyService groupBuyService;
@@ -172,16 +174,27 @@ class GroupBuyServiceTest {
     }
 
     @Test
-    @DisplayName("사용자별 참여 공동구매 조회 - 최신순 정렬 포함")
-    void getGroupBuysByMemberId_shouldReturnPagedResult() {
+    @DisplayName("토큰 기반 공동구매 조회 - 최신순 정렬 포함")
+    void getGroupBuysByToken_shouldReturnPagedResult() {
+        // given
+        String token = "Bearer fake.jwt.token";
+        String extractedToken = "fake.jwt.token";
+
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<GroupBuy> mockPage = new PageImpl<>(groupBuys);
 
+        // when
+        when(jwtUtil.isTokenBlacklisted(extractedToken)).thenReturn(false);
+        when(jwtUtil.extractEmail(extractedToken)).thenReturn("user@example.com");
+        when(jwtUtil.validateAccessTokenInRedis("user@example.com", extractedToken)).thenReturn(true);
+        when(jwtUtil.extractMemberId(extractedToken)).thenReturn(1L);
         when(historyRepository.findDistinctGroupBuysByMemberId(1L, pageable)).thenReturn(mockPage);
 
-        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByMemberId(1L, pageable);
+        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByToken(token, pageable);
 
+        // then
         assertEquals(2, result.getTotalElements());
+        verify(jwtUtil).extractMemberId(extractedToken);
         verify(historyRepository).findDistinctGroupBuysByMemberId(1L, pageable);
     }
 
