@@ -10,13 +10,14 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,10 +33,8 @@ public class GroupBuyService {
     private final HistoryRepository historyRepository;
     private final JwtUtil jwtUtil;
 
-    // TODO : 커스텀 예외 처리 적용 필요
-
     /**
-     * 매일 자정(00:00)에 마감일이 지난 공동구매의 상태를 CLOSED로 변경
+     * 매일 자정(00:00)에 마감일이 지난 공동구매 상태를 CLOSED로 변경
      */
     @Transactional
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
@@ -58,10 +57,10 @@ public class GroupBuyService {
     @Transactional
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.PRODUCT_NOT_FOUND));
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.CATEGORY_NOT_FOUND));
 
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
@@ -118,7 +117,7 @@ public class GroupBuyService {
                     GroupBuy updated = groupBuyRepository.save(existing);
                     return GroupBuyResDto.fromEntity(updated);
                 })
-                .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 
     /**
@@ -127,7 +126,7 @@ public class GroupBuyService {
     @Transactional
     public GroupBuyResDto patchGroupBuy(Long id, GroupBuyPatchReqDto request) {
         GroupBuy existing = groupBuyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
 
         existing.setTargetParticipants(request.getTargetParticipants() != null ? request.getTargetParticipants() : existing.getTargetParticipants());
         existing.setCurrentParticipantCount(request.getCurrentParticipantCount() != null ? request.getCurrentParticipantCount() : existing.getCurrentParticipantCount());
@@ -166,12 +165,13 @@ public class GroupBuyService {
      */
     public Page<GroupBuyResDto> getGroupBuysByToken(String token, Pageable pageable) {
         String rawToken = token.replace("Bearer ", "");
+
         if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new RuntimeException("로그아웃된 토큰입니다.");
+            throw new CustomException(GroupBuyErrorCode.TOKEN_BLACKLISTED);
         }
 
         if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new RuntimeException("유효하지 않은 토큰입니다.");
+            throw new CustomException(GroupBuyErrorCode.TOKEN_INVALID);
         }
 
         Long memberId = jwtUtil.extractMemberId(rawToken);
@@ -189,6 +189,6 @@ public class GroupBuyService {
     public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
         return groupBuyRepository.findById(id)
                 .map(GroupBuyStatusResDto::fromEntity)
-                .orElseThrow(() -> new RuntimeException("GroupBuy not found with id " + id));
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 }
