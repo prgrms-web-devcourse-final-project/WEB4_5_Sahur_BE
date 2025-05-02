@@ -5,6 +5,8 @@ import com.team5.backend.domain.member.member.dto.EmailResDto;
 import com.team5.backend.domain.member.member.dto.EmailSendReqDto;
 import com.team5.backend.domain.member.member.dto.EmailVerificationReqDto;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -115,7 +117,7 @@ public class MailService {
 
             // 발송 실패시 커스텀 예외 등 처리 로직 필요
             log.error("메일 발송 실패: " + sendEmail, e);
-            throw new MessagingException("메일 발송 중 오류가 발생했습니다: " + e.getMessage(), e);
+            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }
     }
 
@@ -168,7 +170,7 @@ public class MailService {
             // 인증 성공 시 Redis에 인증 완료 상태 저장
             String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
             values.set(verifiedKey, "true");
-            redisTemplate.expire(verifiedKey, verifiedExpirationMinutes, TimeUnit.MINUTES); // 10분
+            redisTemplate.expire(verifiedKey, verifiedExpirationMinutes, TimeUnit.MINUTES); // 3분
 
             // 인증 성공 후 Redis에서 인증 코드 삭제
             redisTemplate.delete(key);
@@ -226,7 +228,7 @@ public class MailService {
         } catch (MailException e) {
 
             log.error("비밀번호 재설정 인증번호 메일 발송 실패: " + email, e);
-            throw new MessagingException("메일 발송 중 오류가 발생했습니다: " + e.getMessage(), e);
+            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }
     }
 
@@ -247,7 +249,7 @@ public class MailService {
             // 인증 성공 시 Redis에 인증 완료 상태 저장
             String verifiedKey = PASSWORD_RESET_VERIFIED_PREFIX + email;
             values.set(verifiedKey, "true");
-            redisTemplate.expire(verifiedKey, verifiedExpirationMinutes, TimeUnit.MINUTES); // 10분
+            redisTemplate.expire(verifiedKey, verifiedExpirationMinutes, TimeUnit.MINUTES); // 3분
 
             // 인증 코드 삭제
             redisTemplate.delete(key);

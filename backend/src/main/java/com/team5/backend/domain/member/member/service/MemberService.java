@@ -8,6 +8,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,9 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -27,6 +25,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
     private final HistoryRepository historyRepository;
 
@@ -38,18 +37,18 @@ public class MemberService {
 
         // 이메일 중복 검사
         if (memberRepository.existsByEmail(email)) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+            throw new CustomException(MemberErrorCode.EMAIL_ALREADY_USED);
         }
 
         // 닉네임 중복 검사
         if (memberRepository.existsByNickname(signupReqDto.getNickname())) {
-            throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+            throw new CustomException(MemberErrorCode.NICKNAME_ALREADY_USED);
         }
 
         // 이메일 인증 상태 확인
         boolean isVerified = mailService.isEmailVerified(email);
         if (!isVerified) {
-            throw new RuntimeException("이메일 인증이 완료되지 않았습니다.");
+            throw new CustomException(MemberErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         // 비밀번호 암호화
@@ -81,17 +80,9 @@ public class MemberService {
     public GetMemberResDto getMemberById(Long memberId) {
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         return GetMemberResDto.fromEntity(member);
-    }
-
-    // 모든 회원 조회
-    public List<GetMemberResDto> getAllMembers() {
-
-        return memberRepository.findAll().stream()
-                .map(GetMemberResDto::fromEntity)
-                .collect(Collectors.toList());
     }
 
     // 회원 정보 수정
@@ -99,18 +90,18 @@ public class MemberService {
     public GetMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
 
         Member existingMember = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         // 이메일 변경 시 중복 검사
         if (patchMemberReqDto.getEmail() != null && !patchMemberReqDto.getEmail().equals(existingMember.getEmail())
                 && memberRepository.existsByEmail(patchMemberReqDto.getEmail())) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+            throw new CustomException(MemberErrorCode.EMAIL_ALREADY_USED);
         }
 
         // 닉네임 변경 시 중복 검사
         if (patchMemberReqDto.getNickname() != null && !patchMemberReqDto.getNickname().equals(existingMember.getNickname())
                 && memberRepository.existsByNickname(patchMemberReqDto.getNickname())) {
-            throw new RuntimeException("이미 사용 중인 닉네임입니다.");
+            throw new CustomException(MemberErrorCode.NICKNAME_ALREADY_USED);
         }
 
         // 변경할 필드만 수정
@@ -148,11 +139,17 @@ public class MemberService {
 
     // 회원 삭제
     @Transactional
-    public void deleteMember(Long memberId) {
+    public void deleteMember(String token, HttpServletResponse response) {
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
+        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
 
+        Member member = memberRepository.findById(loggedInMember.getMemberId())
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 회원 데이터 삭제 전에 로그아웃 처리
+        authService.logout(token, response);
+
+        // 회원 데이터 삭제
         memberRepository.delete(member);
     }
 
