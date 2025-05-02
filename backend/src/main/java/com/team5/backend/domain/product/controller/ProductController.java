@@ -1,15 +1,20 @@
 package com.team5.backend.domain.product.controller;
 
-import com.team5.backend.domain.product.dto.ProductCreateReqDto;
-import com.team5.backend.domain.product.dto.ProductResDto;
-import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
-import com.team5.backend.domain.product.service.ProductService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.team5.backend.domain.product.dto.ProductCreateReqDto;
+import com.team5.backend.domain.product.dto.ProductResDto;
+import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
+import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.service.ProductService;
+import com.team5.backend.global.dto.RsData;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -25,9 +30,14 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResDto>> getAllProducts() {
-        List<ProductResDto> responses = productService.getAllProducts();
-        return ResponseEntity.ok(responses);
+    public RsData<Page<ProductResDto>> getAllProducts(
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false) String keyword,
+        @PageableDefault(size = 10) Pageable pageable
+    ) {
+        Page<Product> page = productService.getAllProducts(category, keyword, pageable);
+        Page<ProductResDto> response = page.map(ProductResDto::fromEntity);
+        return new RsData<>("200", "상품 목록을 조회했습니다.", response);
     }
 
     @GetMapping("/{productId}")

@@ -14,6 +14,7 @@ public class OrderCreateResDto {
 	private Long orderId;
 	private Long memberId;
 	private Long groupBuyId;
+	private Long productId;
 	private Integer totalPrice;
 	private OrderStatus status;
 	private Integer quantity;
@@ -24,6 +25,7 @@ public class OrderCreateResDto {
 			.orderId(order.getOrderId())
 			.memberId(order.getMember().getMemberId())
 			.groupBuyId(order.getGroupBuy().getGroupBuyId())
+			.productId(order.getProduct().getProductId())
 			.totalPrice(order.getTotalPrice())
 			.status(order.getStatus())
 			.quantity(order.getQuantity())
