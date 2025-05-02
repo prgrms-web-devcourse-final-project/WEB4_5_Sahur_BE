@@ -1,7 +1,7 @@
 spring:
+
   datasource:
-    # 추후 RDS 도입 고려
-    url: jdbc:mysql://mysql_1:3306/tung_db
+    url: jdbc:mysql://${custom.db.host}:3306/tung_db
     username: root
     password: ${custom.db.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -36,5 +36,3 @@ custom:
     domain: ${custom.prod.domain}
     backUrl: ${custom.prod.backUrl}
     frontUrl: ${custom.prod.frontUrl}
-
-    hostname: ${HOSTNAME}
