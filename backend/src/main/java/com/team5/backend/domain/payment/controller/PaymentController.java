@@ -58,4 +58,11 @@ public class PaymentController {
 
 		return new RsData<>("200", "결제 내역을 비동기로 조회했습니다.", result);
 	}
+
+	@GetMapping("/orders/{orderId}")
+	public RsData<PaymentResDto> getPaymentByOrder(@PathVariable Long orderId) {
+		String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
+		PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
+		return new RsData<>("200", "결제 정보를 조회했습니다.", dto);
+	}
 }
