@@ -12,6 +12,7 @@ public class HistoryResDto {
     private Long memberId;
     private Long productId;
     private Long groupBuyId;
+    private Long orderId;
     private Boolean writable;
 
     public static HistoryResDto fromEntity(History history) {
@@ -20,6 +21,7 @@ public class HistoryResDto {
                 .memberId(history.getMember().getMemberId())
                 .productId(history.getProduct().getProductId())
                 .groupBuyId(history.getGroupBuy().getGroupBuyId())
+                .orderId(history.getOrder().getOrderId())
                 .writable(history.getWritable())
                 .build();
     }

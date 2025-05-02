@@ -8,6 +8,7 @@ import lombok.Getter;
 public class ReviewCreateReqDto {
     private Long memberId;
     private Long productId;
+    private Long historyId;
     private String comment;
     private Integer rate;
     private String imageUrl;

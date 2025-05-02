@@ -12,6 +12,7 @@ public class ReviewResDto {
     private Long reviewId;
     private Long memberId;
     private Long productId;
+    private Long historyId;
     private String comment;
     private Integer rate;
     private LocalDateTime createdAt;
@@ -22,6 +23,7 @@ public class ReviewResDto {
                 .reviewId(review.getReviewId())
                 .memberId(review.getMember().getMemberId())
                 .productId(review.getProduct().getProductId())
+                .historyId(review.getHistory().getHistoryId())
                 .comment(review.getComment())
                 .rate(review.getRate())
                 .createdAt(review.getCreatedAt())

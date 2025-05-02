@@ -1,26 +1,19 @@
 package com.team5.backend.domain.order.controller;
 
+import com.team5.backend.domain.delivery.service.DeliveryService;
+import com.team5.backend.domain.order.dto.*;
+import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.service.OrderService;
+import com.team5.backend.domain.payment.service.PaymentService;
+import com.team5.backend.domain.payment.service.TossService;
+import com.team5.backend.global.dto.RsData;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
-import com.team5.backend.domain.delivery.dto.DeliveryResDto;
-import com.team5.backend.domain.delivery.entity.Delivery;
-import com.team5.backend.domain.delivery.service.DeliveryService;
-import com.team5.backend.domain.order.dto.*;
-import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.service.OrderService;
-import com.team5.backend.domain.payment.dto.PaymentResDto;
-import com.team5.backend.domain.payment.service.PaymentService;
-import com.team5.backend.domain.payment.service.TossService;
-import com.team5.backend.global.dto.RsData;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -69,26 +62,4 @@ public class OrderController {
 		orderService.cancelOrder(orderId);
 	}
 
-	@PostMapping("/{orderId}/delivery")
-	@ResponseStatus(HttpStatus.CREATED)
-	public RsData<DeliveryResDto> createDelivery(
-		@PathVariable Long orderId,
-		@RequestBody @Valid DeliveryReqDto request
-	) {
-		Delivery delivery = deliveryService.createDelivery(orderId, request);
-		return new RsData<>("201", "배송 정보가 생성되었습니다.", DeliveryResDto.from(delivery));
-	}
-
-	@GetMapping("/{orderId}/delivery")
-	public RsData<DeliveryResDto> getDeliveryByOrder(@PathVariable Long orderId) {
-		Delivery delivery = deliveryService.getDeliveryByOrder(orderId);
-		return new RsData<>("200", "배송 정보를 조회했습니다.", DeliveryResDto.from(delivery));
-	}
-
-	@GetMapping("/{orderId}/payment")
-	public RsData<PaymentResDto> getPaymentByOrder(@PathVariable Long orderId) {
-		String paymentKey = paymentService.getPaymentKeyByOrder(orderId);
-		PaymentResDto dto = tossService.getPaymentInfoByPaymentKey(paymentKey);
-		return new RsData<>("200", "결제 정보를 조회했습니다.", dto);
-	}
 }

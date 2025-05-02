@@ -25,8 +25,10 @@ public class DeliveryService {
 		Delivery delivery = Delivery.create(
 			order,
 			request.getAddress(),
+            request.getPccc(),
 			request.getContact(),
-			request.getPccc()
+            request.getStatus(),
+            request.getShipping()
 		);
 		return deliveryRepository.save(delivery);
 	}
@@ -42,8 +44,10 @@ public class DeliveryService {
 			.orElseThrow(() -> new IllegalArgumentException("배송 정보를 찾을 수 없습니다."));
 		delivery.updateDeliveryInfo(
 			request.getAddress(),
+			request.getPccc(),
 			request.getContact(),
-			request.getPccc()
+            request.getStatus(),
+            request.getShipping()
 		);
 		return delivery;
 	}
