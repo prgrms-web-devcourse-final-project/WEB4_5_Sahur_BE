@@ -166,7 +166,7 @@ public class BaseInitData implements CommandLineRunner {
                     .pccc(null)                                        // 선택적 필드라면 null 허용
                     .contact("010-1234-5678")                          // 테스트용 연락처
                     .status(DeliveryStatus.PREPARING)                   // 배송 초기 단계
-                    .shipping("우체국택배")
+                    .shipping("123456789123456789")
                     .build();
 
             deliveryRepository.save(delivery);
