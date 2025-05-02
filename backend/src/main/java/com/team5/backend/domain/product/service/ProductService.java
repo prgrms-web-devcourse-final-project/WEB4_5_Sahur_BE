@@ -1,8 +1,9 @@
 package com.team5.backend.domain.product.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,13 +43,13 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public List<Product> getAllProducts(String category, String keyword) {
+    public Page<Product> getAllProducts(String category, String keyword, Pageable pageable) {
         if (category != null) {
-            return productRepository.findByCategory_Category(category);
+            return productRepository.findByCategory_Category(category, pageable);
         } else if (keyword != null) {
-            return productRepository.findByCategory_Keyword(keyword);
+            return productRepository.findByCategory_Keyword(keyword, pageable);
         } else {
-            return productRepository.findAll();
+            return productRepository.findAll(pageable);
         }
     }
 

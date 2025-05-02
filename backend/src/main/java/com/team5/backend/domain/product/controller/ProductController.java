@@ -1,8 +1,8 @@
 package com.team5.backend.domain.product.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,17 +30,14 @@ public class ProductController {
     }
 
     @GetMapping
-    public RsData<List<ProductResDto>> getAllProducts(
+    public RsData<Page<ProductResDto>> getAllProducts(
         @RequestParam(required = false) String category,
-        @RequestParam(required = false) String keyword
+        @RequestParam(required = false) String keyword,
+        @PageableDefault(size = 10) Pageable pageable
     ) {
-        List<Product> products = productService.getAllProducts(category, keyword);
-        List<ProductResDto> response = products.stream()
-            .map(ProductResDto::fromEntity)
-            .collect(Collectors.toList());
-
-        String msg = response.isEmpty() ? "조회된 상품이 없습니다." : "상품 목록을 조회했습니다.";
-        return new RsData<>("200", msg, response);
+        Page<Product> page = productService.getAllProducts(category, keyword, pageable);
+        Page<ProductResDto> response = page.map(ProductResDto::fromEntity);
+        return new RsData<>("200", "상품 목록을 조회했습니다.", response);
     }
 
     @GetMapping("/{productId}")
