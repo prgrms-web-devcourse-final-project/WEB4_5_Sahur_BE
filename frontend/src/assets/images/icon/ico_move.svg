@@ -1,0 +1,10 @@
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="lucide:move" clip-path="url(#clip0_2679_63681)">
+<path id="Vector" d="M10.0013 1.66797V18.3346M10.0013 1.66797L7.5013 4.16797M10.0013 1.66797L12.5013 4.16797M10.0013 18.3346L12.5013 15.8346M10.0013 18.3346L7.5013 15.8346M15.8346 7.5013L18.3346 10.0013M18.3346 10.0013L15.8346 12.5013M18.3346 10.0013H1.66797M1.66797 10.0013L4.16797 7.5013M1.66797 10.0013L4.16797 12.5013" stroke="white" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_2679_63681">
+<rect width="20" height="20" fill="white"/>
+</clipPath>
+</defs>
+</svg>
