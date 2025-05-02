@@ -9,9 +9,12 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
-import com.team5.backend.domain.order.dto.*;
+import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
+import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 
@@ -25,6 +28,7 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final MemberRepository memberRepository;
 	private final GroupBuyRepository groupBuyRepository;
+	private final ProductRepository productRepository;
 
 	public Order createOrder(OrderCreateReqDto request) {
 		Member member = memberRepository.findById(request.getMemberId())
@@ -33,7 +37,10 @@ public class OrderService {
 		GroupBuy groupBuy = groupBuyRepository.findById(request.getGroupBuyId())
 				.orElseThrow(() -> new CustomException(OrderErrorCode.GROUPBUY_NOT_FOUND));
 
-		Order order = Order.create(member, groupBuy, request.getQuantity());
+		Product product = productRepository.findById(request.getProductId())
+			.orElseThrow(() -> new CustomException(OrderErrorCode.PRODUCT_NOT_FOUND));
+
+		Order order = Order.create(member, groupBuy, product, request.getQuantity());
 		return orderRepository.save(order);
 	}
 

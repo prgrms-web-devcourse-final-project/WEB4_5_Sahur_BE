@@ -14,6 +14,9 @@ public class OrderCreateReqDto {
 	@NotNull(message = "공동구매 ID는 필수 입력입니다.")
 	private Long groupBuyId;
 
+	@NotNull(message = "상품 ID는 필수 입력입니다.")
+	private Long productId;
+
 	@NotNull(message = "수량은 필수 입력입니다.")
 	@Min(value = 1, message = "수량은 1 이상이어야 합니다.")
 	private Integer quantity;
