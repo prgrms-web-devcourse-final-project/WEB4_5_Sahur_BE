@@ -3,12 +3,14 @@ package com.team5.backend.domain.member.member.service;
 import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.AuthErrorCode;
+import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,11 +30,11 @@ public class AuthService {
 
         // 이메일로 회원 조회
         Member member = memberRepository.findByEmail(loginReqDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_INFO));
 
         // 비밀번호 확인
         if (!passwordEncoder.matches(loginReqDto.getPassword(), member.getPassword())) {
-            throw new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다.");
+            throw new CustomException(AuthErrorCode.INVALID_LOGIN_INFO);
         }
 
         // 액세스 토큰 생성 - Redis에 저장되고 클라이언트에 반환됨
@@ -62,7 +64,7 @@ public class AuthService {
         String accessToken = extractCookieValue(request, "accessToken");
 
         if (accessToken == null) {
-            throw new RuntimeException("액세스 토큰이 없습니다.");
+            throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
         }
 
         // 토큰에서 사용자 이메일 추출
@@ -85,7 +87,7 @@ public class AuthService {
 
         // 리프레시 토큰 유효성 검증
         if (jwtUtil.isTokenExpired(refreshToken) || jwtUtil.isTokenBlacklisted(refreshToken)) {
-            throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 토큰에서 사용자 정보 추출
@@ -95,7 +97,7 @@ public class AuthService {
 
         // Redis에 저장된 리프레시 토큰과 비교
         if (!jwtUtil.validateRefreshTokenInRedis(email, refreshToken)) {
-            throw new RuntimeException("토큰이 일치하지 않습니다.");
+            throw new CustomException(AuthErrorCode.TOKEN_MISMATCH);
         }
 
         // 새로운 액세스 토큰 생성
@@ -147,14 +149,14 @@ public class AuthService {
 
         // 토큰이 블랙리스트에 있는지 확인
         if (jwtUtil.isTokenBlacklisted(extractedToken)) {
-            throw new RuntimeException("로그아웃된 토큰입니다.");
+            throw new CustomException(AuthErrorCode.LOGOUT_TOKEN);
         }
 
         // Redis에 저장된 토큰과 일치하는지 확인
         String username = jwtUtil.extractEmail(extractedToken);
 
         if (!jwtUtil.validateAccessTokenInRedis(username, extractedToken)) {
-            throw new RuntimeException("유효하지 않은 토큰입니다.");
+            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
         }
 
         // 토큰에서 사용자 정보 추출
@@ -162,14 +164,14 @@ public class AuthService {
 
         return memberRepository.findByEmail(tokenInfo.getEmail())
                 .map(GetMemberResDto::fromEntity)
-                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
     // 토큰에서 사용자 정보를 추출하는 메서드
     public TokenInfoResDto extractTokenInfo(String token) {
 
         if (jwtUtil.isTokenExpired(token)) {
-            throw new RuntimeException("만료된 토큰입니다.");
+            throw new CustomException(AuthErrorCode.EXPIRED_TOKEN);
         }
 
         String email = jwtUtil.extractEmail(token);
