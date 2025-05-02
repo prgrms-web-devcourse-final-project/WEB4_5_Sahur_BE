@@ -131,27 +131,33 @@ public class MailService {
             redisTemplate.delete(key);
         }
 
-        // 새로운 인증 코드 발송
-        String authCode = sendSimpleMessage(email);
+        try {
+            // 새로운 인증 코드 발송
+            String authCode = sendSimpleMessage(email);
 
-        if (authCode != null) {
-            // Redis에 인증 코드 저장 (만료 시간 설정)
-            ValueOperations<String, String> values = redisTemplate.opsForValue();
+            if (authCode != null) {
+                // Redis에 인증 코드 저장 (만료 시간 설정)
+                ValueOperations<String, String> values = redisTemplate.opsForValue();
 
-            // Redis에 저장하고 만료 시간 설정 (밀리초를 초 단위로 변환)
-            values.set(key, authCode);
-            redisTemplate.expire(key, authCodeExpirationSeconds, TimeUnit.SECONDS); // 3분
+                // Redis에 저장하고 만료 시간 설정 (밀리초를 초 단위로 변환)
+                values.set(key, authCode);
+                redisTemplate.expire(key, authCodeExpirationSeconds, TimeUnit.SECONDS); // 3분
+
+                return EmailResDto.builder()
+                        .success(true)
+                        .message("인증 코드가 전송되었습니다.")
+                        .build();
+            }
 
             return EmailResDto.builder()
-                    .success(true)
-                    .message("인증 코드가 전송되었습니다.")
+                    .success(false)
+                    .message("인증 코드 전송이 실패하였습니다.")
                     .build();
-        }
+        } catch (MailException e) {
 
-        return EmailResDto.builder()
-                .success(false)
-                .message("인증 코드 전송이 실패하였습니다.")
-                .build();
+            log.error("인증번호 메일 발송 실패: " + email, e);
+            throw new MessagingException("메일 발송 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
     }
 
     public EmailResDto validationAuthCode(EmailVerificationReqDto emailVerificationReqDto) {
@@ -240,7 +246,7 @@ public class MailService {
 
         // Redis에서 인증 코드 조회
         ValueOperations<String, String> values = redisTemplate.opsForValue();
-        String key = PASSWORD_RESET_VERIFIED_PREFIX + email;
+        String key = PASSWORD_RESET_AUTH_PREFIX + email;
         String storedAuthCode = values.get(key);
 
         // 인증 코드 검증

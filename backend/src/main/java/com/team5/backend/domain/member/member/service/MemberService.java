@@ -1,12 +1,11 @@
 package com.team5.backend.domain.member.member.service;
 
-import com.team5.backend.domain.member.member.dto.GetMemberResDto;
-import com.team5.backend.domain.member.member.dto.SignupReqDto;
-import com.team5.backend.domain.member.member.dto.SignupResDto;
-import com.team5.backend.domain.member.member.dto.PatchMemberReqDto;
+import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.MemberErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -147,5 +146,37 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다. ID: " + memberId));
 
         memberRepository.delete(member);
+    }
+
+    // 비밀번호 재설정
+    @Transactional
+    public PasswordResetResDto resetPassword(PasswordResetReqDto passwordResetReqDto) {
+
+        String email = passwordResetReqDto.getEmail();
+        String newPassword = passwordResetReqDto.getPassword();
+
+        // 인증 완료 여부 조회
+        if (!mailService.isPasswordResetVerified(email)) {
+            return PasswordResetResDto.builder()
+                    .success(false)
+                    .message("이메일 인증이 완료되지 않았거나 인증 시간이 만료되었습니다.")
+                    .build();
+        }
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 3비밀번호 암호화 및 업데이트
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        member.setPassword(encodedPassword);
+        memberRepository.save(member);
+
+        // Redis에 저장된 인증 정보 삭제
+        mailService.clearPasswordResetVerificationStatus(email);
+
+        return PasswordResetResDto.builder()
+                .success(true)
+                .message("비밀번호가 성공적으로 재설정되었습니다.")
+                .build();
     }
 }

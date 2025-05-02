@@ -4,6 +4,7 @@ import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
+import com.team5.backend.global.dto.RsData;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -105,5 +106,34 @@ public class MemberController {
         return response.isSuccess()
                 ? ResponseEntity.ok(response)
                 : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // 비밀번호 재설정 이메일 인증번호 전송
+    @PostMapping("/auth/password/email/send")
+    public RsData<EmailResDto> requestPasswordResetAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
+
+        EmailResDto response = mailService.sendPasswordResetAuthCode(emailSendReqDto);
+
+        if (response.isSuccess()) return new RsData<>("200-1", "비밀번호 재설정 인증번호가 이메일로 전송되었습니다.", response);
+        else return new RsData<>("400-1", "이메일 인증번호 전송에 실패했습니다.", response);
+    }
+
+    // 비밀번호 재설정 이메일 인증번호 검증
+    @PostMapping("/auth/password/email/verify")
+    public RsData<EmailResDto> validatePasswordResetAuthCode(@RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
+
+        EmailResDto response = mailService.verifyPasswordResetAuthCode(emailVerificationReqDto);
+
+        if (response.isSuccess()) return new RsData<>("200-1", "인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
+        else return new RsData<>("400-1", "인증번호가 유효하지 않거나 만료되었습니다.", response);
+    }
+
+    // 비밀번호 재설정
+    @PatchMapping("/members/password/reset")
+    public RsData<PasswordResetResDto> resetPassword(@Valid @RequestBody PasswordResetReqDto passwordResetReqDto) {
+        PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
+
+        if (response.isSuccess()) return new RsData<>("200-1", "비밀번호가 성공적으로 재설정되었습니다.", response);
+        else return new RsData<>("400-1", "비밀번호 재설정에 실패했습니다.", response);
     }
 }
