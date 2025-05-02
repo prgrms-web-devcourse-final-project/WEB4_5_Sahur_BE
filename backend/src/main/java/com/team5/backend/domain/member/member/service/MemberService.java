@@ -10,6 +10,7 @@ import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +32,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     private final HistoryRepository historyRepository;
+    private final JwtUtil jwtUtil;
+
 
     // 회원 생성
     @Transactional
@@ -158,9 +161,28 @@ public class MemberService {
         memberRepository.delete(member);
     }
 
-    public Page<ProductResDto> getReviewableProductsByMember(Long memberId, Pageable pageable) {
+    public Page<ProductResDto> getReviewableProductsByMember(String token, Pageable pageable) {
+        // 1. 토큰 전처리
+        String rawToken = token.replace("Bearer ", "");
+
+        // 2. 토큰 유효성 검증
+        if (jwtUtil.isTokenBlacklisted(rawToken)) {
+            throw new RuntimeException("로그아웃된 토큰입니다.");
+        }
+
+        String email = jwtUtil.extractEmail(rawToken);
+
+        if (!jwtUtil.validateAccessTokenInRedis(email, rawToken)) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+
+        // 3. memberId 추출
+        Long memberId = jwtUtil.extractMemberId(rawToken);
+
+        // 4. 정렬 및 조회
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
         return historyRepository.findWritableProductsByMemberId(memberId, sortedPageable)
                 .map(ProductResDto::fromEntity);
     }
