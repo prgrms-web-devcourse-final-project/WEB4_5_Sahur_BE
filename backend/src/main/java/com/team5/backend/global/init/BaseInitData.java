@@ -34,7 +34,7 @@ public class BaseInitData implements CommandLineRunner {
                     .email("example@example.com")
                     .password(passwordEncoder.encode("password1!"))
                     .nickname("테스트")
-                    .address("서울")
+                    .address("서울시")
                     .role(Role.USER)
                     .emailVerified(true)
                     .imageUrl("http://example.com/image.jpg")

@@ -56,7 +56,6 @@ resource "aws_eip" "team05-eip" {
   }
 }
 
-
 # NAT 게이트웨이 생성
 resource "aws_nat_gateway" "team05-nat" {
   allocation_id = aws_eip.team05-eip.id
