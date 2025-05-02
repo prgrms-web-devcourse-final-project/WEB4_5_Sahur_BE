@@ -1,5 +1,6 @@
 package com.team5.backend.domain.dibs.service;
 
+import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.dibs.dto.DibsCreateReqDto;
 import com.team5.backend.domain.dibs.dto.DibsResDto;
 import com.team5.backend.domain.dibs.entity.Dibs;
@@ -20,12 +21,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DibsServiceTest {
@@ -207,5 +212,44 @@ class DibsServiceTest {
 
         assertEquals("이미 찜한 상품입니다.", e.getMessage());
     }
+
+    @Test
+    @DisplayName("동일한 회원이 다른 상품 찜 가능")
+    void createDibs_DifferentProduct() {
+        // given
+        Product anotherProduct = Product.builder()
+                .productId(200L)
+                .title("다른 상품")
+                .price(20000)
+                .description("설명")
+                .category(Category.builder().categoryId(1L).build())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+
+        DibsCreateReqDto dto = DibsCreateReqDto.builder()
+                .memberId(1L)
+                .productId(200L)
+                .build();
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(productRepository.findById(200L)).thenReturn(Optional.of(anotherProduct));
+        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(200L, 1L))
+                .thenReturn(Optional.empty());
+        when(dibsRepository.save(any())).thenReturn(Dibs.builder()
+                .dibsId(2L)
+                .member(member)
+                .product(anotherProduct)
+                .build());
+
+        // when
+        DibsResDto result = dibsService.createDibs(dto);
+
+        // then
+        assertEquals(2L, result.getDibsId());
+        assertEquals(1L, result.getMemberId());
+        assertEquals(200L, result.getProductId());
+    }
+
 
 }
