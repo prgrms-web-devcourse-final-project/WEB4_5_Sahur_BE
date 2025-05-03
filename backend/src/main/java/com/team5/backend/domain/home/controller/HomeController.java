@@ -6,16 +6,25 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.Bucket;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "HomeController", description = "API 서버 홈")
 @RestController
 public class HomeController {
+
+    private final S3Client s3Client;
+
+    public HomeController(S3Client s3Client) {
+        this.s3Client = s3Client;
+    }
 
     @Operation(summary = "API 서버 시작페이지", description = "API 서버 시작페이지입니다.")
     @GetMapping(value = "/", produces = "text/plain;charset=UTF-8")
@@ -32,6 +41,17 @@ public class HomeController {
 
         // 무중단 배포 시 환경 변화 확인
         return "API 서버에 오신 걸 환영합니다. Host: " + hostName;
+    }
+
+    @Operation(summary = "S3 버킷 목록 조회", description = "AWS S3에 등록된 버킷 이름 조회")
+    @GetMapping("/buckets")
+    @ResponseBody
+    public List<String> buckets() {
+        return s3Client.listBuckets()
+                .buckets()
+                .stream()
+                .map(Bucket::name)
+                .toList();
     }
 
     @GetMapping("/session")
