@@ -1,5 +1,7 @@
 package com.team5.backend.domain.order.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,23 @@ public class OrderService {
 			return orderRepository.findByStatus(status, pageable);
 		} else {
 			return orderRepository.findAll(pageable);
+		}
+	}
+
+	@Transactional
+	public Page<Order> getOrdersByMember(Long memberId, String status, Pageable pageable) {
+		List<OrderStatus> statusList = null;
+
+		if ("inProgress".equalsIgnoreCase(status)) {
+			statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
+		} else if ("canceled". equalsIgnoreCase(status)) {
+			statusList = List.of(OrderStatus.CANCELED);
+		}
+
+		if (statusList != null) {
+			return orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
+		} else {
+			return orderRepository.findByMember_MemberId(memberId, pageable);
 		}
 	}
 
