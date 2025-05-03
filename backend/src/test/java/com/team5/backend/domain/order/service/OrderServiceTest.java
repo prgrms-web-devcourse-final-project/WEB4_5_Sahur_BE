@@ -26,6 +26,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
@@ -130,9 +131,37 @@ class OrderServiceTest {
 		Pageable pageable = PageRequest.of(0, 10);
 		when(orderRepository.findAll(pageable)).thenReturn(mockPage);
 
-		Page<Order> result = orderService.getOrders(pageable);
+		Page<Order> result = orderService.getOrders(null, null, pageable);
 
 		assertThat(result.getContent()).hasSize(2);
+	}
+
+	@Test
+	@DisplayName("주문 목록 조회 - 주문번호로 필터링 성공")
+	void getOrders_byOrderId_success() {
+		Order order = mock(Order.class);
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Order> mockPage = new PageImpl<>(List.of(order));
+
+		when(orderRepository.findByOrderId(1L, pageable)).thenReturn(mockPage);
+
+		Page<Order> result = orderService.getOrders(1L, null, pageable);
+
+		assertThat(result.getContent()).containsExactly(order);
+	}
+
+	@Test
+	@DisplayName("주문 목록 조회 - 상태로 필터링 성공")
+	void getOrders_byStatus_success() {
+		Order order = mock(Order.class);
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Order> mockPage = new PageImpl<>(List.of(order));
+
+		when(orderRepository.findByStatus(OrderStatus.PAID, pageable)).thenReturn(mockPage);
+
+		Page<Order> result = orderService.getOrders(null, OrderStatus.PAID, pageable);
+
+		assertThat(result.getContent()).containsExactly(order);
 	}
 
 	@Test
@@ -161,7 +190,13 @@ class OrderServiceTest {
 	void updateOrder_success() {
 		Product product = Product.builder().price(1500).build();
 		GroupBuy groupBuy = GroupBuy.builder().product(product).build();
-		Order order = Order.builder().groupBuy(groupBuy).build();
+
+		Order order = Order.builder()
+			.product(product)
+			.groupBuy(groupBuy)
+			.quantity(1)
+			.totalPrice(1500)
+			.build();
 
 		when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 

@@ -114,13 +114,43 @@ class OrderControllerTest {
     void getOrders_success() throws Exception {
         Order order = mockOrder();
 
-        Mockito.when(orderService.getOrders(any(Pageable.class)))
+        Mockito.when(orderService.getOrders(eq(null), eq(null), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(order)));
 
         mockMvc.perform(get("/api/v1/orders"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/orders?search=1 - 주문번호로 주문 목록 조회 성공")
+    void getOrdersByOrderId_success() throws Exception {
+        Order order = mockOrder();
+        Mockito.when(orderService.getOrders(eq(1L), eq(null), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(order)));
+
+        mockMvc.perform(get("/api/v1/orders")
+                .param("search", "1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("200"))
+            .andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/orders?status=PAID - 주문 상태별 주문 목록 조회 성공")
+    void getOrdersByStatus_success() throws Exception {
+        Order order = mockOrder();
+        order.markAsPaid();
+
+        Mockito.when(orderService.getOrders(eq(null), eq(OrderStatus.PAID), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(order)));
+
+        mockMvc.perform(get("/api/v1/orders")
+                .param("status", "PAID"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("200"))
+            .andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
     }
 
     @Test
