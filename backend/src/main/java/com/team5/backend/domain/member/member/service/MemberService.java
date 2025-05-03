@@ -10,6 +10,7 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -54,13 +56,20 @@ public class MemberService {
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupReqDto.getPassword());
 
+        // 프로필 이미지가 null이면 기본 이미지로 설정
+        String imageUrl = signupReqDto.getImageUrl();
+        if (imageUrl == null || imageUrl.trim().isEmpty()) {
+            imageUrl = "/images/default-profile.png";
+            log.info("기본 이미지 설정");
+        }
+
         Member member = Member.builder()
                 .email(email)
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(encodedPassword)
                 .address(signupReqDto.getAddress())
-                .imageUrl(signupReqDto.getImageUrl())
+                .imageUrl(imageUrl)
                 .role(Role.USER)
                 .emailVerified(true)  // 이미 인증이 완료된 상태이므로 true로 설정
                 .build();
