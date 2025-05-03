@@ -216,7 +216,9 @@ class OrderControllerTest {
     @DisplayName("DELETE /api/v1/orders/{id} - 주문 취소 성공")
     void cancelOrder_success() throws Exception {
         mockMvc.perform(delete("/api/v1/orders/1"))
-                .andExpect(status().isNoContent());
+            .andExpect(status().isNoContent())
+            .andExpect(jsonPath("$.code").value("204"))
+            .andExpect(jsonPath("$.msg").value("주문이 성공적으로 취소되었습니다."));
 
         Mockito.verify(orderService).cancelOrder(1L);
     }
