@@ -165,6 +165,48 @@ class OrderServiceTest {
 	}
 
 	@Test
+	@DisplayName("회원 주문 조회 성공 - 전체 상태")
+	void getOrdersByMember_all_success() {
+		Order order1 = mock(Order.class);
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Order> mockPage = new PageImpl<>(List.of(order1));
+
+		when(orderRepository.findByMember_MemberId(1L, pageable)).thenReturn(mockPage);
+
+		Page<Order> result = orderService.getOrdersByMember(1L, null, pageable);
+
+		assertThat(result.getContent()).containsExactly(order1);
+	}
+
+	@Test
+	@DisplayName("회원 주문 조회 성공 - inProgress 상태 필터링")
+	void getOrdersByMember_inProgress_success() {
+		Order order = mock(Order.class);
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Order> mockPage = new PageImpl<>(List.of(order));
+
+		when(orderRepository.findByMember_MemberIdAndStatusIn(eq(1L), anyList(), eq(pageable))).thenReturn(mockPage);
+
+		Page<Order> result = orderService.getOrdersByMember(1L, "inProgress", pageable);
+
+		assertThat(result.getContent()).containsExactly(order);
+	}
+
+	@Test
+	@DisplayName("회원 주문 조회 성공 - canceled 상태 필터링")
+	void getOrdersByMember_canceled_success() {
+		Order order = mock(Order.class);
+		Pageable pageable = PageRequest.of(0, 10);
+		Page<Order> mockPage = new PageImpl<>(List.of(order));
+
+		when(orderRepository.findByMember_MemberIdAndStatusIn(eq(1L), anyList(), eq(pageable))).thenReturn(mockPage);
+
+		Page<Order> result = orderService.getOrdersByMember(1L, "canceled", pageable);
+
+		assertThat(result.getContent()).containsExactly(order);
+	}
+
+	@Test
 	@DisplayName("주문 상세 조회 성공")
 	void getOrderDetail_success() {
 		Order order = mock(Order.class);

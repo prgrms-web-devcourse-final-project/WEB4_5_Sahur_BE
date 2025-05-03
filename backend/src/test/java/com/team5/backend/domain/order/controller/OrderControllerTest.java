@@ -154,6 +154,35 @@ class OrderControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/orders/members/{memberId} - 회원 주문 전체 조회")
+    void getMemberOrders_all_success() throws Exception {
+        Order order = mockOrder();
+
+        Mockito.when(orderService.getOrdersByMember(eq(1L), eq(null), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(order)));
+
+        mockMvc.perform(get("/api/v1/orders/members/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("200"))
+            .andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/orders/members/{memberId}?status=inProgress - 상태 필터링 조회")
+    void getMemberOrders_status_inProgress_success() throws Exception {
+        Order order = mockOrder();
+
+        Mockito.when(orderService.getOrdersByMember(eq(1L), eq("inProgress"), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(order)));
+
+        mockMvc.perform(get("/api/v1/orders/members/1")
+                .param("status", "inProgress"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("200"))
+            .andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."));
+    }
+
+    @Test
     @DisplayName("GET /api/v1/orders/{id} - 주문 상세 조회 성공")
     void getOrderDetail_success() throws Exception {
         Order order = mockOrder();
