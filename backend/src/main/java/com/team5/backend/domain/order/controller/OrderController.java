@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.service.OrderService;
 import com.team5.backend.global.dto.RsData;
 
@@ -30,11 +31,13 @@ public class OrderController {
 
 	@GetMapping
 	public RsData<Page<OrderListResDto>> getOrders(
+		@RequestParam(required = false) Long search,
+		@RequestParam(required = false) OrderStatus status,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<OrderListResDto> orderDtos = orderService.getOrders(pageable)
-			.map(OrderListResDto::from);
-		return new RsData<>("200", "주문 목록 조회에 성공했습니다.", orderDtos);
+		Page<Order> orders = orderService.getOrders(search, status, pageable);
+		Page<OrderListResDto> dtoPage = orders.map(OrderListResDto::from);
+		return new RsData<>("200", "주문 목록 조회에 성공했습니다.", dtoPage);
 	}
 
 	@GetMapping("/{orderId}")
