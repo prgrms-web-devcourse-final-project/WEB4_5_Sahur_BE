@@ -16,7 +16,6 @@ import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.admin.repository.GroupBuyRequestRepository;
 import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
@@ -55,7 +54,6 @@ public class BaseInitData implements CommandLineRunner {
     private final PaymentRepository paymentRepository;
     private final ReviewRepository reviewRepository;
     private final GroupBuyRepository groupBuyRepository;
-    private final GroupBuyRequestRepository groupBuyRequestRepository;
     private final NotificationRepository notificationRepository;
     private final DeliveryRepository deliveryRepository;
     private final DibsRepository dibsRepository;
