@@ -14,7 +14,6 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.admin.entity.GroupBuyRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.repository.GroupBuyRequestRepository;
