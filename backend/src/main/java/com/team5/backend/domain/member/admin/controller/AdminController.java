@@ -1,6 +1,5 @@
 package com.team5.backend.domain.member.admin.controller;
 
-import com.team5.backend.domain.member.admin.dto.GroupBuyRequestResDto;
 import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.service.AdminService;
@@ -10,7 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -27,13 +29,6 @@ public class AdminController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/groupBuyRequest/list")
-    public ResponseEntity<Page<GroupBuyRequestResDto>> getGroupBuyRequests(
-            @PageableDefault(size = 5) Pageable pageable
-    ) {
-        Page<GroupBuyRequestResDto> result = adminService.getAllGroupBuyRequests(pageable);
-        return ResponseEntity.ok(result);
-    }
 
     private final AdminService adminService;
 }
