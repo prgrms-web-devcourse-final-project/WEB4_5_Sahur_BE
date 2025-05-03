@@ -59,8 +59,8 @@ public class OrderController {
 
 	@PatchMapping("/{orderId}")
 	public RsData<OrderUpdateResDto> updateOrder(
-			@PathVariable Long orderId,
-			@RequestBody OrderUpdateReqDto request
+		@PathVariable Long orderId,
+		@RequestBody OrderUpdateReqDto request
 	) {
 		Order order = orderService.updateOrder(orderId, request);
 		return new RsData<>("200", "주문 정보가 수정되었습니다.", OrderUpdateResDto.from(order));
@@ -68,8 +68,8 @@ public class OrderController {
 
 	@DeleteMapping("/{orderId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void cancelOrder(@PathVariable Long orderId) {
+	public RsData<Void> cancelOrder(@PathVariable Long orderId) {
 		orderService.cancelOrder(orderId);
+		return new RsData<>("204", "주문이 성공적으로 취소되었습니다.");
 	}
-
 }
