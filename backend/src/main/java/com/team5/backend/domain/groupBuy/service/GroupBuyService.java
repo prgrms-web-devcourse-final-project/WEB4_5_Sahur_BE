@@ -1,7 +1,5 @@
 package com.team5.backend.domain.groupBuy.service;
 
-import com.team5.backend.domain.category.entity.Category;
-import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
@@ -25,7 +23,6 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
     private final HistoryRepository historyRepository;
     // TODO : 커스텀 예외 처리 적용 필요
 
@@ -53,12 +50,9 @@ public class GroupBuyService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
 
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
-                .category(category)
                 .targetParticipants(request.getTargetParticipants())
                 .currentParticipantCount(0)
                 .round(request.getRound())
