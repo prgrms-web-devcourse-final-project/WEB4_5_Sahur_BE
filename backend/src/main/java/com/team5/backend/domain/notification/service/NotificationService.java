@@ -9,6 +9,7 @@ import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.NotificationErrorCode;
+import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,26 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
+    private final JwtUtil jwtUtil;
 
     /**
      * 알림 생성
      */
     @Transactional
-    public NotificationResDto createNotification(NotificationCreateReqDto request) {
-        Member member = memberRepository.findById(request.getMemberId())
+    public NotificationResDto createNotification(NotificationCreateReqDto request, String token) {
+        String rawToken = token.replace("Bearer ", "");
+
+        if (jwtUtil.isTokenBlacklisted(rawToken)) {
+            throw new CustomException(NotificationErrorCode.TOKEN_BLACKLISTED);
+        }
+
+        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
+            throw new CustomException(NotificationErrorCode.TOKEN_INVALID);
+        }
+
+        Long memberId = jwtUtil.extractMemberId(rawToken);
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND));
 
         Notification notification = Notification.builder()
@@ -108,9 +122,21 @@ public class NotificationService {
     }
 
     /**
-     * 특정 회원의 알림 목록 조회
+     * 특정 회원의 알림 목록 조회 (토큰 기반)
      */
-    public Page<NotificationResDto> getNotificationsByMemberId(Long memberId, Pageable pageable) {
+    public Page<NotificationResDto> getNotificationsByMemberToken(String token, Pageable pageable) {
+        String rawToken = token.replace("Bearer ", "");
+
+        if (jwtUtil.isTokenBlacklisted(rawToken)) {
+            throw new CustomException(NotificationErrorCode.TOKEN_BLACKLISTED);
+        }
+
+        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
+            throw new CustomException(NotificationErrorCode.TOKEN_INVALID);
+        }
+
+        Long memberId = jwtUtil.extractMemberId(rawToken);
+
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND);
         }
