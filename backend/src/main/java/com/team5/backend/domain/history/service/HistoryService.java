@@ -86,9 +86,10 @@ public class HistoryService {
     /**
      * 구매 이력 단건 조회
      */
-    public Optional<HistoryResDto> getHistoryById(Long id) {
+    public HistoryResDto getHistoryById(Long id) {
         return historyRepository.findById(id)
-                .map(HistoryResDto::fromEntity);
+                .map(HistoryResDto::fromEntity)
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
     }
 
     /**

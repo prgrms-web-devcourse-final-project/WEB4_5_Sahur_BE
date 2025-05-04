@@ -49,9 +49,8 @@ public class HistoryController {
     public RsData<HistoryResDto> getHistoryById(
             @Parameter(description = "구매 이력 ID") @PathVariable Long id) {
 
-        return historyService.getHistoryById(id)
-                .map(data -> RsDataUtil.success("구매 이력 조회 성공", data))
-                .orElseThrow(() -> new RuntimeException("해당 구매 이력을 찾을 수 없습니다."));
+        HistoryResDto dto = historyService.getHistoryById(id);
+        return RsDataUtil.success("구매 이력 조회 성공", dto);
     }
 
     @Operation(summary = "구매 이력 수정", description = "구매 이력의 writable 값을 수정합니다.")
