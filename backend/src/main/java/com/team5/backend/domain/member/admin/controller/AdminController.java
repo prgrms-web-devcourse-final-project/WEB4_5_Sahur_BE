@@ -1,6 +1,5 @@
 package com.team5.backend.domain.member.admin.controller;
 
-import com.team5.backend.domain.member.admin.dto.GroupBuyRequestResDto;
 import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.service.AdminService;
@@ -24,14 +23,6 @@ public class AdminController {
             @RequestParam(value = "status", required = false) ProductRequestStatus status
     ) {
         Page<ProductRequestResDto> result = adminService.getProductRequests(pageable, status);
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/groupBuyRequest/list")
-    public ResponseEntity<Page<GroupBuyRequestResDto>> getGroupBuyRequests(
-            @PageableDefault(size = 5) Pageable pageable
-    ) {
-        Page<GroupBuyRequestResDto> result = adminService.getAllGroupBuyRequests(pageable);
         return ResponseEntity.ok(result);
     }
 

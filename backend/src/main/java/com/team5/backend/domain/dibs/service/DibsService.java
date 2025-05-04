@@ -9,6 +9,8 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,32 +32,34 @@ public class DibsService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
+        dibsRepository.findByProduct_ProductIdAndMember_MemberId(product.getProductId(), member.getMemberId())
+                .ifPresent(dibs -> { throw new IllegalStateException("이미 찜한 상품입니다."); });
+
         Dibs dibs = Dibs.builder()
                 .member(member)
                 .product(product)
-                .status(true)
                 .build();
 
         Dibs saved = dibsRepository.save(dibs);
-        return toResponse(saved);
+        return DibsResDto.fromEntity(saved);
     }
 
-    public List<DibsResDto> getAllDibs() {
-        return dibsRepository.findAll().stream()
-                .map(this::toResponse)
+    public Page<DibsResDto> getPagedDibsByMemberId(Long memberId, Pageable pageable) {
+        return dibsRepository.findByMember_MemberId(memberId, pageable)
+                .map(DibsResDto::fromEntity);
+    }
+
+    public List<DibsResDto> getAllDibsByMemberId(Long memberId) {
+        return dibsRepository.findByMember_MemberId(memberId).stream()
+                .map(DibsResDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    public void deleteDibs(Long dibsId) {
-        dibsRepository.deleteById(dibsId);
+    public void deleteByProductAndMember(Long productId, Long memberId) {
+        Dibs dibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(productId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 관심상품이 존재하지 않습니다."));
+        dibsRepository.delete(dibs);
     }
 
-    private DibsResDto toResponse(Dibs dibs) {
-        return DibsResDto.builder()
-                .dibsId(dibs.getDibsId())
-                .memberId(dibs.getMember().getMemberId())
-                .productId(dibs.getProduct().getProductId())
-                .status(dibs.getStatus())
-                .build();
-    }
+
 }

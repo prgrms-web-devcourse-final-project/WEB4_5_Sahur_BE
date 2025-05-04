@@ -1,0 +1,76 @@
+.floatingBody {
+  position: absolute;
+  top: 100%; /* 헤더 아래에 붙게 */
+  left: 0;
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.category {
+  color: var(--Gray-300, #676e76);
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 21px;
+  //text-align: center;
+  cursor: pointer;
+}
+
+:global(.accordion-button::after) {
+  margin-left: 1rem !important; /* 원하는 간격으로 조절 */
+}
+
+/* 아코디언이 열려 있거나 닫혀 있든 항상 동일한 스타일로 만들기 */
+:global(.accordion-button) {
+  background-color: transparent !important;
+  padding: 0.5rem 1rem !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+/* 열렸을 때도 동일하게 유지 */
+:global(.accordion-button:not(.collapsed)) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+/* 닫혔을 때도 동일하게 유지 */
+:global(.accordion-button.collapsed) {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+.shoppingKeywordText {
+  font-family: Inter;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  cursor: pointer;
+}
+
+small {
+  margin: 0;
+  text-align: center;
+  color: var(--Gray-300, #676e76);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.keywordBold {
+  font-family: Inter;
+  font-weight: 1000;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}

@@ -14,14 +14,12 @@ public class DibsResDto {
     private Long dibsId;
     private Long memberId;
     private Long productId;
-    private Boolean status;
 
     public static DibsResDto fromEntity(Dibs dibs) {
         return DibsResDto.builder()
                 .dibsId(dibs.getDibsId())
                 .memberId(dibs.getMember().getMemberId())
                 .productId(dibs.getProduct().getProductId())
-                .status(dibs.getStatus())
                 .build();
     }
 }
