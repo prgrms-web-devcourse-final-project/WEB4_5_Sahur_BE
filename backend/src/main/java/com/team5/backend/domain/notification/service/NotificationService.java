@@ -12,9 +12,9 @@ import com.team5.backend.global.exception.code.NotificationErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,7 @@ public class NotificationService {
     /**
      * 알림 생성
      */
+    @Transactional
     public NotificationResDto createNotification(NotificationCreateReqDto request) {
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND));
@@ -64,10 +65,10 @@ public class NotificationService {
         return NotificationResDto.fromEntity(notification);
     }
 
-
     /**
      * 알림 전체 업데이트
      */
+    @Transactional
     public NotificationResDto updateNotification(Long id, NotificationUpdateReqDto request) {
         return notificationRepository.findById(id)
                 .map(existing -> {
@@ -84,6 +85,7 @@ public class NotificationService {
     /**
      * 알림 삭제
      */
+    @Transactional
     public void deleteNotification(Long id) {
         if (!notificationRepository.existsById(id)) {
             throw new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND);
@@ -94,6 +96,7 @@ public class NotificationService {
     /**
      * 알림 읽음 상태 PATCH
      */
+    @Transactional
     public NotificationResDto patchNotification(Long id) {
         return notificationRepository.findById(id)
                 .map(existing -> {
