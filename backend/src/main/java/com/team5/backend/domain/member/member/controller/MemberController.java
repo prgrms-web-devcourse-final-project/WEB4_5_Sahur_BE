@@ -122,9 +122,19 @@ public class MemberController {
     // 비밀번호 재설정
     @PatchMapping("/members/password/reset")
     public RsData<PasswordResetResDto> resetPassword(@Valid @RequestBody PasswordResetReqDto passwordResetReqDto) {
+
         PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
 
         if (response.isSuccess()) return new RsData<>("200", "비밀번호가 성공적으로 재설정되었습니다.", response);
         else return new RsData<>("400", "비밀번호 재설정에 실패했습니다.", response);
+    }
+
+    @PostMapping("/members/nickname/check")
+    public RsData<NicknameCheckResDto> checkNicknameDuplicate(@RequestBody NicknameCheckReqDto nicknameCheckReqDto) {
+
+        NicknameCheckResDto response = memberService.checkNicknameDuplicate(nicknameCheckReqDto.getNickname());
+
+        if (response.isExists()) return new RsData<>("400", "이미 사용 중인 닉네임입니다.", response);
+        else return new RsData<>("200", "사용 가능한 닉네임입니다.", response);
     }
 }

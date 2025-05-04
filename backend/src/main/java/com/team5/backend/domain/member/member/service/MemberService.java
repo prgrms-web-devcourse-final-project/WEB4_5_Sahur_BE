@@ -203,4 +203,13 @@ public class MemberService {
                 .message("비밀번호가 성공적으로 재설정되었습니다.")
                 .build();
     }
+
+    public NicknameCheckResDto checkNicknameDuplicate(String nickname) {
+
+        boolean exists = memberRepository.existsByNickname(nickname);
+
+        return NicknameCheckResDto.builder()
+                .exists(exists)
+                .build();
+    }
 }
