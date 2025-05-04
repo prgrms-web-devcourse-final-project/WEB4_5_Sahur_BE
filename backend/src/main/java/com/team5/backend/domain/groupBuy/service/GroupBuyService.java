@@ -97,10 +97,12 @@ public class GroupBuyService {
     /**
      * ID로 공동구매 단건 조회
      */
-    public Optional<GroupBuyResDto> getGroupBuyById(Long id) {
+    public GroupBuyResDto getGroupBuyById(Long id) {
         return groupBuyRepository.findById(id)
-                .map(GroupBuyResDto::fromEntity);
+                .map(GroupBuyResDto::fromEntity)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
+
 
     /**
      * 공동구매 전체 업데이트
