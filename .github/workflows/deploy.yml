@@ -1,0 +1,190 @@
+name: deploy
+
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - 'backend/src/**'
+      - 'backend/build.gradle'
+      - 'backend/settings.gradle'
+      - 'backend/Dockerfile'
+    branches:
+      - deploy
+
+jobs:
+  makeTagAndRelease:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.create_tag.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Tag
+        id: create_tag
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.create_tag.outputs.new_tag }}
+          release_name: Release ${{ steps.create_tag.outputs.new_tag }}
+          body: ${{ steps.create_tag.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+  buildImageAndPush:
+    name: 도커 이미지 빌드와 푸시
+    needs: makeTagAndRelease
+    runs-on: ubuntu-latest
+    outputs:
+      owner_lc: ${{ steps.export_owner.outputs.owner_lc }}
+      image_name: ${{ steps.export_image.outputs.image_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: application-secret.yml 생성
+        env:
+          APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
+        run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
+
+      - name: Docker Buildx 설치
+        uses: docker/setup-buildx-action@v2
+
+      - name: 레지스트리 로그인
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: set lower case owner name
+        id: export_owner
+        run: |
+          OWNER_LC="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "owner_lc=$OWNER_LC" >> $GITHUB_OUTPUT
+
+      - name: export image name
+        id: export_image
+        run: echo "image_name=tung_app" >> $GITHUB_OUTPUT
+
+      - name: 빌드 앤 푸시
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ steps.export_owner.outputs.owner_lc }}/${{ steps.export_image.outputs.image_name }}:${{ needs.makeTagAndRelease.outputs.tag_name }},
+            ghcr.io/${{ steps.export_owner.outputs.owner_lc }}/${{ steps.export_image.outputs.image_name }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [buildImageAndPush]
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 인스턴스 ID 가져오기
+        id: get_instance_id
+        run: |
+          INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=team05-main" "Name=instance-state-name,Values=running" --query "Reservations[].Instances[].InstanceId" --output text)
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+          echo $INSTANCE_ID
+      - name: AWS SSM Send-Command
+        uses: peterkimzz/aws-ssm-send-command@master
+        id: ssm
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          instance-ids: ${{ env.INSTANCE_ID }}
+          working-directory: /
+          comment: Deploy
+          command: |
+            # 공통 변수
+            IMAGE="ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest"
+            NETWORK="common"
+            HEALTH_ENDPOINT="/actuator/health"
+            TIMEOUT=60
+
+            # 현재 실행 중인 컨테이너 확인
+            if docker ps --format '{{.Names}}' | grep -q "app1_1"; then
+              CURRENT="app1_1"
+              NEXT="app1_2"
+              CURRENT_PORT=8080
+              NEXT_PORT=8081
+            else
+              CURRENT="app1_2"
+              NEXT="app1_1"
+              CURRENT_PORT=8081
+              NEXT_PORT=8080
+            fi
+
+            # 다음 컨테이너 실행
+            echo "Starting new container: $NEXT on port $NEXT_PORT..."
+            docker pull "$IMAGE"
+            docker stop "$NEXT" 2>/dev/null
+            docker rm "$NEXT" 2>/dev/null
+            docker run -d \
+              --network $NETWORK \
+              --name "$NEXT" \
+              -p "$NEXT_PORT":8080 \
+              "$IMAGE"
+
+            # 헬스체크 대기
+            echo "Waiting for health check..."
+            START_TIME=$(date +%s)
+            while true; do
+              CONTENT=$(curl -s http://localhost:$NEXT_PORT$HEALTH_ENDPOINT)
+
+              if [[ "$CONTENT" == *'"status":"UP"'* ]]; then
+                echo "✅ $NEXT is UP!"
+                break
+              fi
+
+              ELAPSED_TIME=$(( $(date +%s) - START_TIME ))
+              if [[ $ELAPSED_TIME -ge $TIMEOUT ]]; then
+                echo "❌ Timeout: $NEXT did not start in $TIMEOUT seconds."
+                docker stop "$NEXT"
+                docker rm "$NEXT"
+                exit 1
+              fi
+
+              echo "⏳ Waiting for $NEXT to be UP..."
+              sleep 5
+            done
+
+            # 기존 컨테이너 중지 및 제거
+            echo "Stopping old container: $CURRENT"
+            docker stop "$CURRENT" 2>/dev/null
+            docker rm "$CURRENT" 2>/dev/null
+
+            # dangling image 제거
+            docker rmi $(docker images -f "dangling=true" -q) 2>/dev/null
+
+            echo "✅ Deployment complete. Running container: $NEXT on port $NEXT_PORT"
+
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: [ buildImageAndPush ]
+#    steps:
+#      - name: AWS SSM Send-Command
+#        uses: peterkimzz/aws-ssm-send-command@master
+#        id: ssm
+#        with:
+#          aws-region: ${{ secrets.AWS_REGION }}
+#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#          instance-ids: "i-0ed9e6ec1efa96acc"
+#          working-directory: /
+#          comment: Deploy
+#          command: |
+#            docker pull ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
+#            docker stop app1 2>/dev/null || true && \
+#            docker rm app1 2>/dev/null || true && \
+#            docker run -d --name app1 --network common -p 8080:8080 ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
+#            docker rmi $(docker images -f "dangling=true" -q) || true
