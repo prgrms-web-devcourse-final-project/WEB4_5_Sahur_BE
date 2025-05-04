@@ -12,12 +12,16 @@ import com.team5.backend.domain.review.dto.ReviewResDto;
 import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.ReviewErrorCode;
+import com.team5.backend.global.exception.code.HistoryErrorCode;
+import com.team5.backend.global.exception.code.ProductErrorCode;
+import com.team5.backend.global.exception.code.MemberErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,19 +31,17 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
-    // TODO : 커스텀 예외 처리 적용 필요
-
 
     /**
      * 리뷰 생성
      */
     public ReviewResDto createReview(ReviewCreateReqDto request) {
         Member member = memberRepository.findById(request.getMemberId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
         History history = historyRepository.findById(request.getHistoryId())
-                .orElseThrow(() -> new RuntimeException("History not found"));
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
 
         Review review = Review.builder()
                 .member(member)
@@ -70,9 +72,10 @@ public class ReviewService {
     /**
      * 리뷰 ID로 단건 조회
      */
-    public Optional<ReviewResDto> getReviewById(Long id) {
+    public ReviewResDto getReviewById(Long id) {
         return reviewRepository.findById(id)
-                .map(ReviewResDto::fromEntity);
+                .map(ReviewResDto::fromEntity)
+                .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
     }
 
     /**
@@ -87,7 +90,7 @@ public class ReviewService {
                     Review updated = reviewRepository.save(existing);
                     return ReviewResDto.fromEntity(updated);
                 })
-                .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
+                .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
     }
 
     /**
@@ -109,7 +112,7 @@ public class ReviewService {
                     Review updatedReview = reviewRepository.save(existingReview);
                     return ReviewResDto.fromEntity(updatedReview);
                 })
-                .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
+                .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
     }
 
     /**
@@ -117,24 +120,18 @@ public class ReviewService {
      */
     public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found with id " + id));
+                .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
         review.getHistory().setWritable(true);
         reviewRepository.deleteById(id);
     }
 
     /**
      * 특정 상품(productId)의 리뷰 목록 조회
-     * @param productId 상품 ID
-     * @param pageable 페이징 및 정렬 정보
-     * @param sortBy "latest" 또는 "rate"
      */
     public Page<ReviewResDto> getReviewsByProductId(Long productId, Pageable pageable, String sortBy) {
-        Sort sort;
-        if ("rate".equalsIgnoreCase(sortBy)) {
-            sort = Sort.by(Sort.Order.desc("rate")); // 평점순
-        } else {
-            sort = Sort.by(Sort.Order.desc("createdAt")); // 기본은 최신순
-        }
+        Sort sort = "rate".equalsIgnoreCase(sortBy)
+                ? Sort.by(Sort.Order.desc("rate"))
+                : Sort.by(Sort.Order.desc("createdAt"));
 
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
@@ -144,8 +141,6 @@ public class ReviewService {
 
     /**
      * 특정 회원(memberId)이 작성한 리뷰 목록 조회
-     * @param memberId 회원 ID
-     * @param pageable 페이징 정보 (기본 정렬: 최신순)
      */
     public Page<ReviewResDto> getReviewsByMemberId(Long memberId, Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
