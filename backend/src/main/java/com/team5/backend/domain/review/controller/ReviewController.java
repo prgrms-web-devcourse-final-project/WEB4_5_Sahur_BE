@@ -25,15 +25,19 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 생성", description = "회원이 특정 상품에 대해 리뷰를 작성합니다.")
     @PostMapping
-    public RsData<ReviewResDto> createReview(@RequestBody @Valid ReviewCreateReqDto request) {
-        ReviewResDto response = reviewService.createReview(request);
+    public RsData<ReviewResDto> createReview(
+            @RequestHeader("Authorization") String token,
+            @RequestBody @Valid ReviewCreateReqDto request
+    ) {
+        ReviewResDto response = reviewService.createReview(request, token);
         return RsDataUtil.success("리뷰 생성 성공", response);
     }
 
     @Operation(summary = "전체 리뷰 조회", description = "모든 리뷰를 최신순으로 페이징 조회합니다.")
     @GetMapping
     public RsData<Page<ReviewResDto>> getAllReviews(
-            @Parameter(description = "페이징 정보") @PageableDefault(size = 5) Pageable pageable) {
+            @Parameter(description = "페이징 정보") @PageableDefault(size = 5) Pageable pageable
+    ) {
         Page<ReviewResDto> response = reviewService.getAllReviews(pageable);
         return RsDataUtil.success("리뷰 목록 조회 성공", response);
     }
@@ -49,7 +53,8 @@ public class ReviewController {
     @PutMapping("/{id}")
     public RsData<ReviewResDto> updateReview(
             @PathVariable Long id,
-            @RequestBody @Valid ReviewUpdateReqDto request) {
+            @RequestBody @Valid ReviewUpdateReqDto request
+    ) {
         ReviewResDto response = reviewService.updateReview(id, request);
         return RsDataUtil.success("리뷰 수정 성공", response);
     }
@@ -58,7 +63,8 @@ public class ReviewController {
     @PatchMapping("/{id}")
     public RsData<ReviewResDto> patchReview(
             @PathVariable Long id,
-            @RequestBody ReviewPatchReqDto request) {
+            @RequestBody ReviewPatchReqDto request
+    ) {
         ReviewResDto response = reviewService.patchReview(id, request);
         return RsDataUtil.success("리뷰 수정 성공", response);
     }
@@ -75,17 +81,19 @@ public class ReviewController {
     public RsData<Page<ReviewResDto>> getReviewsByProductId(
             @PathVariable Long productId,
             @RequestParam(defaultValue = "latest") String sortBy,
-            @PageableDefault(size = 5) Pageable pageable) {
+            @PageableDefault(size = 5) Pageable pageable
+    ) {
         Page<ReviewResDto> response = reviewService.getReviewsByProductId(productId, pageable, sortBy);
         return RsDataUtil.success("상품 리뷰 조회 성공", response);
     }
 
-    @Operation(summary = "회원별 리뷰 조회", description = "회원 ID로 작성한 리뷰들을 최신순으로 조회합니다.")
-    @GetMapping("/member/{memberId}/list")
-    public RsData<Page<ReviewResDto>> getReviewsByMemberId(
-            @PathVariable Long memberId,
-            @PageableDefault(size = 5) Pageable pageable) {
-        Page<ReviewResDto> response = reviewService.getReviewsByMemberId(memberId, pageable);
-        return RsDataUtil.success("회원 리뷰 조회 성공", response);
+    @Operation(summary = "내 리뷰 조회", description = "현재 로그인한 회원이 작성한 리뷰를 최신순으로 조회합니다.")
+    @GetMapping("/my")
+    public RsData<Page<ReviewResDto>> getMyReviews(
+            @RequestHeader("Authorization") String token,
+            @PageableDefault(size = 5) Pageable pageable
+    ) {
+        Page<ReviewResDto> response = reviewService.getReviewsByToken(token, pageable);
+        return RsDataUtil.success("내 리뷰 조회 성공", response);
     }
 }
