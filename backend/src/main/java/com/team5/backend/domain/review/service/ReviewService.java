@@ -20,6 +20,7 @@ import com.team5.backend.global.exception.code.MemberErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -35,6 +36,7 @@ public class ReviewService {
     /**
      * 리뷰 생성
      */
+    @Transactional
     public ReviewResDto createReview(ReviewCreateReqDto request) {
         Member member = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -81,6 +83,7 @@ public class ReviewService {
     /**
      * 리뷰 수정 (전체 필드)
      */
+    @Transactional
     public ReviewResDto updateReview(Long id, ReviewUpdateReqDto request) {
         return reviewRepository.findById(id)
                 .map(existing -> {
@@ -96,6 +99,7 @@ public class ReviewService {
     /**
      * 리뷰 수정 (일부 필드)
      */
+    @Transactional
     public ReviewResDto patchReview(Long id, ReviewPatchReqDto request) {
         return reviewRepository.findById(id)
                 .map(existingReview -> {
@@ -118,6 +122,7 @@ public class ReviewService {
     /**
      * 리뷰 삭제
      */
+    @Transactional
     public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
