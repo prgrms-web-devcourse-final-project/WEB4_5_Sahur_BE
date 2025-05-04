@@ -1,5 +1,7 @@
 package com.team5.backend.domain.review.service;
 
+import com.team5.backend.domain.history.entity.History;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
@@ -25,6 +27,7 @@ class ReviewServiceTest {
     @Mock private ReviewRepository reviewRepository;
     @Mock private MemberRepository memberRepository;
     @Mock private ProductRepository productRepository;
+    @Mock private HistoryRepository historyRepository;
     @Mock private JwtUtil jwtUtil;
 
     @InjectMocks
@@ -33,6 +36,8 @@ class ReviewServiceTest {
     private Member member;
     private Product product;
     private Review review;
+    private History history;
+
 
     private final String token = "Bearer valid.token.here";
     private final String rawToken = "valid.token.here";
@@ -43,18 +48,20 @@ class ReviewServiceTest {
 
         member = Member.builder().memberId(1L).email("test@team5.com").nickname("테스터").build();
         product = Product.builder().productId(1L).title("테스트상품").build();
+        history = History.builder().historyId(1L).member(member).product(product).build(); // history 추가
 
         review = Review.builder()
                 .reviewId(1L)
                 .member(member)
                 .product(product)
+                .history(history) // 여기 추가
                 .comment("좋아요")
                 .rate(5)
                 .imageUrl("url")
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        // 토큰 mock 설정
+        // JwtUtil mock 설정
         when(jwtUtil.isTokenBlacklisted(rawToken)).thenReturn(false);
         when(jwtUtil.validateAccessTokenInRedis(eq("test@team5.com"), eq(rawToken))).thenReturn(true);
         when(jwtUtil.extractEmail(rawToken)).thenReturn("test@team5.com");
@@ -66,6 +73,7 @@ class ReviewServiceTest {
     void createReview() {
         ReviewCreateReqDto dto = ReviewCreateReqDto.builder()
                 .productId(1L)
+                .historyId(1L) // ✅ 여기 추가
                 .comment("좋아요")
                 .rate(5)
                 .imageUrl("url")
@@ -73,6 +81,7 @@ class ReviewServiceTest {
 
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(historyRepository.findById(1L)).thenReturn(Optional.of(history)); // ✅ mock 설정
         when(reviewRepository.save(any())).thenReturn(review);
 
         ReviewResDto result = reviewService.createReview(dto, token);
@@ -80,6 +89,7 @@ class ReviewServiceTest {
         assertEquals("좋아요", result.getComment());
         verify(reviewRepository).save(any());
     }
+
 
     @Test
     @DisplayName("전체 리뷰 조회")
@@ -147,14 +157,29 @@ class ReviewServiceTest {
     @Test
     @DisplayName("상품 ID로 리뷰 조회 - 최신순 정렬")
     void getReviewsByProductId_latestSorted() {
-        Review r1 = Review.builder().reviewId(1L).product(product).member(member).rate(3).comment("첫째")
-                .createdAt(LocalDateTime.now().minusDays(3)).build();
-        Review r2 = Review.builder().reviewId(2L).product(product).member(member).rate(4).comment("둘째")
-                .createdAt(LocalDateTime.now().minusDays(2)).build();
-        Review r3 = Review.builder().reviewId(3L).product(product).member(member).rate(5).comment("셋째")
-                .createdAt(LocalDateTime.now().minusDays(1)).build();
+        History history1 = History.builder().historyId(201L).build();
+        History history2 = History.builder().historyId(202L).build();
+        History history3 = History.builder().historyId(203L).build();
 
-        Page<Review> page = new PageImpl<>(List.of(r3, r2, r1));
+        Review r1 = Review.builder()
+                .reviewId(1L).product(product).member(member).rate(3).comment("첫째")
+                .createdAt(LocalDateTime.now().minusDays(3))
+                .history(history1)
+                .build();
+
+        Review r2 = Review.builder()
+                .reviewId(2L).product(product).member(member).rate(4).comment("둘째")
+                .createdAt(LocalDateTime.now().minusDays(2))
+                .history(history2)
+                .build();
+
+        Review r3 = Review.builder()
+                .reviewId(3L).product(product).member(member).rate(5).comment("셋째")
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .history(history3)
+                .build();
+
+        Page<Review> page = new PageImpl<>(List.of(r3, r2, r1)); // 최신순
         Pageable pageable = PageRequest.of(0, 5);
 
         when(reviewRepository.findByProductProductId(eq(1L), any(Pageable.class))).thenReturn(page);
@@ -162,16 +187,29 @@ class ReviewServiceTest {
         Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, "latest");
 
         assertEquals("셋째", result.getContent().get(0).getComment());
+        assertEquals("둘째", result.getContent().get(1).getComment());
+        assertEquals("첫째", result.getContent().get(2).getComment());
     }
+
 
     @Test
     @DisplayName("상품 ID로 리뷰 조회 - 평점순 정렬")
     void getReviewsByProductId_rateSorted() {
-        Review r1 = Review.builder().reviewId(1L).product(product).member(member).rate(2).comment("낮음").build();
-        Review r2 = Review.builder().reviewId(2L).product(product).member(member).rate(4).comment("중간").build();
-        Review r3 = Review.builder().reviewId(3L).product(product).member(member).rate(5).comment("높음").build();
+        History history1 = History.builder().historyId(101L).build();
+        History history2 = History.builder().historyId(102L).build();
+        History history3 = History.builder().historyId(103L).build();
 
-        Page<Review> page = new PageImpl<>(List.of(r3, r2, r1));
+        Review r1 = Review.builder()
+                .reviewId(1L).product(product).member(member).history(history1)
+                .rate(2).comment("낮음").build();
+        Review r2 = Review.builder()
+                .reviewId(2L).product(product).member(member).history(history2)
+                .rate(4).comment("중간").build();
+        Review r3 = Review.builder()
+                .reviewId(3L).product(product).member(member).history(history3)
+                .rate(5).comment("높음").build();
+
+        Page<Review> page = new PageImpl<>(List.of(r3, r2, r1)); // 평점순 내림차순
         Pageable pageable = PageRequest.of(0, 5);
 
         when(reviewRepository.findByProductProductId(eq(1L), any(Pageable.class))).thenReturn(page);
@@ -179,7 +217,9 @@ class ReviewServiceTest {
         Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, "rate");
 
         assertEquals(5, result.getContent().get(0).getRate());
+        assertEquals("높음", result.getContent().get(0).getComment());
     }
+
 
     @Test
     @DisplayName("토큰 기반 회원 리뷰 조회")
