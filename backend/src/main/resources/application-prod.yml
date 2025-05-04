@@ -1,5 +1,4 @@
 spring:
-
   datasource:
     url: jdbc:mysql://${custom.db.host}:3306/tung_db
     username: root
