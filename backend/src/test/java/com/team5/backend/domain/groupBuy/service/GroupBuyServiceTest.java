@@ -145,10 +145,10 @@ class GroupBuyServiceTest {
     void getGroupBuyById_shouldReturnDtoWhenFound() {
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuys.get(0)));
 
-        Optional<GroupBuyResDto> result = groupBuyService.getGroupBuyById(1L);
+        GroupBuyResDto result = groupBuyService.getGroupBuyById(1L);
 
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getGroupBuyId());
+        assertTrue(result instanceof GroupBuyResDto);
+        assertEquals(1L, result.getGroupBuyId());
     }
 
     @Test
