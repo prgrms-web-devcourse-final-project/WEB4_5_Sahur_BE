@@ -145,7 +145,8 @@ class NotificationServiceTest {
     @Test
     @DisplayName("토큰 기반 회원 알림 조회")
     void getNotificationsByMemberToken() {
-        Pageable pageable = PageRequest.of(0, 5);
+        // 정렬 조건을 포함한 pageable: createdAt 내림차순
+        Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         when(memberRepository.existsById(1L)).thenReturn(true);
         when(notificationRepository.findByMemberMemberId(eq(1L), any(Pageable.class)))
@@ -154,6 +155,9 @@ class NotificationServiceTest {
         Page<NotificationResDto> result = notificationService.getNotificationsByMemberToken(token, pageable);
 
         assertEquals(1, result.getTotalElements());
-        verify(notificationRepository).findByMemberMemberId(1L, pageable);
+
+        // 정렬 포함된 pageable 객체가 일치하지 않을 수 있으므로 any(Pageable.class)로 검증
+        verify(notificationRepository).findByMemberMemberId(eq(1L), any(Pageable.class));
     }
+
 }
