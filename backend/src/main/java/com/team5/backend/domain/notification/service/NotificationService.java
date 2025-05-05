@@ -62,6 +62,7 @@ public class NotificationService {
     /**
      * 전체 알림 목록 조회
      */
+    @Transactional(readOnly = true)
     public Page<NotificationResDto> getAllNotifications(Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -73,6 +74,7 @@ public class NotificationService {
     /**
      * 알림 단건 조회
      */
+    @Transactional(readOnly = true)
     public NotificationResDto getNotificationById(Long id) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
@@ -124,6 +126,7 @@ public class NotificationService {
     /**
      * 특정 회원의 알림 목록 조회 (토큰 기반)
      */
+    @Transactional(readOnly = true)
     public Page<NotificationResDto> getNotificationsByMemberToken(String token, Pageable pageable) {
         String rawToken = token.replace("Bearer ", "");
 
