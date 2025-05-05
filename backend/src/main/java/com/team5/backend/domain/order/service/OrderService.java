@@ -57,7 +57,7 @@ public class OrderService {
 		}
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public Page<Order> getOrdersByMember(Long memberId, String status, Pageable pageable) {
 		List<OrderStatus> statusList = null;
 
@@ -80,6 +80,7 @@ public class OrderService {
 			.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 	}
 
+	@Transactional
 	public Order updateOrder(Long orderId, OrderUpdateReqDto request) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
