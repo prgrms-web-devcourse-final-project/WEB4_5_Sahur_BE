@@ -26,10 +26,10 @@ jobs:
 
       - name: 🔐 Grant execute permission for gradlew
         run: chmod +x ./gradlew
-        working-directory: backend/project2/
+        working-directory: backend
         shell: bash
 
       - name: 🛠 Build with Gradle with test profile
         run: sudo ./gradlew build -Pprofile=test
-        working-directory: backend/project2/
+        working-directory: backend
         shell: bash
