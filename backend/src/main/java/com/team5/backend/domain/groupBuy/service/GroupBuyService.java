@@ -1,7 +1,5 @@
 package com.team5.backend.domain.groupBuy.service;
 
-import com.team5.backend.domain.category.entity.Category;
-import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
@@ -29,7 +27,6 @@ public class GroupBuyService {
 
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
-    private final CategoryRepository categoryRepository;
     private final HistoryRepository historyRepository;
     private final JwtUtil jwtUtil;
 
@@ -64,7 +61,6 @@ public class GroupBuyService {
 
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
-                .category(category)
                 .targetParticipants(request.getTargetParticipants())
                 .currentParticipantCount(0)
                 .round(request.getRound())
