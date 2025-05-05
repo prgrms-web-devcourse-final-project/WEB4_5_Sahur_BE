@@ -8,6 +8,7 @@ import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
+import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -72,6 +74,19 @@ public class AdminService {
                 .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_REQUEST_NOT_FOUND));
 
         productRequest.changeStatus(newStatus);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductResDto> getAllProducts(String search, Pageable pageable) {
+        Page<Product> products;
+
+        if (StringUtils.hasText(search)) {
+            products = productRepository.findByTitleContainingIgnoreCase(search, pageable);
+        } else {
+            products = productRepository.findAll(pageable);
+        }
+
+        return products.map(ProductResDto::fromEntity);
     }
 
 

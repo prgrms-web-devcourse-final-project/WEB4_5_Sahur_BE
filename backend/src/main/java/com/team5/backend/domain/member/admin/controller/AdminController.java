@@ -5,6 +5,7 @@ import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.admin.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.service.AdminService;
+import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +57,16 @@ public class AdminController {
     ) {
         adminService.updateProductRequestStatus(productRequestId, request.getStatus());
         return RsDataUtil.success("상품 등록 요청 상태가 수정되었습니다.", "success");
+    }
+
+    @Operation(summary = "전체 상품 목록 조회", description = "관리자가 전체 상품을 조회하고 검색합니다.")
+    @GetMapping("/products")
+    public RsData<Page<ProductResDto>> getAllProducts(
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<ProductResDto> result = adminService.getAllProducts(search, pageable);
+        return RsDataUtil.success("상품 목록 조회 성공", result);
     }
 
 
