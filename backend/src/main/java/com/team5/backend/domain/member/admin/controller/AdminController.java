@@ -37,14 +37,14 @@ public class AdminController {
     }
 
 
-    @PatchMapping("/productRequest/{productRequestId}/status")
-    @Operation(summary = "상품 등록 요청 상태 수정", description = "관리자가 상품 등록 요청의 상태를 APPROVED 또는 REJECTED로 변경합니다.")
+    @PatchMapping("/products/{productId}/decision")
+    @Operation(summary = "상품 등록 승인/반려", description = "관리자가 상품 등록 요청의 상태를 APPROVED 또는 REJECTED로 변경합니다.")
     public RsData<String> updateProductRequestStatus(
-            @Parameter(description = "상품 등록 요청 ID", required = true)
-            @PathVariable Long productRequestId,
+            @Parameter(description = "상품 ID", required = true)
+            @PathVariable Long productId,
             @RequestBody @Valid ProductRequestUpdateReqDto request
     ) {
-        adminService.updateProductRequestStatus(productRequestId, request.getStatus());
+        adminService.updateProductRequestStatus(productId, request.getStatus());
         return RsDataUtil.success("상품 등록 요청 상태가 수정되었습니다.", "success");
     }
 
