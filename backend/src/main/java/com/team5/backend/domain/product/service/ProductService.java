@@ -26,6 +26,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public ProductResDto createProduct(ProductCreateReqDto request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
@@ -55,12 +56,14 @@ public class ProductService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ProductResDto getProductById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
         return ProductResDto.fromEntity(product);
     }
 
+    @Transactional
     public ProductResDto updateProduct(Long productId, ProductUpdateReqDto request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
@@ -74,10 +77,19 @@ public class ProductService {
         return ProductResDto.fromEntity(updatedProduct);
     }
 
+    @Transactional
     public void deleteProduct(Long productId) {
         if (!productRepository.existsById(productId)) {
             throw new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND);
         }
         productRepository.deleteById(productId);
     }
+
+    @Transactional(readOnly = true)
+    public Long getDibCount(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+        return product.getDibCount();
+    }
 }
+
