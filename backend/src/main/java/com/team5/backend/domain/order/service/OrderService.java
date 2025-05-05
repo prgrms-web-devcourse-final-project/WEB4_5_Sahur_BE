@@ -1,7 +1,5 @@
 package com.team5.backend.domain.order.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,7 +12,6 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
@@ -25,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderService {
 
 	private final OrderRepository orderRepository;
@@ -47,31 +45,8 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<Order> getOrders(Long search, OrderStatus status, Pageable pageable) {
-		if (search != null) {
-			return orderRepository.findByOrderId(search, pageable);
-		} else if (status != null) {
-			return orderRepository.findByStatus(status, pageable);
-		} else {
-			return orderRepository.findAll(pageable);
-		}
-	}
-
-	@Transactional(readOnly = true)
-	public Page<Order> getOrdersByMember(Long memberId, String status, Pageable pageable) {
-		List<OrderStatus> statusList = null;
-
-		if ("inProgress".equalsIgnoreCase(status)) {
-			statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
-		} else if ("canceled". equalsIgnoreCase(status)) {
-			statusList = List.of(OrderStatus.CANCELED);
-		}
-
-		if (statusList != null) {
-			return orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
-		} else {
-			return orderRepository.findByMember_MemberId(memberId, pageable);
-		}
+	public Page<Order> getOrders(Pageable pageable) {
+		return orderRepository.findAll(pageable);
 	}
 
 	@Transactional(readOnly = true)
@@ -80,7 +55,6 @@ public class OrderService {
 			.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 	}
 
-	@Transactional
 	public Order updateOrder(Long orderId, OrderUpdateReqDto request) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
