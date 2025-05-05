@@ -1,0 +1,35 @@
+name: Test CI
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, closed ]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 👋 Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 1
+
+      - name: ☕️ Set up JDK 21
+        uses: actions/setup-java@v4.7.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 🔐 Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        working-directory: backend
+        shell: bash
+
+      - name: 🛠 Build with Gradle with test profile
+        run: sudo ./gradlew build -Pprofile=test
+        working-directory: backend
+        shell: bash
