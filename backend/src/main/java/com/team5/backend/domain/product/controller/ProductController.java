@@ -29,6 +29,7 @@ public class ProductController {
         return RsDataUtil.success("상품 생성 성공", response);
     }
 
+    // 미사용?
     @Operation(summary = "상품 목록 조회", description = "카테고리 또는 키워드로 상품을 검색하고, 페이징 처리된 결과를 반환합니다.")
     @GetMapping
     public RsData<Page<ProductResDto>> getAllProducts(
@@ -62,5 +63,12 @@ public class ProductController {
     public RsData<Void> deleteProduct(@PathVariable Long productId) {
         productService.deleteProduct(productId);
         return RsDataUtil.success("상품 삭제 성공", null);
+    }
+
+    @Operation(summary = "상품 관심 등록 수 조회", description = "상품 ID로 상품의 관심 등록 수를 조회합니다.")
+    @GetMapping("/{productId}/dibs/count")
+    public RsData<Long> getDibCount(@PathVariable Long productId) {
+        Long dibCount = productService.getDibCount(productId);
+        return RsDataUtil.success("관심 등록 수 조회 성공", dibCount);
     }
 }
