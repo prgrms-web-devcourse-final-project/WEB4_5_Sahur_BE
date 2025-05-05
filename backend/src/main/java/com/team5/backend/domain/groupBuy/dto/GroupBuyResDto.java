@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class GroupBuyResDto {
     private Long groupBuyId;
     private Long productId;
-    private Long categoryId;
     private Integer targetParticipants;
     private Integer currentParticipantCount;
     private Integer round;
@@ -24,7 +23,6 @@ public class GroupBuyResDto {
         return GroupBuyResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .productId(groupBuy.getProduct().getProductId())
-                .categoryId(groupBuy.getCategory().getCategoryId())
                 .targetParticipants(groupBuy.getTargetParticipants())
                 .currentParticipantCount(groupBuy.getCurrentParticipantCount())
                 .round(groupBuy.getRound())
