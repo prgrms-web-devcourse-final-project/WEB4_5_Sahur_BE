@@ -56,9 +56,6 @@ public class GroupBuyService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.PRODUCT_NOT_FOUND));
 
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.CATEGORY_NOT_FOUND));
-
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
                 .targetParticipants(request.getTargetParticipants())
