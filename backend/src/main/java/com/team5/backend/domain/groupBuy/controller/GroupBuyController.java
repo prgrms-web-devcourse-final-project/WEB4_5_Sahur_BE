@@ -104,4 +104,12 @@ public class GroupBuyController {
         Page<GroupBuyResDto> responses = groupBuyService.getGroupBuysByToken(token, pageable);
         return RsDataUtil.success("회원 참여 공동구매 조회 성공", responses);
     }
+
+    @Operation(summary = "공동구매 마감 처리", description = "공동구매를 CLOSED 상태로 마감합니다.")
+    @PatchMapping("/{groupBuyId}/close")
+    public RsData<Empty> closeGroupBuy(
+            @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
+        groupBuyService.closeGroupBuy(groupBuyId);
+        return RsDataUtil.success("공동구매 상태 마감 성공");
+    }
 }
