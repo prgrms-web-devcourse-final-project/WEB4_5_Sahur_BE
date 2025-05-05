@@ -10,7 +10,6 @@ import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.util.ImageUtil;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -223,24 +222,5 @@ public class MemberService {
         return NicknameCheckResDto.builder()
                 .exists(exists)
                 .build();
-    }
-
-    @Transactional
-    public String uploadProfileImage(Long memberId, MultipartFile profileImage) throws IOException {
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
-
-        // 기존 프로필 이미지 삭제 (선택 사항)
-        if (member.getImageUrl() != null) {
-            imageUtil.deleteImage(member.getImageUrl());
-        }
-
-        // 새 이미지 저장
-        String profileImageUrl = imageUtil.saveImage(profileImage);
-        member.setImageUrl(profileImageUrl);
-        memberRepository.save(member);
-
-        return profileImageUrl; // 저장된 이미지 경로 반환
     }
 }
