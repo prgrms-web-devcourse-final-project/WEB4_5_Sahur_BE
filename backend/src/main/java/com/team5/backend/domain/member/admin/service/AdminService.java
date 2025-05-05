@@ -4,9 +4,15 @@ import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.AdminErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +29,14 @@ public class AdminService {
                 : productRequestRepository.findAll(sortedPageable);
 
         return pageResult.map(ProductRequestResDto::fromEntity);
+    }
+
+    @Transactional
+    public void updateProductRequestStatus(Long productRequestId, ProductRequestStatus newStatus) {
+        ProductRequest productRequest = productRequestRepository.findById(productRequestId)
+                .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_REQUEST_NOT_FOUND));
+
+        productRequest.changeStatus(newStatus);
     }
 
 }
