@@ -77,6 +77,7 @@ public class ReviewService {
     /**
      * 전체 리뷰 목록 조회 (최신순 정렬)
      */
+    @Transactional(readOnly = true)
     public Page<ReviewResDto> getAllReviews(Pageable pageable) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -88,6 +89,7 @@ public class ReviewService {
     /**
      * 리뷰 ID로 단건 조회
      */
+    @Transactional(readOnly = true)
     public ReviewResDto getReviewById(Long id) {
         return reviewRepository.findById(id)
                 .map(ReviewResDto::fromEntity)
@@ -147,6 +149,7 @@ public class ReviewService {
     /**
      * 특정 상품(productId)의 리뷰 목록 조회
      */
+    @Transactional(readOnly = true)
     public Page<ReviewResDto> getReviewsByProductId(Long productId, Pageable pageable, String sortBy) {
         Sort sort = "rate".equalsIgnoreCase(sortBy)
                 ? Sort.by(Sort.Order.desc("rate"))
@@ -161,6 +164,7 @@ public class ReviewService {
     /**
      * 특정 회원의 리뷰 목록 조회 (토큰 기반)
      */
+    @Transactional(readOnly = true)
     public Page<ReviewResDto> getReviewsByToken(String token, Pageable pageable) {
         String rawToken = token.replace("Bearer ", "");
 
