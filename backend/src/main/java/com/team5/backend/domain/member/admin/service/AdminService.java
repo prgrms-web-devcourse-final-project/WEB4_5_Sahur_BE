@@ -66,5 +66,13 @@ public class AdminService {
         groupBuyRepository.save(groupBuy);
     }
 
+    @Transactional
+    public void updateProductRequestStatus(Long productRequestId, ProductRequestStatus newStatus) {
+        ProductRequest productRequest = productRequestRepository.findById(productRequestId)
+                .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_REQUEST_NOT_FOUND));
+
+        productRequest.changeStatus(newStatus);
+    }
+
 
 }

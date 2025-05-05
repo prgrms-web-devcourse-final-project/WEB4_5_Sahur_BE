@@ -50,4 +50,7 @@ public class ProductRequest {
     @Column(nullable = false)
     private ProductRequestStatus status;
 
+    public void changeStatus(ProductRequestStatus newStatus) {
+        this.status = newStatus;
+    }
 }
