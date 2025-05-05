@@ -12,6 +12,8 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderDetailResDto;
+import com.team5.backend.domain.order.dto.OrderListResDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -47,34 +49,37 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<Order> getOrders(Long search, OrderStatus status, Pageable pageable) {
+	public Page<OrderListResDto> getOrders(Long search, OrderStatus status, Pageable pageable) {
+		Page<Order> orders = null;
 		if (search != null) {
-			return orderRepository.findByOrderId(search, pageable);
+			orders = orderRepository.findByOrderId(search, pageable);
 		} else if (status != null) {
-			return orderRepository.findByStatus(status, pageable);
+			orders = orderRepository.findByStatus(status, pageable);
 		} else {
-			return orderRepository.findAll(pageable);
+			orders = orderRepository.findAll(pageable);
 		}
+		return orders.map(OrderListResDto::from);
 	}
 
 	@Transactional(readOnly = true)
-	public Page<Order> getOrdersByMember(Long memberId, String status, Pageable pageable) {
+	public Page<OrderListResDto> getOrdersByMember(Long memberId, String status, Pageable pageable) {
+		Page<Order> orders = null;
 		if ("inProgress".equalsIgnoreCase(status)) {
 			List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
-			return orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
+			orders = orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
 		} else if ("canceled".equalsIgnoreCase(status)) {
-			return orderRepository.findByMember_MemberIdAndStatusIn(
-				memberId, List.of(OrderStatus.CANCELED), pageable
-			);
+			orders = orderRepository.findByMember_MemberIdAndStatusIn(memberId, List.of(OrderStatus.CANCELED), pageable);
 		} else {
-			return orderRepository.findByMember_MemberId(memberId, pageable);
+			orders = orderRepository.findByMember_MemberId(memberId, pageable);
 		}
+		return orders.map(OrderListResDto::from);
 	}
 
 	@Transactional(readOnly = true)
-	public Order getOrderDetail(Long orderId) {
-		return orderRepository.findWithDetailsByOrderId(orderId)
+	public OrderDetailResDto getOrderDetail(Long orderId) {
+		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
+		return OrderDetailResDto.from(order);
 	}
 
 	@Transactional
@@ -82,7 +87,7 @@ public class OrderService {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 
-		Integer newTotalPrice = order.getProduct().getPrice() * request.getQuantity();
+		int newTotalPrice = order.getProduct().getPrice() * request.getQuantity();
 		order.updateOrderInfo(request.getQuantity(), newTotalPrice);
 
 		return order;

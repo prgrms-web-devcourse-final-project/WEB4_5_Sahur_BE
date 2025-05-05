@@ -25,6 +25,8 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderDetailResDto;
+import com.team5.backend.domain.order.dto.OrderListResDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -144,7 +146,7 @@ class OrderServiceTest {
 	@Test
 	@DisplayName("주문 목록 조회 성공")
 	void getOrders_success() {
-		Page<Order> result = orderService.getOrders(null, null, pageable);
+		Page<OrderListResDto> result = orderService.getOrders(null, null, pageable);
 		assertThat(result.getContent()).isNotEmpty();
 	}
 
@@ -152,18 +154,18 @@ class OrderServiceTest {
 	@DisplayName("주문 목록 조회 - 주문번호로 필터링 성공")
 	void getOrders_byOrderId_success() {
 		Long orderId = order.getOrderId();
-		Page<Order> result = orderService.getOrders(orderId, null, pageable);
+		Page<OrderListResDto> result = orderService.getOrders(orderId, null, pageable);
 
 		assertThat(result.getContent())
 			.hasSize(1)
-			.extracting(Order::getOrderId)
+			.extracting(OrderListResDto::getOrderId)
 			.containsExactly(orderId);
 	}
 
 	@Test
 	@DisplayName("주문 목록 조회 - 상태로 필터링 성공")
 	void getOrders_byStatus_success() {
-		Page<Order> result = orderService.getOrders(null, OrderStatus.BEFOREPAID, pageable);
+		Page<OrderListResDto> result = orderService.getOrders(null, OrderStatus.BEFOREPAID, pageable);
 
 		assertThat(result.getContent())
 			.isNotEmpty()
@@ -173,17 +175,17 @@ class OrderServiceTest {
 	@Test
 	@DisplayName("회원 주문 조회 성공 - 전체 상태")
 	void getOrdersByMember_all_success() {
-		Page<Order> result = orderService.getOrdersByMember(member.getMemberId(), null, pageable);
+		Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), null, pageable);
 
 		assertThat(result.getContent())
 			.isNotEmpty()
-			.allMatch(o -> o.getMember().getMemberId().equals(member.getMemberId()));
+			.allMatch(o -> o.getMemberId().equals(member.getMemberId()));
 	}
 
 	@Test
 	@DisplayName("회원 주문 조회 성공 - inProgress 상태 필터링")
 	void getOrdersByMember_inProgress_success() {
-		Page<Order> result = orderService.getOrdersByMember(member.getMemberId(), "inProgress", pageable);
+		Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "inProgress", pageable);
 
 		assertThat(result.getContent())
 			.isNotEmpty()
@@ -203,19 +205,19 @@ class OrderServiceTest {
 			.status(OrderStatus.CANCELED)
 			.build());
 
-		Page<Order> result = orderService.getOrdersByMember(member.getMemberId(), "canceled", pageable);
+		Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "canceled", pageable);
 
 		assertThat(result.getContent())
-			.extracting(Order::getStatus)
+			.extracting(OrderListResDto::getStatus)
 			.contains(OrderStatus.CANCELED);
 	}
 
 	@Test
 	@DisplayName("주문 상세 조회 성공")
 	void getOrderDetail_success() {
-		Order found = orderService.getOrderDetail(order.getOrderId());
-		assertThat(found).isNotNull();
-		assertThat(found.getOrderId()).isEqualTo(order.getOrderId());
+		OrderDetailResDto response = orderService.getOrderDetail(order.getOrderId());
+		assertThat(response).isNotNull();
+		assertThat(response.getOrderId()).isEqualTo(order.getOrderId());
 	}
 
 	@Test

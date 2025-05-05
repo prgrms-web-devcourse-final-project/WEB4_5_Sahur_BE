@@ -42,8 +42,7 @@ public class OrderController {
 		@RequestParam(required = false) OrderStatus status,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<Order> orders = orderService.getOrders(search, status, pageable);
-		Page<OrderListResDto> dtoPage = orders.map(OrderListResDto::from);
+		Page<OrderListResDto> dtoPage = orderService.getOrders(search, status, pageable);
 		return RsDataUtil.success("주문 목록 조회에 성공했습니다.", dtoPage);
 	}
 
@@ -54,16 +53,15 @@ public class OrderController {
 		@RequestParam(required = false) String status,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<Order> orders = orderService.getOrdersByMember(memberId, status, pageable);
-		Page<OrderListResDto> dtoPage = orders.map(OrderListResDto::from);
+		Page<OrderListResDto> dtoPage = orderService.getOrdersByMember(memberId, status, pageable);
 		return RsDataUtil.success("회원 주문 목록 조회에 성공했습니다.", dtoPage);
 	}
 
 	@Operation(summary = "주문 상세 조회", description = "주문 ID를 통해 상세 정보를 조회합니다.")
 	@GetMapping("/{orderId}")
 	public RsData<OrderDetailResDto> getOrderDetail(@PathVariable Long orderId) {
-		Order order = orderService.getOrderDetail(orderId);
-		return RsDataUtil.success("주문 상세 조회에 성공했습니다.", OrderDetailResDto.from(order));
+		OrderDetailResDto response = orderService.getOrderDetail(orderId);
+		return RsDataUtil.success("주문 상세 조회에 성공했습니다.", response);
 	}
 
 	@Operation(summary = "주문 수정", description = "수량을 수정하면 총 가격도 변경됩니다.")
