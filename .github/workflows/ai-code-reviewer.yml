@@ -1,4 +1,4 @@
-# .github/workflows/main.yml
+# .github/workflows/ai-code-reviewer.yml
 name: AI Code Reviewer
 
 on:
