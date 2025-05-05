@@ -11,7 +11,9 @@ import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.service.OrderService;
+import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
+import com.team5.backend.global.exception.RsDataUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,7 +32,7 @@ public class OrderController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public RsData<OrderCreateResDto> createOrder(@RequestBody OrderCreateReqDto request) {
 		Order order = orderService.createOrder(request);
-		return new RsData<>("201", "주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
+		return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
 	}
 
 	@Operation(summary = "주문 목록 조회", description = "모든 주문 목록을 조회하거나 주문번호, 상태로 필터링할 수 있습니다.")
@@ -42,7 +44,7 @@ public class OrderController {
 	) {
 		Page<Order> orders = orderService.getOrders(search, status, pageable);
 		Page<OrderListResDto> dtoPage = orders.map(OrderListResDto::from);
-		return new RsData<>("200", "주문 목록 조회에 성공했습니다.", dtoPage);
+		return RsDataUtil.success("주문 목록 조회에 성공했습니다.", dtoPage);
 	}
 
 	@Operation(summary = "회원 주문 조회", description = "특정 회원의 주문 목록을 조회합니다. 상태 필터링할 수 있습니다.")
@@ -54,14 +56,14 @@ public class OrderController {
 	) {
 		Page<Order> orders = orderService.getOrdersByMember(memberId, status, pageable);
 		Page<OrderListResDto> dtoPage = orders.map(OrderListResDto::from);
-		return new RsData<>("200", "회원 주문 목록 조회에 성공했습니다.", dtoPage);
+		return RsDataUtil.success("회원 주문 목록 조회에 성공했습니다.", dtoPage);
 	}
 
 	@Operation(summary = "주문 상세 조회", description = "주문 ID를 통해 상세 정보를 조회합니다.")
 	@GetMapping("/{orderId}")
 	public RsData<OrderDetailResDto> getOrderDetail(@PathVariable Long orderId) {
 		Order order = orderService.getOrderDetail(orderId);
-		return new RsData<>("200", "주문 상세 조회에 성공했습니다.", OrderDetailResDto.from(order));
+		return RsDataUtil.success("주문 상세 조회에 성공했습니다.", OrderDetailResDto.from(order));
 	}
 
 	@Operation(summary = "주문 수정", description = "수량을 수정하면 총 가격도 변경됩니다.")
@@ -71,14 +73,14 @@ public class OrderController {
 		@RequestBody OrderUpdateReqDto request
 	) {
 		Order order = orderService.updateOrder(orderId, request);
-		return new RsData<>("200", "주문 정보가 수정되었습니다.", OrderUpdateResDto.from(order));
+		return RsDataUtil.success("주문 정보가 수정되었습니다.", OrderUpdateResDto.from(order));
 	}
 
 	@Operation(summary = "주문 취소", description = "주문을 취소합니다.")
 	@DeleteMapping("/{orderId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public RsData<Void> cancelOrder(@PathVariable Long orderId) {
+	public RsData<Empty> cancelOrder(@PathVariable Long orderId) {
 		orderService.cancelOrder(orderId);
-		return new RsData<>("204", "주문이 성공적으로 취소되었습니다.");
+		return RsDataUtil.success("주문이 성공적으로 취소되었습니다.");
 	}
 }
