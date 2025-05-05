@@ -73,7 +73,7 @@ public class BaseInitData implements CommandLineRunner {
                     .email("hong@example.com")
                     .password(passwordEncoder.encode("password123!"))
                     .nickname("길동이")
-                    .address("부산")
+//                    .address("부산")
                     .role(Role.USER)
                     .emailVerified(true)
                     .imageUrl("http://example.com/image.jpg")
@@ -159,7 +159,7 @@ public class BaseInitData implements CommandLineRunner {
             // Delivery
             Delivery delivery = Delivery.builder()
                     .order(order)
-                    .address(member.getAddress())
+                    .address(member.getAddress().toString())
                     .pccc(null)                                        // 선택적 필드라면 null 허용
                     .contact("010-1234-5678")                          // 테스트용 연락처
                     .status(DeliveryStatus.PREPARING)                   // 배송 초기 단계

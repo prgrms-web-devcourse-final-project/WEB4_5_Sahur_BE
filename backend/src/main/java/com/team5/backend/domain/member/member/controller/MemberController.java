@@ -99,6 +99,7 @@ public class MemberController {
         if (response.isSuccess()) return new RsData<>("200", "인증이 완료되었습니다.", response);
         else return new RsData<>("400", "인증번호가 유효하지 않거나 만료되었습니다.", response);
     }
+
     // 비밀번호 재설정 이메일 인증번호 전송
     @PostMapping("/auth/password/email/send")
     public RsData<EmailResDto> requestPasswordResetAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {

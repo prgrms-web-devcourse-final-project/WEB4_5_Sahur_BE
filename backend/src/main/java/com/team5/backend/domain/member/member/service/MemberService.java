@@ -6,6 +6,7 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.dto.ProductResDto;
+import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import jakarta.servlet.http.HttpServletResponse;
@@ -63,12 +64,14 @@ public class MemberService {
             log.info("기본 이미지 설정");
         }
 
+        Address address = signupReqDto.toAddress();
+
         Member member = Member.builder()
                 .email(email)
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(encodedPassword)
-                .address(signupReqDto.getAddress())
+                .address(address)
                 .imageUrl(imageUrl)
                 .role(Role.USER)
                 .emailVerified(true)  // 이미 인증이 완료된 상태이므로 true로 설정
@@ -133,9 +136,9 @@ public class MemberService {
             existingMember.setPassword(encodedPassword);
         }
 
-        if (patchMemberReqDto.getAddress() != null) {
-            existingMember.setAddress(patchMemberReqDto.getAddress());
-        }
+//        if (patchMemberReqDto.getAddress() != null) {
+//            existingMember.setAddress(patchMemberReqDto.getAddress());
+//        }
 
         if (patchMemberReqDto.getImageUrl() != null) {
             existingMember.setImageUrl(patchMemberReqDto.getImageUrl());

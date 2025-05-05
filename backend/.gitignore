@@ -42,4 +42,6 @@ db_dev.trace.db
 db_test.mv.db
 db_test.trace.db
 
+docker-compose.yml
+
 src/main/resources/application-secret.yml
