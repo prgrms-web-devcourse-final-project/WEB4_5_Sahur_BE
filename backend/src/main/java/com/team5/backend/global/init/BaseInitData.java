@@ -109,7 +109,6 @@ public class BaseInitData implements CommandLineRunner {
 
                 GroupBuy groupBuy = groupBuyRepository.save(GroupBuy.builder()
                         .product(product)
-                        .category(category)
                         .targetParticipants(5 + i)
                         .currentParticipantCount(1)
                         .round(1)
