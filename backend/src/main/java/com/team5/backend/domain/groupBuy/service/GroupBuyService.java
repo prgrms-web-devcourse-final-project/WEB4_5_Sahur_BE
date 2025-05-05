@@ -161,6 +161,18 @@ public class GroupBuyService {
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 
+    @Transactional
+    public void closeGroupBuy(Long id) {
+        GroupBuy groupBuy = groupBuyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        if (groupBuy.getStatus() == GroupBuyStatus.CLOSED) {
+            throw new CustomException(GroupBuyErrorCode.GROUP_BUY_ALREADY_CLOSED);
+        }
+
+        groupBuy.setStatus(GroupBuyStatus.CLOSED);
+    }
+
     /**
      * 공동구매 마감이 오늘인지 판단하고 DTO로 변환
      */
