@@ -14,4 +14,9 @@ public class Address {
     private String zipCode;
     private String streetAdr;
     private String detailAdr;
+
+    @Override
+    public String toString() {
+        return streetAdr + " " + detailAdr;
+    }
 }
