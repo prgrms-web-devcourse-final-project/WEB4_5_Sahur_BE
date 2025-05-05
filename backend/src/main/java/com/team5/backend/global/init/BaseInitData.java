@@ -14,9 +14,6 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.admin.entity.ProductRequest;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
@@ -24,7 +21,6 @@ import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
 import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
@@ -32,6 +28,7 @@ import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
+import com.team5.backend.global.entity.Address;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +36,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -49,7 +48,6 @@ public class BaseInitData implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
-    private final ProductRequestRepository productRequestRepository;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final ReviewRepository reviewRepository;
@@ -67,138 +65,107 @@ public class BaseInitData implements CommandLineRunner {
     private void initData() {
         if (memberRepository.count() == 0) {
 
-            // Member
-            Member member = Member.builder()
-                    .name("홍길동")
-                    .email("hong@example.com")
-                    .password(passwordEncoder.encode("password123!"))
-                    .nickname("길동이")
-//                    .address("부산")
-                    .role(Role.USER)
-                    .emailVerified(true)
-                    .imageUrl("http://example.com/image.jpg")
-                    .build();
-            memberRepository.save(member);
+            List<CategoryType> categoryTypes = Arrays.asList(
+                    CategoryType.FASHION_CLOTHES,
+                    CategoryType.FASHION_ACCESSORY,
+                    CategoryType.BEAUTY,
+                    CategoryType.DIGITAL_APPLIANCE,
+                    CategoryType.FURNITURE,
+                    CategoryType.LIVING,
+                    CategoryType.FOOD,
+                    CategoryType.SPORTS,
+                    CategoryType.CAR,
+                    CategoryType.BOOK,
+                    CategoryType.KIDS,
+                    CategoryType.PET
+            );
 
+            for (int i = 0; i < categoryTypes.size(); i++) {
+                Category category = categoryRepository.save(Category.builder()
+                        .category(categoryTypes.get(i))
+                        .keyword(KeywordType.DEFAULT)
+                        .uid(i + 1)
+                        .build());
 
-            // Category
-            Category category = Category.builder()
-                    .category(CategoryType.DIGITAL_APPLIANCE)
-                    .keyword(KeywordType.DEFAULT)
-                    .uid(1)
-                    .build();
-            categoryRepository.save(category);
+                Member member = memberRepository.save(Member.builder()
+                        .name("사용자" + (i + 1))
+                        .email("user" + (i + 1) + "@example.com")
+                        .password(passwordEncoder.encode("password123!"))
+                        .nickname("유저" + (i + 1))
+                        .address(new Address(
+                                (i % 2 == 0 ? "00000" : "11111"), // zipCode
+                                (i % 2 == 0 ? "서울시 강남구" : "부산시 해운대구"), // streetAdr
+                                "상세주소" + (i + 1) // detailAdr
+                        ))
+                        .role(Role.USER)
+                        .emailVerified(true)
+                        .imageUrl("http://example.com/user" + (i + 1) + ".jpg")
+                        .build());
 
+                Product product = productRepository.save(Product.builder()
+                        .category(category)
+                        .title(category.getCategory().name() + " 상품")
+                        .description("이것은 " + category.getCategory().name() + " 카테고리의 상품입니다.")
+                        .imageUrl("http://example.com/" + category.getCategory().name().toLowerCase() + ".jpg")
+                        .price(10000 * (i + 1))
+                        .createdAt(LocalDateTime.now())
+                        .build());
 
-            // Product
-            Product product = Product.builder()
-                    .category(category)
-                    .title("스마트폰")
-                    .description("최신형 스마트폰입니다.")
-                    .imageUrl("http://example.com/product.jpg")
-                    .price(999000)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            productRepository.save(product);
+                GroupBuy groupBuy = groupBuyRepository.save(GroupBuy.builder()
+                        .product(product)
+                        .targetParticipants(5 + i)
+                        .currentParticipantCount(1)
+                        .round(1)
+                        .deadline(LocalDateTime.now().plusDays(7))
+                        .status(GroupBuyStatus.ONGOING)
+                        .build());
 
+                Order order = orderRepository.save(Order.create(member, groupBuy, product, 1));
 
-            // Product Request
-            ProductRequest request = ProductRequest.builder()
-                    .member(member)
-                    .category(category)
-                    .title("원하는 스마트폰")
-                    .productUrl("http://request.com/item")
-                    .etc("색상은 블랙으로요.")
-                    .status(ProductRequestStatus.WAITING)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            productRequestRepository.save(request);
+                paymentRepository.save(Payment.create(order, "payment-key-cat" + i));
 
+                notificationRepository.save(Notification.builder()
+                        .member(member)
+                        .type(NotificationType.ORDER)
+                        .title("[알림] 주문이 완료되었습니다.")
+                        .message("상품 주문이 완료되었습니다. 주문번호: " + order.getOrderId())
+                        .url("/orders/" + order.getOrderId())
+                        .read(false)
+                        .build());
 
-            // GroupBuy
-            GroupBuy groupBuy = GroupBuy.builder()
-                    .product(product)
-                    .targetParticipants(10)
-                    .currentParticipantCount(1)
-                    .round(1)
-                    .deadline(LocalDateTime.now().plusDays(7))
-                    .status(GroupBuyStatus.ONGOING)
-                    .build();
-            groupBuyRepository.save(groupBuy);
+                deliveryRepository.save(Delivery.builder()
+                        .order(order)
+                        .address(member.getAddress().toString())
+                        .pccc(null)
+                        .contact("010-1000-10" + String.format("%02d", i))
+                        .status(DeliveryStatus.PREPARING)
+                        .shipping("우체국택배")
+                        .build());
 
+                dibsRepository.save(Dibs.builder()
+                        .member(member)
+                        .product(product)
+                        .build());
 
-            // Order
-            Order order = Order.builder()
-                    .member(member)
-                    .groupBuy(groupBuy)
-                    .product(product)
-                    .quantity(1)
-                    .totalPrice(999000)
-                    .status(OrderStatus.BEFOREPAID)
-                    .build();
-            orderRepository.save(order);
+                History history = historyRepository.save(History.builder()
+                        .member(member)
+                        .product(product)
+                        .groupBuy(groupBuy)
+                        .order(order)
+                        .writable(true)
+                        .createdAt(LocalDateTime.now())
+                        .build());
 
-
-            // Payment
-            Payment payment = Payment.create(order, "fake-payment-key-1234");
-            paymentRepository.save(payment);
-
-
-            // Notification
-            Notification notification = Notification.builder()
-                    .member(member)
-                    .type(NotificationType.ORDER)
-                    .title("주문이 완료되었습니다.")
-                    .message("주문하신 상품이 곧 배송됩니다.")
-                    .url("/orders/" + order.getOrderId())
-                    .read(false)
-                    .build();
-            notificationRepository.save(notification);
-
-
-            // Delivery
-            Delivery delivery = Delivery.builder()
-                    .order(order)
-                    .address(member.getAddress().toString())
-                    .pccc(null)                                        // 선택적 필드라면 null 허용
-                    .contact("010-1234-5678")                          // 테스트용 연락처
-                    .status(DeliveryStatus.PREPARING)                   // 배송 초기 단계
-                    .shipping("123456789123456789")
-                    .build();
-
-            deliveryRepository.save(delivery);
-
-
-            // Dibs
-            Dibs dibs = Dibs.builder()
-                    .member(member)
-                    .product(product)
-                    .build();
-            dibsRepository.save(dibs);
-
-
-            // History
-            History history = History.builder()
-                    .member(member)
-                    .product(product)
-                    .groupBuy(groupBuy)
-                    .order(order)
-                    .writable(true)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            historyRepository.save(history);
-
-            // Review
-            Review review = Review.builder()
-                    .member(member)
-                    .product(product)
-                    .history(history)
-                    .comment("아주 만족스럽습니다!")
-                    .rate(5)
-                    .createdAt(LocalDateTime.now())
-                    .imageUrl("http://example.com/review.jpg")
-                    .build();
-            reviewRepository.save(review);
+                reviewRepository.save(Review.builder()
+                        .member(member)
+                        .product(product)
+                        .history(history)
+                        .comment("카테고리 " + category.getCategory().name() + "의 리뷰입니다.")
+                        .rate(5 - (i % 3))
+                        .createdAt(LocalDateTime.now())
+                        .imageUrl("http://example.com/review_cat" + i + ".jpg")
+                        .build());
+            }
         }
     }
 }

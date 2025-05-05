@@ -12,14 +12,16 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +57,6 @@ public class GroupBuyService {
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.PRODUCT_NOT_FOUND));
-
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.CATEGORY_NOT_FOUND));
 
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
