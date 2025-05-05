@@ -72,6 +72,7 @@ public class HistoryService {
     /**
      * 전체 구매 이력 조회 (최신순)
      */
+    @Transactional(readOnly = true)
     public Page<HistoryResDto> getAllHistories(Pageable pageable) {
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -86,6 +87,7 @@ public class HistoryService {
     /**
      * 구매 이력 단건 조회
      */
+    @Transactional(readOnly = true)
     public HistoryResDto getHistoryById(Long id) {
         return historyRepository.findById(id)
                 .map(HistoryResDto::fromEntity)
