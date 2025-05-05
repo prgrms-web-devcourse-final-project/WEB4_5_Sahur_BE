@@ -15,12 +15,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	@EntityGraph(attributePaths = {"member", "groupBuy", "product"})
 	Page<Order> findAll(Pageable pageable);
 
+	@EntityGraph(attributePaths = {"member", "groupBuy", "product"})
 	Page<Order> findByOrderId(Long orderId, Pageable pageable);
 
 	Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 
+	@EntityGraph(attributePaths = {"member", "product", "groupBuy"})
 	Page<Order> findByMember_MemberId(Long memberId, Pageable pageable);
 
+	@EntityGraph(attributePaths = {"member", "product", "groupBuy"})
 	Page<Order> findByMember_MemberIdAndStatusIn(Long memberId, List<OrderStatus> status, Pageable pageable);
 
 	@EntityGraph(attributePaths = {"member", "groupBuy", "product"})
