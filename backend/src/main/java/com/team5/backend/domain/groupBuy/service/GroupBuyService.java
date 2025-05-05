@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +29,6 @@ public class GroupBuyService {
     private final HistoryRepository historyRepository;
     private final JwtUtil jwtUtil;
 
-    /**
-     * 매일 자정(00:00)에 마감일이 지난 공동구매 상태를 CLOSED로 변경
-     */
     @Transactional
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     public void updateGroupBuyStatuses() {
@@ -48,9 +44,6 @@ public class GroupBuyService {
         groupBuyRepository.saveAll(ongoingGroupBuys);
     }
 
-    /**
-     * 새로운 공동구매 생성
-     */
     @Transactional
     public GroupBuyResDto createGroupBuy(GroupBuyCreateReqDto request) {
         Product product = productRepository.findById(request.getProductId())
@@ -69,9 +62,7 @@ public class GroupBuyService {
         return GroupBuyResDto.fromEntity(saved);
     }
 
-    /**
-     * 전체 공동구매 목록 조회 + 정렬
-     */
+    @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
         Sort sort = getSortForField(sortField);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -87,19 +78,13 @@ public class GroupBuyService {
         };
     }
 
-    /**
-     * ID로 공동구매 단건 조회
-     */
+    @Transactional(readOnly = true)
     public GroupBuyResDto getGroupBuyById(Long id) {
         return groupBuyRepository.findById(id)
                 .map(GroupBuyResDto::fromEntity)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 
-
-    /**
-     * 공동구매 전체 업데이트
-     */
     @Transactional
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
         return groupBuyRepository.findById(id)
@@ -115,9 +100,6 @@ public class GroupBuyService {
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 
-    /**
-     * 공동구매 부분 업데이트
-     */
     @Transactional
     public GroupBuyResDto patchGroupBuy(Long id, GroupBuyPatchReqDto request) {
         GroupBuy existing = groupBuyRepository.findById(id)
@@ -133,17 +115,12 @@ public class GroupBuyService {
         return GroupBuyResDto.fromEntity(updated);
     }
 
-    /**
-     * 공동구매 삭제
-     */
     @Transactional
     public void deleteGroupBuy(Long id) {
         groupBuyRepository.deleteById(id);
     }
 
-    /**
-     * 오늘 마감인 공동구매 조회
-     */
+    @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getTodayDeadlineGroupBuys(Pageable pageable, GroupBuySortField sortField) {
         LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime endOfToday = startOfToday.plusDays(1).minusNanos(1);
@@ -155,9 +132,7 @@ public class GroupBuyService {
         return pageResult.map(GroupBuyResDto::fromEntity);
     }
 
-    /**
-     * 특정 사용자(token)를 통한 공동구매 목록 조회
-     */
+    @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getGroupBuysByToken(String token, Pageable pageable) {
         String rawToken = token.replace("Bearer ", "");
 
@@ -178,12 +153,11 @@ public class GroupBuyService {
         return groupBuys.map(GroupBuyResDto::fromEntity);
     }
 
-    /**
-     * 공동구매 상태 조회
-     */
+    @Transactional(readOnly = true)
     public GroupBuyStatusResDto getGroupBuyStatus(Long id) {
         return groupBuyRepository.findById(id)
                 .map(GroupBuyStatusResDto::fromEntity)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 }
+
