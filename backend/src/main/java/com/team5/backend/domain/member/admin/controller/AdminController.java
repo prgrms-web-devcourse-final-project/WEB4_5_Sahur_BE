@@ -69,5 +69,14 @@ public class AdminController {
         return RsDataUtil.success("상품 목록 조회 성공", result);
     }
 
+    @Operation(summary = "상품 상세 조회", description = "관리자가 상품의 상세 정보를 조회합니다.")
+    @GetMapping("/products/{productId}")
+    public RsData<ProductResDto> getProductDetail(
+            @Parameter(description = "상품 ID", required = true)
+            @PathVariable Long productId
+    ) {
+        ProductResDto result = adminService.getProductDetail(productId);
+        return RsDataUtil.success("상품 상세 조회 성공", result);
+    }
 
 }

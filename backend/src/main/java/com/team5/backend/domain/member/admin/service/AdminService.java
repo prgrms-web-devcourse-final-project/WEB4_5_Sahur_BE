@@ -89,5 +89,13 @@ public class AdminService {
         return products.map(ProductResDto::fromEntity);
     }
 
+    @Transactional(readOnly = true)
+    public ProductResDto getProductDetail(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_NOT_FOUND));
+
+        return ProductResDto.fromEntity(product);
+    }
+
 
 }
