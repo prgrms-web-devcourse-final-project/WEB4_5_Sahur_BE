@@ -75,7 +75,6 @@ class GroupBuyServiceTest {
                 GroupBuy.builder()
                         .groupBuyId(1L)
                         .product(testProduct)
-                        .category(testCategory)
                         .targetParticipants(10)
                         .currentParticipantCount(1)
                         .round(1)
@@ -86,7 +85,6 @@ class GroupBuyServiceTest {
                 GroupBuy.builder()
                         .groupBuyId(2L)
                         .product(testProduct)
-                        .category(testCategory)
                         .targetParticipants(15)
                         .currentParticipantCount(5)
                         .round(2)
@@ -102,7 +100,6 @@ class GroupBuyServiceTest {
     void createGroupBuy_shouldReturnSavedGroupBuyResDto() {
         GroupBuyCreateReqDto req = GroupBuyCreateReqDto.builder()
                 .productId(1L)
-                .categoryId(1L)
                 .targetParticipants(10)
                 .round(1)
                 .deadline(LocalDateTime.now().plusDays(3))
@@ -111,7 +108,6 @@ class GroupBuyServiceTest {
         GroupBuy saved = GroupBuy.builder()
                 .groupBuyId(1L)
                 .product(testProduct)
-                .category(testCategory)
                 .targetParticipants(10)
                 .status(GroupBuyStatus.ONGOING)
                 .build();
@@ -235,7 +231,7 @@ class GroupBuyServiceTest {
 
         assertEquals(30, result.getTargetParticipants());
         assertEquals(2, result.getRound());
-        assertNotNull(result.getProductId()); // productId가 null 아님 확인
+        assertNotNull(result.getProduct()); // product가 null 아님 확인
     }
 
     @Test
@@ -252,7 +248,6 @@ class GroupBuyServiceTest {
         GroupBuy groupBuy = GroupBuy.builder()
                 .groupBuyId(1L)
                 .product(testProduct) // 추가
-                .category(testCategory)
                 .deadline(LocalDateTime.now().plusHours(3))
                 .build();
 

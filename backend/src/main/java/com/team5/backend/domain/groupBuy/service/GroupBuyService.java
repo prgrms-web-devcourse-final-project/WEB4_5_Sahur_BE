@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class GroupBuyService {
                 .build();
 
         GroupBuy saved = groupBuyRepository.save(groupBuy);
-        return GroupBuyResDto.fromEntity(saved);
+        return toDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +68,7 @@ public class GroupBuyService {
         Sort sort = getSortForField(sortField);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
-        return pageResult.map(GroupBuyResDto::fromEntity);
+        return pageResult.map(this::toDto);
     }
 
     private Sort getSortForField(GroupBuySortField sortField) {
@@ -81,7 +82,7 @@ public class GroupBuyService {
     @Transactional(readOnly = true)
     public GroupBuyResDto getGroupBuyById(Long id) {
         return groupBuyRepository.findById(id)
-                .map(GroupBuyResDto::fromEntity)
+                .map(this::toDto)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
 
@@ -95,7 +96,7 @@ public class GroupBuyService {
                     existing.setDeadline(request.getDeadline());
                     existing.setStatus(request.getStatus());
                     GroupBuy updated = groupBuyRepository.save(existing);
-                    return GroupBuyResDto.fromEntity(updated);
+                    return toDto(updated);
                 })
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
@@ -112,7 +113,7 @@ public class GroupBuyService {
         existing.setStatus(request.getStatus() != null ? request.getStatus() : existing.getStatus());
 
         GroupBuy updated = groupBuyRepository.save(existing);
-        return GroupBuyResDto.fromEntity(updated);
+        return toDto(updated);
     }
 
     @Transactional
@@ -129,7 +130,7 @@ public class GroupBuyService {
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
-        return pageResult.map(GroupBuyResDto::fromEntity);
+        return pageResult.map(this::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -150,7 +151,7 @@ public class GroupBuyService {
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         Page<GroupBuy> groupBuys = historyRepository.findDistinctGroupBuysByMemberId(memberId, sortedPageable);
-        return groupBuys.map(GroupBuyResDto::fromEntity);
+        return groupBuys.map(this::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -159,5 +160,25 @@ public class GroupBuyService {
                 .map(GroupBuyStatusResDto::fromEntity)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
     }
-}
 
+    @Transactional
+    public void closeGroupBuy(Long id) {
+        GroupBuy groupBuy = groupBuyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        if (groupBuy.getStatus() == GroupBuyStatus.CLOSED) {
+            throw new CustomException(GroupBuyErrorCode.GROUP_BUY_ALREADY_CLOSED);
+        }
+
+        groupBuy.setStatus(GroupBuyStatus.CLOSED);
+    }
+
+    /**
+     * 공동구매 마감이 오늘인지 판단하고 DTO로 변환
+     */
+    private GroupBuyResDto toDto(GroupBuy groupBuy) {
+        boolean isDeadlineToday = groupBuy.getDeadline() != null &&
+                groupBuy.getDeadline().toLocalDate().isEqual(LocalDate.now());
+        return GroupBuyResDto.fromEntity(groupBuy, isDeadlineToday);
+    }
+}
