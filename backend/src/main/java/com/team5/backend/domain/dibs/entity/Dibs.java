@@ -26,6 +26,4 @@ public class Dibs {
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
-    private Boolean status;
 }

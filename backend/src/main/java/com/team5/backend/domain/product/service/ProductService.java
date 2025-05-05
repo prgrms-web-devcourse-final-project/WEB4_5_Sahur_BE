@@ -14,6 +14,8 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.ProductErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,9 +26,10 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional
     public ProductResDto createProduct(ProductCreateReqDto request) {
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
 
         Product product = Product.builder()
                 .category(category)
@@ -53,16 +56,17 @@ public class ProductService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ProductResDto getProductById(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다. ID: " + productId));
-
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
         return ProductResDto.fromEntity(product);
     }
 
+    @Transactional
     public ProductResDto updateProduct(Long productId, ProductUpdateReqDto request) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다. ID: " + productId));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         product.setTitle(request.getTitle());
         product.setDescription(request.getDescription());
@@ -73,7 +77,19 @@ public class ProductService {
         return ProductResDto.fromEntity(updatedProduct);
     }
 
+    @Transactional
     public void deleteProduct(Long productId) {
+        if (!productRepository.existsById(productId)) {
+            throw new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND);
+        }
         productRepository.deleteById(productId);
     }
+
+    @Transactional(readOnly = true)
+    public Long getDibCount(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+        return product.getDibCount();
+    }
 }
+

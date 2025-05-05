@@ -32,6 +32,7 @@ public class AdminService {
     private final ProductRepository productRepository;
     private final GroupBuyRepository groupBuyRepository;
 
+
     public Page<ProductRequestResDto> getProductRequests(Pageable pageable, ProductRequestStatus status) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -96,6 +97,5 @@ public class AdminService {
 
         return ProductResDto.fromEntity(product);
     }
-
 
 }

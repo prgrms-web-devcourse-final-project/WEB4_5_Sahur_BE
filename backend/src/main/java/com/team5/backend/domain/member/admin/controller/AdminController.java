@@ -78,5 +78,4 @@ public class AdminController {
         ProductResDto result = adminService.getProductDetail(productId);
         return RsDataUtil.success("상품 상세 조회 성공", result);
     }
-
 }
