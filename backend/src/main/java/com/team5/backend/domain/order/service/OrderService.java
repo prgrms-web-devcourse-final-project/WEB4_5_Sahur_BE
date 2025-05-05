@@ -59,16 +59,13 @@ public class OrderService {
 
 	@Transactional(readOnly = true)
 	public Page<Order> getOrdersByMember(Long memberId, String status, Pageable pageable) {
-		List<OrderStatus> statusList = null;
-
 		if ("inProgress".equalsIgnoreCase(status)) {
-			statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
-		} else if ("canceled". equalsIgnoreCase(status)) {
-			statusList = List.of(OrderStatus.CANCELED);
-		}
-
-		if (statusList != null) {
+			List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
 			return orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
+		} else if ("canceled".equalsIgnoreCase(status)) {
+			return orderRepository.findByMember_MemberIdAndStatusIn(
+				memberId, List.of(OrderStatus.CANCELED), pageable
+			);
 		} else {
 			return orderRepository.findByMember_MemberId(memberId, pageable);
 		}
