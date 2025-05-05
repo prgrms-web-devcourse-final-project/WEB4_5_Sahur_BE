@@ -46,6 +46,13 @@ public class AdminService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_NOT_FOUND));
 
+        ProductRequest productRequest = productRequestRepository.findById(request.getProductRequestId())
+                .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_REQUEST_NOT_FOUND));
+
+        if (productRequest.getStatus() != ProductRequestStatus.APPROVED) {
+            throw new CustomException(AdminErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+        }
+
         GroupBuy groupBuy = GroupBuy.builder()
                 .product(product)
                 .targetParticipants(request.getTargetParticipants())

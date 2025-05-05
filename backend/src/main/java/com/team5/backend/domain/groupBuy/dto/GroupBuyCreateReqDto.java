@@ -18,4 +18,6 @@ public class GroupBuyCreateReqDto {
     private Integer round;
     @NotNull
     private LocalDateTime deadline;
+    @NotNull
+    private Long productRequestId;
 }
