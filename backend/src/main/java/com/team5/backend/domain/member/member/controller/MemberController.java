@@ -1,5 +1,6 @@
 package com.team5.backend.domain.member.member.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
@@ -9,7 +10,11 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -19,12 +24,14 @@ public class MemberController {
     private final MemberService memberService;
     private final AuthService authService;
     private final MailService mailService;
+    private final ObjectMapper objectMapper;
 
     // 회원 생성
-    @PostMapping("/auth/signup")
-    public RsData<SignupResDto> signup(@Valid @RequestBody SignupReqDto signupReqDto) {
+    @PostMapping(value = "/auth/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RsData<SignupResDto> signup(@RequestPart("memberData") @Valid SignupReqDto signupReqDto,
+                                       @RequestPart(value = "image", required = false) MultipartFile profileImage) throws IOException {
 
-        SignupResDto signupResDto = memberService.signup(signupReqDto);
+        SignupResDto signupResDto = memberService.signup(signupReqDto, profileImage);
         return new RsData<>("201", "회원가입에 성공했습니다.", signupResDto);
     }
 

@@ -9,6 +9,8 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
+import com.team5.backend.global.util.ImageUtil;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
 @Service
@@ -29,13 +34,13 @@ public class MemberService {
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    private final ImageUtil imageUtil;
 
     private final HistoryRepository historyRepository;
 
     // 회원 생성
     @Transactional
-    public SignupResDto signup(SignupReqDto signupReqDto) {
-
+    public SignupResDto signup(SignupReqDto signupReqDto, MultipartFile profileImage) throws IOException {
         String email = signupReqDto.getEmail();
 
         // 이메일 중복 검사
@@ -57,10 +62,14 @@ public class MemberService {
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupReqDto.getPassword());
 
-        // 프로필 이미지가 null이면 기본 이미지로 설정
-        String imageUrl = signupReqDto.getImageUrl();
-        if (imageUrl == null || imageUrl.trim().isEmpty()) {
-            imageUrl = "/images/default-profile.png";
+        // 프로필 이미지 처리
+        String imageUrl = "/images/default-profile.png"; // 기본값
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // 이미지가 제공된 경우 업로드
+            imageUrl = imageUtil.saveImage(profileImage);
+            log.info("프로필 이미지 업로드: {}", imageUrl);
+        } else {
             log.info("기본 이미지 설정");
         }
 
@@ -214,5 +223,24 @@ public class MemberService {
         return NicknameCheckResDto.builder()
                 .exists(exists)
                 .build();
+    }
+
+    @Transactional
+    public String uploadProfileImage(Long memberId, MultipartFile profileImage) throws IOException {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
+
+        // 기존 프로필 이미지 삭제 (선택 사항)
+        if (member.getImageUrl() != null) {
+            imageUtil.deleteImage(member.getImageUrl());
+        }
+
+        // 새 이미지 저장
+        String profileImageUrl = imageUtil.saveImage(profileImage);
+        member.setImageUrl(profileImageUrl);
+        memberRepository.save(member);
+
+        return profileImageUrl; // 저장된 이미지 경로 반환
     }
 }
