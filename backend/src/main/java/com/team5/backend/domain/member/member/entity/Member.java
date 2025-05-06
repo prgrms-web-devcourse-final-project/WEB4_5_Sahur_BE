@@ -1,5 +1,6 @@
 package com.team5.backend.domain.member.member.entity;
 
+import com.team5.backend.global.entity.Address;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,8 +40,8 @@ public class Member {
     @Column(name = "updatedAt", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "address", nullable = false)
-    private String address;
+    @Embedded
+    private Address address;
 
     @Column(name = "imageUrl")
     private String imageUrl;

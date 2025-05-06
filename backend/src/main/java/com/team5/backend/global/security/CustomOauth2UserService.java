@@ -77,7 +77,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .nickname(username) // 프로바이더_ID를 기본 닉네임으로 설정
                     .name(oAuth2UserInfo.getName() != null ? oAuth2UserInfo.getName() : username) // 이름 정보가 있으면 사용, 없으면 username 사용
                     .password(password)
-                    .address("") // 기본 주소는 빈 문자열로 설정 (나중에 사용자가 업데이트할 수 있도록)
+                    .address(null) // 기본 주소는 빈 문자열로 설정 (나중에 사용자가 업데이트할 수 있도록)
                     .imageUrl(imageUrl) // 프로필 이미지 가져와서 설정
                     .role(Role.USER)
                     .emailVerified(true) // OAuth 로그인은 이메일이 검증된 것으로 간주
