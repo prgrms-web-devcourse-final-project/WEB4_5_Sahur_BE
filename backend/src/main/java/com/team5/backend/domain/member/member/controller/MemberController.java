@@ -47,10 +47,10 @@ public class MemberController {
 
     // 회원 수정
     @PatchMapping("/members/modify")
-    public RsData<GetMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token, @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
+    public RsData<PatchMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token, @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
         GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
-        GetMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
+        PatchMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
 
         return new RsData<>("200", "회원 정보가 수정되었습니다.", updatedMember);
     }

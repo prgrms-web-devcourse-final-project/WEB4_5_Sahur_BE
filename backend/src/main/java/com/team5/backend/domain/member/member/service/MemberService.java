@@ -107,7 +107,7 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public GetMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
+    public PatchMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
 
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -154,7 +154,7 @@ public class MemberService {
 
         Member updatedMember = memberRepository.save(existingMember);
 
-        return GetMemberResDto.fromEntity(updatedMember);
+        return new PatchMemberResDto(updatedMember.getMemberId(), "회원 정보가 성공적으로 수정되었습니다.");
     }
 
     // 회원 삭제

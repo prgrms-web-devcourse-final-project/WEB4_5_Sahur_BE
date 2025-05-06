@@ -18,20 +18,20 @@ import java.util.regex.Pattern;
 @Component
 public class ImageUtil {
 
-//    @Value("${cloud.aws.credentials.access-key}")
-//    private String accessKey;
-//
-//    @Value("${cloud.aws.credentials.secret-key}")
-//    private String secretKey;
-//
-//    @Value("${cloud.aws.region.static}")
-//    private String region;
-//
-//    @Value("${cloud.aws.s3.bucket}")
-//    private String bucketName;
-//
-//    @Value("${cloud.aws.s3.base-url}")
-//    private String baseUrl;
+    @Value("${cloud.aws.credentials.access-key}")
+    private String accessKey;
+
+    @Value("${cloud.aws.credentials.secret-key}")
+    private String secretKey;
+
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
+
+    @Value("${cloud.aws.s3.base-url}")
+    private String baseUrl;
 
     // S3 클라이언트 초기화
     private S3Client getS3Client() {
