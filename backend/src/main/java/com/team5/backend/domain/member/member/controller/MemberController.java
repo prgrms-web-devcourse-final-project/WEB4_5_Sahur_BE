@@ -1,11 +1,13 @@
 package com.team5.backend.domain.member.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
 import com.team5.backend.global.dto.RsData;
+import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.exception.code.CommonErrorCode;
+import com.team5.backend.global.exception.code.MemberErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -24,7 +26,6 @@ public class MemberController {
     private final MemberService memberService;
     private final AuthService authService;
     private final MailService mailService;
-    private final ObjectMapper objectMapper;
 
     // 회원 생성
     @PostMapping(value = "/auth/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -32,7 +33,7 @@ public class MemberController {
                                        @RequestPart(value = "image", required = false) MultipartFile profileImage) throws IOException {
 
         SignupResDto signupResDto = memberService.signup(signupReqDto, profileImage);
-        return new RsData<>("201", "회원가입에 성공했습니다.", signupResDto);
+        return RsDataUtil.success("회원가입에 성공했습니다.", signupResDto);
     }
 
     // 회원 조회
@@ -42,7 +43,7 @@ public class MemberController {
         GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
         GetMemberResDto memberResDto = memberService.getMemberById(loggedInMember.getMemberId());
 
-        return new RsData<>("200", "회원 정보를 성공적으로 조회했습니다.", memberResDto);
+        return RsDataUtil.success("회원 정보를 성공적으로 조회했습니다.", memberResDto);
     }
 
     // 회원 수정
@@ -52,7 +53,7 @@ public class MemberController {
         GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
         PatchMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
 
-        return new RsData<>("200", "회원 정보가 수정되었습니다.", updatedMember);
+        return RsDataUtil.success("회원 정보가 수정되었습니다.", updatedMember);
     }
 
     // 회원 탈퇴
@@ -60,7 +61,7 @@ public class MemberController {
     public RsData<Void> deleteMember(@RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
 
         memberService.deleteMember(token, response);
-        return new RsData<>("200", "로그아웃 및 회원 탈퇴가 완료되었습니다.", null);
+        return new RsData<>("200-0", "로그아웃 및 회원 탈퇴가 완료되었습니다.", null);
     }
 
     // 로그인
@@ -68,23 +69,23 @@ public class MemberController {
     public RsData<LoginResDto> login(@Valid @RequestBody LoginReqDto loginReqDto, HttpServletResponse response) {
 
         LoginResDto loginResDto = authService.login(loginReqDto, response);
-        return new RsData<>("200", "로그인에 성공했습니다.", loginResDto);
+        return RsDataUtil.success("로그인에 성공했습니다.", loginResDto);
     }
 
     // 로그아웃
     @PostMapping("/auth/logout")
-    public RsData<LogoutResDto> logout(@RequestHeader(value = "Authorization", required = false) String token,
-                                       HttpServletResponse response) {
+    public RsData<LogoutResDto> logout(@RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
 
         authService.logout(token, response);
-        return new RsData<>("200", "로그아웃에 성공했습니다.", new LogoutResDto());
+        return RsDataUtil.success("로그아웃에 성공했습니다.", new LogoutResDto());
     }
 
     // 토큰 재발급
     @PostMapping("/auth/refresh")
     public RsData<AuthResDto> refreshToken(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
+
         AuthResDto authResDto = authService.refreshToken(refreshToken, response);
-        return new RsData<>("200", "토큰이 재발급되었습니다.", authResDto);
+        return RsDataUtil.success("토큰이 재발급되었습니다.", authResDto);
     }
 
     // 이메일 인증번호 전송
@@ -93,8 +94,8 @@ public class MemberController {
 
         EmailResDto response = mailService.sendAuthCode(emailSendReqDto);
 
-        if (response.isSuccess()) return new RsData<>("200", "인증번호가 이메일로 전송되었습니다.", response);
-        else return new RsData<>("400", "이메일 인증번호 전송에 실패했습니다.", response);
+        if (response.isSuccess()) return RsDataUtil.success("인증번호가 이메일로 전송되었습니다.", response);
+        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
     }
 
     // 이메일 인증번호 검증
@@ -103,8 +104,8 @@ public class MemberController {
 
         EmailResDto response = mailService.validationAuthCode(emailVerificationReqDto);
 
-        if (response.isSuccess()) return new RsData<>("200", "인증이 완료되었습니다.", response);
-        else return new RsData<>("400", "인증번호가 유효하지 않거나 만료되었습니다.", response);
+        if (response.isSuccess()) return RsDataUtil.success("인증이 완료되었습니다.", response);
+        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
     }
 
     // 비밀번호 재설정 이메일 인증번호 전송
@@ -113,8 +114,8 @@ public class MemberController {
 
         EmailResDto response = mailService.sendPasswordResetAuthCode(emailSendReqDto);
 
-        if (response.isSuccess()) return new RsData<>("200", "비밀번호 재설정 인증번호가 이메일로 전송되었습니다.", response);
-        else return new RsData<>("400", "이메일 인증번호 전송에 실패했습니다.", response);
+        if (response.isSuccess()) return RsDataUtil.success("비밀번호 재설정 인증번호가 이메일로 전송되었습니다.", response);
+        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
     }
 
     // 비밀번호 재설정 이메일 인증번호 검증
@@ -123,8 +124,10 @@ public class MemberController {
 
         EmailResDto response = mailService.verifyPasswordResetAuthCode(emailVerificationReqDto);
 
-        if (response.isSuccess()) return new RsData<>("200", "인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
-        else return new RsData<>("400", "인증번호가 유효하지 않거나 만료되었습니다.", response);
+        if (response.isSuccess())
+            return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
+        else
+            return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
     }
 
     // 비밀번호 재설정
@@ -133,8 +136,8 @@ public class MemberController {
 
         PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
 
-        if (response.isSuccess()) return new RsData<>("200", "비밀번호가 성공적으로 재설정되었습니다.", response);
-        else return new RsData<>("400", "비밀번호 재설정에 실패했습니다.", response);
+        if (response.isSuccess()) return RsDataUtil.success("비밀번호가 성공적으로 재설정되었습니다.", response);
+        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
     }
 
     @PostMapping("/members/nickname/check")
@@ -142,7 +145,7 @@ public class MemberController {
 
         NicknameCheckResDto response = memberService.checkNicknameDuplicate(nicknameCheckReqDto.getNickname());
 
-        if (response.isExists()) return new RsData<>("400", "이미 사용 중인 닉네임입니다.", response);
-        else return new RsData<>("200", "사용 가능한 닉네임입니다.", response);
+        if (response.isExists()) return new RsData<>(MemberErrorCode.NICKNAME_ALREADY_USED.getStatus() + "-1", MemberErrorCode.NICKNAME_ALREADY_USED.getMessage(), response);
+        else return RsDataUtil.success("사용 가능한 닉네임입니다.", response);
     }
 }
