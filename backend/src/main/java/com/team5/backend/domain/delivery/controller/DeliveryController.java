@@ -1,16 +1,18 @@
 package com.team5.backend.domain.delivery.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.service.DeliveryService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class DeliveryController {
 
 	private final DeliveryService deliveryService;
 
-	@PostMapping("/orders/{orderId}/delivery")
+	@PostMapping("/order/{orderId}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public DeliveryResDto createDelivery(
 			@PathVariable Long orderId,
@@ -29,7 +31,7 @@ public class DeliveryController {
 		return DeliveryResDto.fromEntity(delivery);
 	}
 
-	@GetMapping("/orders/{orderId}/delivery")
+	@GetMapping("/order/{orderId}")
 	public DeliveryResDto getDeliveryByOrder(@PathVariable Long orderId) {
 		Delivery delivery = deliveryService.getDeliveryByOrder(orderId);
 		return DeliveryResDto.fromEntity(delivery);
