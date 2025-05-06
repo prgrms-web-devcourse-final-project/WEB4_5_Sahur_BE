@@ -8,6 +8,7 @@ on:
       - 'backend/build.gradle'
       - 'backend/settings.gradle'
       - 'backend/Dockerfile'
+      - 'backend/prometheus.yml'
     branches:
       - deploy
 
