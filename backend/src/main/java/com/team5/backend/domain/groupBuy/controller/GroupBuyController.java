@@ -66,11 +66,15 @@ public class GroupBuyController {
 
     @Operation(summary = "공동구매 단건 조회", description = "특정 공동구매의 상세 정보를 조회합니다.")
     @GetMapping("/{groupBuyId}")
-    public RsData<GroupBuyResDto> getGroupBuyById(
-            @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
-        GroupBuyResDto data = groupBuyService.getGroupBuyById(groupBuyId);
+    public RsData<GroupBuyDetailResDto> getGroupBuyById(
+            @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId,
+            @Parameter(description = "Access Token (Bearer 포함)", required = false)
+            @RequestHeader(value = "Authorization", required = false) String token) {
+
+        GroupBuyDetailResDto data = groupBuyService.getGroupBuyById(groupBuyId, token);
         return RsDataUtil.success("공동구매 단건 조회 성공", data);
     }
+
 
     @Operation(summary = "공동구매 수정", description = "전체 필드를 수정합니다.")
     @PutMapping("/{groupBuyId}")
@@ -124,4 +128,6 @@ public class GroupBuyController {
         groupBuyService.closeGroupBuy(groupBuyId);
         return RsDataUtil.success("공동구매 상태 마감 성공");
     }
+
+
 }
