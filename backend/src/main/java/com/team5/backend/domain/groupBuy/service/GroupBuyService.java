@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
@@ -8,6 +9,7 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.util.JwtUtil;
@@ -31,6 +33,8 @@ public class GroupBuyService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
+    private final DibsRepository dibsRepository;
+    private final ReviewRepository reviewRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -67,6 +71,14 @@ public class GroupBuyService {
     }
 
     @Transactional(readOnly = true)
+    public Page<GroupBuyResDto> getAllONGINGGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        Sort sort = getSortForField(sortField);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        Page<GroupBuy> pageResult = groupBuyRepository.findByStatus(GroupBuyStatus.ONGOING, sortedPageable);
+        return pageResult.map(this::toDto);
+    }
+
+    @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
         Sort sort = getSortForField(sortField);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -78,16 +90,49 @@ public class GroupBuyService {
         return switch (sortField) {
             case LATEST -> Sort.by(Sort.Order.desc("createdAt"));
             case POPULAR -> Sort.by(Sort.Order.desc("product.dibCount"));
+            case DEADLINE_SOON -> Sort.by(Sort.Order.asc("deadline"));
             default -> Sort.unsorted();
         };
     }
 
     @Transactional(readOnly = true)
-    public GroupBuyResDto getGroupBuyById(Long id) {
-        return groupBuyRepository.findById(id)
-                .map(this::toDto)
+    public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, String token) {
+        // 공동구매 존재 확인
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        // 오늘 마감인지 확인
+        boolean isTodayDeadline = groupBuy.getDeadline() != null &&
+                groupBuy.getDeadline().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
+
+        // 평균 평점 조회
+        Double averageRate = reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId());
+        if (averageRate == null) averageRate = 0.0;
+
+        boolean isDibs = false;
+
+        // 로그인 여부 확인
+        if (token != null && token.startsWith("Bearer ")) {
+            String rawToken = token.replace("Bearer ", "");
+
+            if (jwtUtil.isTokenBlacklisted(rawToken)) {
+                throw new CustomException(GroupBuyErrorCode.TOKEN_BLACKLISTED);
+            }
+
+            if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
+                throw new CustomException(GroupBuyErrorCode.TOKEN_INVALID);
+            }
+
+            Long memberId = jwtUtil.extractMemberId(rawToken);
+
+            isDibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(
+                    groupBuy.getProduct().getProductId(), memberId
+            ).isPresent();
+        }
+
+        return GroupBuyDetailResDto.fromEntity(groupBuy, isTodayDeadline, isDibs, averageRate);
     }
+
 
     @Transactional
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
@@ -174,6 +219,16 @@ public class GroupBuyService {
         }
 
         groupBuy.setStatus(GroupBuyStatus.CLOSED);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupBuyResDto> getTop3GroupBuysByDibs() {
+        Pageable topThree = PageRequest.of(0, 3);
+        List<GroupBuy> topGroupBuys = groupBuyRepository.findTop3ByDibsOrder(topThree);
+
+        return topGroupBuys.stream()
+                .map(this::toDto)
+                .toList();
     }
 
     /**
