@@ -1,15 +1,17 @@
 package com.team5.backend.domain.delivery.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +61,7 @@ public class DeliveryService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Delivery> getAllDeliveries() {
-		return deliveryRepository.findAll();
+	public Page<Delivery> getAllDeliveries(Pageable pageable) {
+		return deliveryRepository.findAll(pageable);
 	}
 }
