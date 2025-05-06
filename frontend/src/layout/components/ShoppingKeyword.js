@@ -8,18 +8,26 @@ import {
 import style from "../Header.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {faMinus, faXmark} from "@fortawesome/free-solid-svg-icons";
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import clsx from "clsx";
 
-function CustomToggle({ eventKey }) {
+function CustomToggle({ eventKey, keywordList }) {
     const decoratedOnClick = useAccordionButton(eventKey);
     // 현재 열린 아코디언 키를 가져옴
     const currentEventKey = useContext(AccordionContext);
-    console.log(currentEventKey)
+    const [index, setIndex] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setIndex((prev) => (prev + 1) % keywordList.length);
+        }, 5000); // 5초마다 변경
+
+        return () => clearInterval(timer); // 컴포넌트 unmount 시 정리
+    }, []);
     return (
         <Stack direction={"horizontal"} className={style.shoppingKeywordText} onClick={decoratedOnClick}>
-            <span style={{color: "#A855F7", fontWeight: "900", marginRight: "10px"}}>7.</span>
-            커스텀 키보드
+            <span style={{color: "#A855F7", fontWeight: "900", marginRight: "10px"}}>{keywordList[index].order}.</span>
+            {keywordList[index].keyword}
             <span className={clsx("ms-10", currentEventKey.activeEventKey === null ? "ico-collaps-down" : "ico-collaps-up")} />
         </Stack>
     );
@@ -55,7 +63,7 @@ const ShoppingKeyword = () => {
             <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key)}  style={{ width: "350px" }}>
                 <Card style={{ boxShadow: 'none' }}>
                     <Card.Header style={{ border: 'none' }}>
-                        <CustomToggle eventKey={"0"} />
+                        <CustomToggle eventKey={"0"} keywordList={keywordList} />
                     </Card.Header>
                 </Card>
                 <Accordion.Collapse eventKey="0">
