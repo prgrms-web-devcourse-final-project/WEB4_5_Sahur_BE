@@ -107,21 +107,25 @@ public class BaseInitData implements CommandLineRunner {
             int uid = 1;
             for (CategoryType type : CategoryType.values()) {
                 if (type != CategoryType.ALL) {
-                    categories.add(categoryRepository.save(Category.builder().category(type).keyword(KeywordType.DEFAULT).uid(uid++).build()));
+                    categories.add(categoryRepository.save(Category.builder()
+                            .category(type)
+                            .keyword(KeywordType.DEFAULT)
+                            .uid(uid++)
+                            .build()));
                 }
             }
 
             List<Member> members = List.of(
-                    createMember("이수민", "alice@example.com", "수민짱", "서울 마포구", "user_alice.jpg"),
-                    createMember("박지훈", "bob@example.com", "지훈이", "대전 서구", "user_bob.jpg"),
-                    createMember("최유리", "carol@example.com", "율무차", "부산 해운대구", "user_carol.jpg"),
-                    createMember("정예린", "yerin@example.com", "예린스타", "인천 연수구", "user_yerin.jpg"),
-                    createMember("김태호", "taeho@example.com", "호박고구마", "광주 북구", "user_taeho.jpg"),
-                    createMember("홍길동", "hong@example.com", "길동쓰", "울산 남구", "user_hong.jpg"),
-                    createMember("신유진", "yujin@example.com", "진진자라", "전주 완산구", "user_yujin.jpg"),
-                    createMember("오준호", "junho@example.com", "준호킹", "대구 수성구", "user_junho.jpg"),
-                    createMember("백민정", "minjung@example.com", "민정이", "수원 영통구", "user_minjung.jpg"),
-                    createMember("한서준", "seojoon@example.com", "서준이", "청주 상당구", "user_seojoon.jpg")
+                    createMember("이수민", "alice@example.com", "수민짱", new Address("04524", "서울 마포구 월드컵북로 396", "102동 1101호"), "user_alice.jpg"),
+                    createMember("박지훈", "bob@example.com", "지훈이", new Address("34121", "대전 서구 둔산로 123", "301호"), "user_bob.jpg"),
+                    createMember("최유리", "carol@example.com", "율무차", new Address("48058", "부산 해운대구 센텀서로 30", "1501호"), "user_carol.jpg"),
+                    createMember("정예린", "yerin@example.com", "예린스타", new Address("21945", "인천 연수구 송도과학로 16", "A동 1804호"), "user_yerin.jpg"),
+                    createMember("김태호", "taeho@example.com", "호박고구마", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg"),
+                    createMember("홍길동", "hong@example.com", "길동쓰", new Address("44720", "울산 남구 돋질로 100", "505호"), "user_hong.jpg"),
+                    createMember("신유진", "yujin@example.com", "진진자라", new Address("54942", "전북 전주시 완산구 홍산로 275", "2003호"), "user_yujin.jpg"),
+                    createMember("오준호", "junho@example.com", "준호킹", new Address("42071", "대구 수성구 동대구로 400", "302호"), "user_junho.jpg"),
+                    createMember("백민정", "minjung@example.com", "민정이", new Address("16677", "수원 영통구 광교중앙로 170", "B동 1203호"), "user_minjung.jpg"),
+                    createMember("한서준", "seojoon@example.com", "서준이", new Address("28502", "청주 상당구 상당로 69", "3층 301호"), "user_seojoon.jpg")
             );
 
             for (int i = 0; i < 20; i++) {
@@ -166,7 +170,7 @@ public class BaseInitData implements CommandLineRunner {
 
                 DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
                 deliveryRepository.save(Delivery.builder()
-                        .order(order).address(buyer.getAddress()).pccc(null)
+                        .order(order).address(buyer.getAddress().getStreetAdr()).pccc(null)
                         .contact("010-0000-00" + String.format("%02d", i))
                         .status(deliveryStatus)
                         .shipping("TRK" + String.format("%07d", i * 37))
@@ -205,7 +209,7 @@ public class BaseInitData implements CommandLineRunner {
         }
     }
 
-    private Member createMember(String name, String email, String nickname, String address, String imageFile) {
+    private Member createMember(String name, String email, String nickname, Address address, String imageFile) {
         return memberRepository.save(Member.builder()
                 .name(name)
                 .email(email)
