@@ -19,5 +19,7 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     List<GroupBuy> findByStatus(GroupBuyStatus status);
     Page<GroupBuy> findByGroupBuyIdIn(List<Long> groupBuyIds, Pageable pageable);
     Page<GroupBuy> findByStatus(GroupBuyStatus status, Pageable pageable);
+    @Query("SELECT g FROM GroupBuy g WHERE g.status = 'ONGOING' ORDER BY g.product.dibCount DESC")
+    List<GroupBuy> findTop3ByDibsOrder(Pageable pageable);
 
 }
