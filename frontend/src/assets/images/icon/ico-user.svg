@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 100 100">
+    <!-- 바깥 원 -->
+    <circle cx="50" cy="50" r="48" stroke="black" stroke-width="4" fill="none"/>
+
+    <!-- 머리와 몸통을 하나의 경로로 묶음 -->
+    <path d="
+    M36,65
+    Q50,50 64,65
+    C70,70 72,80 72,85
+    H28
+    C28,80 30,70 36,65
+    Z
+
+    M50,30
+    A12,12 0 1,1 49.9,30
+    Z
+  " fill="black"/>
+</svg>

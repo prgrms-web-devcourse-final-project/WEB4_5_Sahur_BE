@@ -1,0 +1,41 @@
+server:
+  port: 8080
+  tomcat:
+    max-swallow-size: 1GB
+    max-http-form-post-size: 1GB
+
+spring:
+  output:
+    ansi:
+      enabled: always
+
+  profiles:
+    active: dev
+    include: secret
+
+  servlet:
+    multipart:
+      max-request-size: 5MB
+      max-file-size: ${spring.servlet.multipart.max-request-size}
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8
+
+custom:
+  site:
+    backUrl: "${custom.dev.backUrl}"
+    frontUrl: "${custom.dev.frontUrl}"
+
+  prod:
+    domain: devapi.store
+    backUrl: "https://api.${custom.prod.domain}"
+    frontUrl: "https://www.${custom.prod.domain}"
+
+  dev:
+    domain: localhost
+    backUrl: "http://${custom.dev.domain}:${server.port}"
+    frontUrl: "http://${custom.dev.domain}:3000"
