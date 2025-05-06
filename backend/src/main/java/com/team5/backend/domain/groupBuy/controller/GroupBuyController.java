@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "GroupBuy", description = "공동구매 관련 API")
 @RestController
 @RequestMapping("/api/v1/groupBuy")
@@ -128,6 +130,14 @@ public class GroupBuyController {
         groupBuyService.closeGroupBuy(groupBuyId);
         return RsDataUtil.success("공동구매 상태 마감 성공");
     }
+
+    @Operation(summary = "인기순 Top 3 공동구매 조회", description = "Dib(관심상품) 수 기준 상위 3개의 공동구매를 조회합니다.")
+    @GetMapping("/popular")
+    public RsData<List<GroupBuyResDto>> getTop3GroupBuysByDibs() {
+        List<GroupBuyResDto> responses = groupBuyService.getTop3GroupBuysByDibs();
+        return RsDataUtil.success("Top 3 공동구매 조회 성공", responses);
+    }
+
 
 
 }
