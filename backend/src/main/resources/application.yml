@@ -23,16 +23,6 @@ spring:
     serialization:
       fail-on-empty-beans: false
 
-# 프로메테우스 설정
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  endpoint:
-    prometheus:
-      access: unrestricted
-
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
