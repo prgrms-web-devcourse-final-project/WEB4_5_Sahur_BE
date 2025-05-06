@@ -26,6 +26,9 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
+    /**
+     * 상품 등록
+     */
     @Transactional
     public ProductResDto createProduct(ProductCreateReqDto request) {
         Category category = categoryRepository.findById(request.getCategoryId())
@@ -45,6 +48,9 @@ public class ProductService {
         return ProductResDto.fromEntity(savedProduct);
     }
 
+    /**
+     * 전체 상품 조회 (카테고리 또는 키워드 기준 필터링 포함, 페이징)
+     */
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(String category, String keyword, Pageable pageable) {
         if (category != null) {
@@ -56,6 +62,9 @@ public class ProductService {
         }
     }
 
+    /**
+     * 단건 상품 조회
+     */
     @Transactional(readOnly = true)
     public ProductResDto getProductById(Long productId) {
         Product product = productRepository.findById(productId)
@@ -63,6 +72,9 @@ public class ProductService {
         return ProductResDto.fromEntity(product);
     }
 
+    /**
+     * 상품 정보 수정
+     */
     @Transactional
     public ProductResDto updateProduct(Long productId, ProductUpdateReqDto request) {
         Product product = productRepository.findById(productId)
@@ -77,6 +89,9 @@ public class ProductService {
         return ProductResDto.fromEntity(updatedProduct);
     }
 
+    /**
+     * 상품 삭제
+     */
     @Transactional
     public void deleteProduct(Long productId) {
         if (!productRepository.existsById(productId)) {
@@ -85,6 +100,9 @@ public class ProductService {
         productRepository.deleteById(productId);
     }
 
+    /**
+     * 찜 수 조회
+     */
     @Transactional(readOnly = true)
     public Long getDibCount(Long productId) {
         Product product = productRepository.findById(productId)
