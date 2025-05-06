@@ -1,5 +1,3 @@
-// 전체 리팩토링된 BaseInitData - 모든 엔티티 흐름 연결
-
 package com.team5.backend.global.init;
 
 import com.team5.backend.domain.category.entity.*;
@@ -36,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
@@ -57,137 +54,167 @@ public class BaseInitData implements CommandLineRunner {
     private final DibsRepository dibsRepository;
     private final HistoryRepository historyRepository;
 
-    private static final List<String> PRODUCT_URLS = List.of(
-            "https://example.com/item1",
-            "https://example.com/item2",
-            "https://example.com/item3"
+    private final List<String> reviewComments = List.of(
+            "배송도 빠르고 제품도 만족해요!",
+            "디자인이 깔끔하고 성능도 좋습니다.",
+            "가격 대비 괜찮은 선택이었어요.",
+            "재구매 의사 있습니다!",
+            "기대한 만큼의 품질은 아니네요.",
+            "색상이 사진과 조금 달라요.",
+            "친구 추천으로 샀는데 잘 산 것 같아요.",
+            "설명서가 불친절해서 아쉬웠어요.",
+            "조립이 쉬워서 만족합니다.",
+            "소음이 좀 있지만 괜찮은 편입니다."
     );
 
-    private static final List<String> NAMES = List.of("김민지", "박철수", "이영희", "정다은", "최준혁", "한서준", "오유진", "유재석", "신동엽", "장도연");
-    private static final List<String> NICKS = List.of("코딩천재", "디버깅왕", "파라미터수집가", "테스트의신", "프론트킬러", "백엔드마스터", "DB매니아", "API지배자", "모니터링러", "도커장인");
-    private static final List<String> ADDRS = List.of("서울", "부산", "인천", "대구", "광주", "대전", "수원", "울산", "제주", "청주");
-    private static final List<String> REVIEWS = List.of("정말 만족합니다!", "배송이 느렸어요", "품질이 별로예요", "친구 추천으로 샀어요", "다시 구매하고 싶어요");
-    private static final List<String> PRODUCT_TITLES = List.of("갤럭시 S24", "아이폰 15", "에어팟 맥스", "키보드", "안마의자", "커피머신", "책상", "시계", "사전", "헤드폰");
-    private static final List<String> PRODUCT_DESCS = List.of("최신 기능", "가성비 최고", "학생 필수", "부모님 선물", "편리함", "튼튼함", "예쁨");
-    private static final List<NotificationType> NOTI_TYPES = Arrays.asList(NotificationType.ORDER, NotificationType.MESSAGE, NotificationType.EVENT, NotificationType.ETC);
+    private final List<String> productTitles = List.of(
+            "트렌디한 여름 반팔티",
+            "프리미엄 가죽 지갑",
+            "촉촉한 수분 크림",
+            "고출력 블루투스 스피커",
+            "모던 디자인 책상",
+            "다기능 전기밥솥",
+            "견고한 철제 선반",
+            "유기농 곡물 세트",
+            "무릎 보호 스포츠 레깅스",
+            "차량용 방향제",
+            "베스트셀러 에세이집",
+            "친환경 유아용 식기",
+            "고양이 자동 화장실"
+    );
+
+    private final List<String> productDescriptions = List.of(
+            "여름에 입기 좋은 시원한 소재의 반팔티입니다.",
+            "소가죽으로 제작된 고급스러운 남성용 지갑.",
+            "건조한 피부를 위한 보습 특화 크림입니다.",
+            "실내외 모두 사용 가능한 대출력 스피커.",
+            "공간 활용에 탁월한 모던 스타일의 책상.",
+            "다양한 기능을 탑재한 최신형 전기밥솥.",
+            "튼튼하고 조립이 쉬운 철제 선반입니다.",
+            "100% 유기농 인증을 받은 건강한 곡물 세트.",
+            "운동 시 무릎을 보호하는 기능성 레깅스.",
+            "장시간 지속되는 차량용 방향제.",
+            "많은 이들에게 감동을 준 인기 에세이.",
+            "아이 건강을 생각한 친환경 식기 세트.",
+            "편리한 청소 기능이 탑재된 고양이 화장실."
+    );
 
     @Override
     public void run(String... args) {
         if (memberRepository.count() == 0) {
-            List<CategoryType> categoryTypes = Arrays.asList(CategoryType.values());
             List<Category> categories = new ArrayList<>();
-            for (int i = 0; i < categoryTypes.size(); i++) {
-                categories.add(categoryRepository.save(Category.builder()
-                        .category(categoryTypes.get(i))
-                        .keyword(KeywordType.DEFAULT)
-                        .uid(i + 1)
-                        .build()));
+            int uid = 1;
+            for (CategoryType type : CategoryType.values()) {
+                if (type != CategoryType.ALL) {
+                    categories.add(categoryRepository.save(Category.builder().category(type).keyword(KeywordType.DEFAULT).uid(uid++).build()));
+                }
             }
 
-            List<Member> members = new ArrayList<>();
-            for (int i = 0; i < 30; i++) {
-                members.add(memberRepository.save(Member.builder()
-                        .name(NAMES.get(i % NAMES.size()))
-                        .email("member" + i + "@example.com")
-                        .password(passwordEncoder.encode("1234"))
-                        .nickname(NICKS.get(i % NICKS.size()))
-                        .address(ADDRS.get(i % ADDRS.size()))
-                        .role(Role.USER)
-                        .emailVerified(true)
-                        .imageUrl("http://example.com/user" + i + ".jpg")
-                        .build()));
-            }
+            List<Member> members = List.of(
+                    createMember("이수민", "alice@example.com", "수민짱", "서울 마포구", "user_alice.jpg"),
+                    createMember("박지훈", "bob@example.com", "지훈이", "대전 서구", "user_bob.jpg"),
+                    createMember("최유리", "carol@example.com", "율무차", "부산 해운대구", "user_carol.jpg"),
+                    createMember("정예린", "yerin@example.com", "예린스타", "인천 연수구", "user_yerin.jpg"),
+                    createMember("김태호", "taeho@example.com", "호박고구마", "광주 북구", "user_taeho.jpg"),
+                    createMember("홍길동", "hong@example.com", "길동쓰", "울산 남구", "user_hong.jpg"),
+                    createMember("신유진", "yujin@example.com", "진진자라", "전주 완산구", "user_yujin.jpg"),
+                    createMember("오준호", "junho@example.com", "준호킹", "대구 수성구", "user_junho.jpg"),
+                    createMember("백민정", "minjung@example.com", "민정이", "수원 영통구", "user_minjung.jpg"),
+                    createMember("한서준", "seojoon@example.com", "서준이", "청주 상당구", "user_seojoon.jpg")
+            );
 
-            List<Product> products = new ArrayList<>();
-            for (int i = 0; i < 30; i++) {
-                Category category = categories.get(i % categories.size());
+            for (int i = 0; i < 20; i++) {
                 Member requester = members.get(i % members.size());
-                String title = PRODUCT_TITLES.get(i % PRODUCT_TITLES.size()) + " 요청형";
+                Category category = categories.get(i % categories.size());
+                String title = productTitles.get(i % productTitles.size());
+                String description = productDescriptions.get(i % productDescriptions.size());
+                String etc = "옵션: 다양함 / 이미지: https://img.example.com/prod_" + i + ".jpg";
 
                 productRequestRepository.save(ProductRequest.builder()
                         .member(requester)
                         .category(category)
-                        .title(title)
-                        .productUrl(PRODUCT_URLS.get(i % PRODUCT_URLS.size()))
-                        .etc("원하는 색상은 블랙입니다.")
+                        .title(title + " 요청")
+                        .productUrl("https://example.com/item" + i)
+                        .etc(etc)
                         .status(ProductRequestStatus.APPROVED)
-                        .createdAt(LocalDateTime.now())
+                        .createdAt(LocalDateTime.now().minusDays(i % 7))
                         .build());
 
-                products.add(productRepository.save(Product.builder()
-                                .category(category)
-                                .title(title)
-                                .description(PRODUCT_DESCS.get(i % PRODUCT_DESCS.size()))
-                                .imageUrl("http://example.com/prod" + i + ".jpg")
-                                .price(10000 + i * 1000)
-                        .dibCount(ThreadLocalRandom.current().nextLong(1, 50))
-                        .createdAt(LocalDateTime.now().minusDays(i % 7))
-                        .build()));
-            }
+                Product product = productRepository.save(Product.builder()
+                        .category(category)
+                        .title(title)
+                        .description(description)
+                        .imageUrl("https://img.example.com/prod_" + i + ".jpg")
+                        .price((int)(100000 + (i * 7000L)))
+                        .dibCount((long) (3 + (i % 10)))
+                        .createdAt(LocalDateTime.now().minusDays(i % 5))
+                        .build());
 
-            for (Product product : products) {
                 GroupBuy groupBuy = groupBuyRepository.save(GroupBuy.builder()
                         .product(product)
-                        .targetParticipants(10)
-                        .currentParticipantCount(ThreadLocalRandom.current().nextInt(1, 10))
-                        .round(ThreadLocalRandom.current().nextInt(1, 4))
-                        .deadline(LocalDateTime.now().plusDays(7))
-                        .status(ThreadLocalRandom.current().nextBoolean() ? GroupBuyStatus.ONGOING : GroupBuyStatus.CLOSED)
+                        .targetParticipants(5 + (i % 4))
+                        .currentParticipantCount((i % 6) + 1)
+                        .round(1 + (i % 3))
+                        .deadline(LocalDateTime.now().plusDays(5 - (i % 3)))
+                        .status(i % 2 == 0 ? GroupBuyStatus.ONGOING : GroupBuyStatus.CLOSED)
                         .build());
 
-                for (int j = 0; j < 3; j++) {
-                    Member member = members.get((j + product.getProductId().intValue()) % members.size());
-                    Order order = orderRepository.save(Order.create(member, groupBuy, product, ThreadLocalRandom.current().nextInt(1, 3)));
-                    paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
+                Member buyer = members.get((i + 1) % members.size());
+                Order order = orderRepository.save(Order.create(buyer, groupBuy, product, 1));
+                paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
 
-                    DeliveryStatus deliveryStatus = DeliveryStatus.values()[ThreadLocalRandom.current().nextInt(DeliveryStatus.values().length)];
-                    deliveryRepository.save(Delivery.builder()
-                            .order(order)
-                            .address(member.getAddress())
-                            .pccc(null)
-                            .contact("010-" + String.format("%04d", new Random().nextInt(10000)) + "-" + String.format("%04d", new Random().nextInt(10000)))
-                            .status(deliveryStatus)
-                            .shipping("우체국택배")
-                            .build());
+                DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
+                deliveryRepository.save(Delivery.builder()
+                        .order(order).address(buyer.getAddress()).pccc(null)
+                        .contact("010-0000-00" + String.format("%02d", i))
+                        .status(deliveryStatus)
+                        .shipping("TRK" + String.format("%07d", i * 37))
+                        .build());
 
-                    dibsRepository.save(Dibs.builder()
-                            .member(member)
-                            .product(product)
-                            .build());
+                dibsRepository.save(Dibs.builder().member(buyer).product(product).build());
+                dibsRepository.save(Dibs.builder().member(requester).product(product).build());
 
-                    History history = historyRepository.save(History.builder()
-                            .member(member)
-                            .product(product)
-                            .groupBuy(groupBuy)
-                            .order(order)
-                            .writable(j % 2 == 0)
-                            .createdAt(LocalDateTime.now())
-                            .build());
+                History history = historyRepository.save(History.builder()
+                        .member(buyer).product(product).groupBuy(groupBuy).order(order)
+                        .writable(i % 2 == 0).createdAt(LocalDateTime.now()).build());
 
-                    if (j % 2 == 0) {
-                        reviewRepository.save(Review.builder()
-                                .member(member)
-                                .product(product)
-                                .history(history)
-                                .comment(REVIEWS.get(j % REVIEWS.size()))
-                                .rate(3 + (j % 3))
-                                .createdAt(LocalDateTime.now())
-                                .imageUrl("http://example.com/review" + product.getProductId() + ".jpg")
-                                .build());
-                    }
+                reviewRepository.save(Review.builder()
+                        .member(buyer).product(product).history(history)
+                        .comment(reviewComments.get(i % reviewComments.size()))
+                        .rate(3 + (i % 3)).createdAt(LocalDateTime.now())
+                        .imageUrl("https://example.com/review/img" + i + ".jpg").build());
 
+                notificationRepository.save(Notification.builder()
+                        .member(buyer).type(NotificationType.ORDER)
+                        .title("주문 완료 알림").message(product.getTitle() + " 주문이 완료되었습니다.")
+                        .url("/orders/" + order.getOrderId()).read(false).createdAt(LocalDateTime.now()).build());
+
+                if (i % 4 == 0) {
                     notificationRepository.save(Notification.builder()
-                            .member(member)
-                            .type(NOTI_TYPES.get(j % NOTI_TYPES.size()))
-                            .title(NOTI_TYPES.get(j % NOTI_TYPES.size()).name() + " 알림")
-                            .message("이벤트 발생: " + NOTI_TYPES.get(j % NOTI_TYPES.size()).name())
-                            .url("/orders/" + order.getOrderId())
-                            .read(false)
-                            .createdAt(LocalDateTime.now())
-                            .build());
+                            .member(buyer).type(NotificationType.EVENT)
+                            .title("이벤트 소식 #" + i + "").message("신규 혜택 오픈!")
+                            .url("/events/" + i).read(false).createdAt(LocalDateTime.now()).build());
+                } else {
+                    notificationRepository.save(Notification.builder()
+                            .member(requester).type(NotificationType.ETC)
+                            .title("시스템 공지").message("정기 점검 예정 안내")
+                            .url("/notice").read(false).createdAt(LocalDateTime.now()).build());
                 }
             }
         }
+    }
+
+    private Member createMember(String name, String email, String nickname, String address, String imageFile) {
+        return memberRepository.save(Member.builder()
+                .name(name)
+                .email(email)
+                .password(passwordEncoder.encode("password123!"))
+                .nickname(nickname)
+                .address(address)
+                .role(Role.USER)
+                .emailVerified(true)
+                .imageUrl("http://example.com/" + imageFile)
+                .build());
     }
 }
 
