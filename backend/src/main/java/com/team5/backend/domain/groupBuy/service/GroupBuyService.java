@@ -64,6 +64,14 @@ public class GroupBuyService {
     }
 
     @Transactional(readOnly = true)
+    public Page<GroupBuyResDto> getAllONGINGGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        Sort sort = getSortForField(sortField);
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        Page<GroupBuy> pageResult = groupBuyRepository.findByStatus(GroupBuyStatus.ONGOING, sortedPageable);
+        return pageResult.map(this::toDto);
+    }
+
+    @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
         Sort sort = getSortForField(sortField);
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
@@ -75,6 +83,7 @@ public class GroupBuyService {
         return switch (sortField) {
             case LATEST -> Sort.by(Sort.Order.desc("createdAt"));
             case POPULAR -> Sort.by(Sort.Order.desc("product.dibCount"));
+            case DEADLINE_SOON -> Sort.by(Sort.Order.asc("deadline"));
             default -> Sort.unsorted();
         };
     }
