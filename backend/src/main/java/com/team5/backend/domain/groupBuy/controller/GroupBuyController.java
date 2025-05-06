@@ -31,15 +31,26 @@ public class GroupBuyController {
         return RsDataUtil.success("공동구매 생성 성공", response);
     }
 
-    @Operation(summary = "전체 공동구매 조회", description = "전체 공동구매 목록을 조회합니다.")
-    @GetMapping
-    public RsData<Page<GroupBuyResDto>> getAllGroupBuys(
+    @Operation(summary = "전체 공동구매 조회 (전체)", description = "모든 상태의 공동구매 목록을 조회합니다.")
+    @GetMapping("/list")
+    public RsData<Page<GroupBuyResDto>> getAllGroupBuysForAdmin(
             @Parameter(description = "페이지 정보") @PageableDefault(size = 5) Pageable pageable,
             @Parameter(description = "정렬 기준", example = "LATEST")
             @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
 
         Page<GroupBuyResDto> responses = groupBuyService.getAllGroupBuys(pageable, sortField);
         return RsDataUtil.success("공동구매 전체 조회 성공", responses);
+    }
+
+    @Operation(summary = "진행 중 공동구매 조회 (진행중인 것만)", description = "진행 중인 공동구매만 조회합니다.")
+    @GetMapping("/list/onGoing")
+    public RsData<Page<GroupBuyResDto>> getAllOngoingGroupBuys(
+            @Parameter(description = "페이지 정보") @PageableDefault(size = 8) Pageable pageable,
+            @Parameter(description = "정렬 기준", example = "LATEST")
+            @RequestParam(value = "sortField", defaultValue = "LATEST") GroupBuySortField sortField) {
+
+        Page<GroupBuyResDto> responses = groupBuyService.getAllONGINGGroupBuys(pageable, sortField);
+        return RsDataUtil.success("진행 중 공동구매 조회 성공", responses);
     }
 
     @Operation(summary = "오늘 마감 공동구매 조회", description = "오늘 마감 예정인 공동구매 목록을 조회합니다.")
@@ -53,10 +64,11 @@ public class GroupBuyController {
         return RsDataUtil.success("오늘 마감 공동구매 조회 성공", responses);
     }
 
+    @Operation(summary = "공동구매 단건 조회", description = "특정 공동구매의 상세 정보를 조회합니다.")
     @GetMapping("/{groupBuyId}")
     public RsData<GroupBuyResDto> getGroupBuyById(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
-        GroupBuyResDto data = groupBuyService.getGroupBuyById(groupBuyId); // Optional 제거
+        GroupBuyResDto data = groupBuyService.getGroupBuyById(groupBuyId);
         return RsDataUtil.success("공동구매 단건 조회 성공", data);
     }
 
@@ -95,7 +107,7 @@ public class GroupBuyController {
     }
 
     @Operation(summary = "회원별 참여 공동구매 조회", description = "회원이 참여한 공동구매 목록을 조회합니다.")
-    @GetMapping("/members")
+    @GetMapping("/member")
     public RsData<Page<GroupBuyResDto>> getGroupBuysByMemberId(
             @Parameter(description = "Access Token (Bearer 포함)", required = true)
             @RequestHeader(value = "Authorization", required = false) String token,
