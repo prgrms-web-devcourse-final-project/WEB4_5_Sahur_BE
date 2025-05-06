@@ -23,6 +23,15 @@ spring:
     serialization:
       fail-on-empty-beans: false
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      access: unrestricted
+
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
