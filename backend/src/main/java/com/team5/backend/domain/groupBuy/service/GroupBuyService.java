@@ -218,6 +218,16 @@ public class GroupBuyService {
         groupBuy.setStatus(GroupBuyStatus.CLOSED);
     }
 
+    @Transactional(readOnly = true)
+    public List<GroupBuyResDto> getTop3GroupBuysByDibs() {
+        Pageable topThree = PageRequest.of(0, 3);
+        List<GroupBuy> topGroupBuys = groupBuyRepository.findTop3ByDibsOrder(topThree);
+
+        return topGroupBuys.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     /**
      * 공동구매 마감이 오늘인지 판단하고 DTO로 변환
      */
