@@ -33,6 +33,7 @@ dependencies {
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0'
 
     runtimeOnly("com.h2database:h2")
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -40,6 +41,11 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // spring 상태 모니터링 (HAproxy, 프로메테우스)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // 프로메테우스
+    implementation ("io.micrometer:micrometer-registry-prometheus")
 
     // 스웨거
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
