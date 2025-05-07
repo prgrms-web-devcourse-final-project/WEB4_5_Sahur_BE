@@ -33,6 +33,7 @@ public class JwtUtil {
     private static final String REDIS_ACCESS_TOKEN_PREFIX = "access:";
     private static final String REDIS_REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String REDIS_BLACKLIST_PREFIX = "blacklist:";
+    private static final String REDIS_REFRESH_BLACKLIST_PREFIX = "refresh_blacklist:";
 
     // 액세스 토큰 생성
     public String generateAccessToken(Long memberId, String email, String role) {
@@ -85,9 +86,8 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 토큰 블랙리스트에 추가 (로그아웃 시 사용)
+    // 액세스 토큰 블랙리스트에 추가 (로그아웃 시 사용)
     public void addToBlacklist(String token) {
-
         // 토큰의 남은 유효 시간 계산
         long expiration = getClaims(token).getExpiration().getTime();
         long now = System.currentTimeMillis();
@@ -108,27 +108,61 @@ public class JwtUtil {
         }
     }
 
+    // 리프레시 토큰 블랙리스트에 추가
+    public void addRefreshTokenToBlacklist(String refreshToken) {
+        // 토큰의 남은 유효 시간 계산
+        long expiration = getClaims(refreshToken).getExpiration().getTime();
+        long now = System.currentTimeMillis();
+        long ttl = expiration - now;
+
+        if (ttl > 0) {
+            // 블랙리스트에 리프레시 토큰 추가 (만료 시간까지만 저장)
+            redisTemplate.opsForValue().set(
+                    REDIS_REFRESH_BLACKLIST_PREFIX + refreshToken,
+                    "logout",
+                    ttl,
+                    TimeUnit.MILLISECONDS
+            );
+
+            // 사용자의 리프레시 토큰도 Redis에서 삭제
+            String email = extractEmail(refreshToken);
+            redisTemplate.delete(REDIS_REFRESH_TOKEN_PREFIX + email);
+        }
+    }
+
     // Redis에서 리프레시 토큰 검증
     public boolean validateRefreshTokenInRedis(String email, String refreshToken) {
-
         String storedToken = redisTemplate.opsForValue().get(REDIS_REFRESH_TOKEN_PREFIX + email);
         return refreshToken.equals(storedToken);
     }
 
     // Redis에서 액세스 토큰 검증
     public boolean validateAccessTokenInRedis(String email, String accessToken) {
-
         String storedToken = redisTemplate.opsForValue().get(REDIS_ACCESS_TOKEN_PREFIX + email);
         return accessToken.equals(storedToken);
     }
 
-    // 토큰이 블랙리스트에 있는지 확인
+    // 액세스 토큰이 블랙리스트에 있는지 확인
     public boolean isTokenBlacklisted(String token) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_BLACKLIST_PREFIX + token));
     }
 
+    // 리프레시 토큰이 블랙리스트에 있는지 확인
+    public boolean isRefreshTokenBlacklisted(String refreshToken) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_REFRESH_BLACKLIST_PREFIX + refreshToken));
+    }
+
     // 리프레시 토큰 삭제 메서드
     public void removeRefreshToken(String email) {
+        // 기존 리프레시 토큰 조회
+        String storedRefreshToken = getStoredRefreshToken(email);
+
+        // 기존 토큰이 있다면 블랙리스트에 추가
+        if (storedRefreshToken != null) {
+            addRefreshTokenToBlacklist(storedRefreshToken);
+        }
+
+        // Redis에서 리프레시 토큰 키 삭제
         redisTemplate.delete(REDIS_REFRESH_TOKEN_PREFIX + email);
     }
 
@@ -153,15 +187,21 @@ public class JwtUtil {
 
     // 토큰 유효성 검증 (블랙리스트 확인 및 Redis 검증 추가)
     public boolean validateToken(String token, String email) {
-
         return (email.equals(extractEmail(token)) &&
                 !isTokenExpired(token) &&
                 !isTokenBlacklisted(token) &&
                 validateAccessTokenInRedis(email, token));
     }
 
-    public Claims getClaims(String token) {
+    // 리프레시 토큰 유효성 검증 (블랙리스트 확인 및 Redis 검증 추가)
+    public boolean validateRefreshToken(String refreshToken, String email) {
+        return (email.equals(extractEmail(refreshToken)) &&
+                !isTokenExpired(refreshToken) &&
+                !isRefreshTokenBlacklisted(refreshToken) &&
+                validateRefreshTokenInRedis(email, refreshToken));
+    }
 
+    public Claims getClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -193,7 +233,15 @@ public class JwtUtil {
 
     // 리프레시 토큰 업데이트
     public void updateRefreshTokenInRedis(String email, String newRefreshToken) {
+        // 기존 리프레시 토큰 조회
+        String oldRefreshToken = getStoredRefreshToken(email);
 
+        // 기존 토큰이 있고 새 토큰과 다르다면 블랙리스트에 추가
+        if (oldRefreshToken != null && !oldRefreshToken.equals(newRefreshToken)) {
+            addRefreshTokenToBlacklist(oldRefreshToken);
+        }
+
+        // 새 리프레시 토큰 저장
         redisTemplate.opsForValue().set(
                 REDIS_REFRESH_TOKEN_PREFIX + email,
                 newRefreshToken,
@@ -209,7 +257,6 @@ public class JwtUtil {
 
     // 만료된 토큰에서도 이메일 추출 (액세스 토큰 갱신에 사용)
     public String extractEmailIgnoringExpiration(String token) {
-
         try {
             return Jwts.parser()
                     .setSigningKey(getSigningKey())
@@ -225,7 +272,6 @@ public class JwtUtil {
 
     // 만료된 토큰에서도 memberId 추출
     public Long extractMemberIdIgnoringExpiration(String token) {
-
         try {
             return Jwts.parser()
                     .setSigningKey(getSigningKey())
@@ -241,7 +287,6 @@ public class JwtUtil {
 
     // 만료된 토큰에서도 역할 추출
     public String extractRoleIgnoringExpiration(String token) {
-
         try {
             return Jwts.parser()
                     .setSigningKey(getSigningKey())

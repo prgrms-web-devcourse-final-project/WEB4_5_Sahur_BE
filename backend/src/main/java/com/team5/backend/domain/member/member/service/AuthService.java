@@ -7,6 +7,7 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.util.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +77,13 @@ public class AuthService {
             throw new CustomException(AuthErrorCode.INVALID_TOKEN);
         }
 
-        // 토큰 블랙리스트에 추가하여 무효화
+        // 리프레시 토큰 조회 후 블랙리스트에 추가
+        String refreshToken = jwtUtil.getStoredRefreshToken(email);
+        if (refreshToken != null) {
+            jwtUtil.addRefreshTokenToBlacklist(refreshToken);
+        }
+
+        // 액세스 토큰 블랙리스트에 추가하여 무효화
         jwtUtil.addToBlacklist(accessToken);
 
         // Redis에서 리프레시 토큰 삭제
@@ -90,19 +97,42 @@ public class AuthService {
     @Transactional
     public AuthResDto refreshToken(String refreshToken, HttpServletResponse response) {
 
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new CustomException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
         // 리프레시 토큰 유효성 검증
-        if (jwtUtil.isTokenExpired(refreshToken) || jwtUtil.isTokenBlacklisted(refreshToken)) {
+        if (jwtUtil.isTokenExpired(refreshToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        // 리프레시 토큰이 블랙리스트에 있는지 확인
+        if (jwtUtil.isRefreshTokenBlacklisted(refreshToken)) {
             throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         // 토큰에서 사용자 정보 추출
-        String email = jwtUtil.extractEmail(refreshToken);
-        Long memberId = jwtUtil.extractMemberId(refreshToken);
-        String role = jwtUtil.extractRole(refreshToken);
+        String email = null;
+        Long memberId = null;
+        String role = null;
+
+        try {
+            email = jwtUtil.extractEmail(refreshToken);
+            memberId = jwtUtil.extractMemberId(refreshToken);
+            role = jwtUtil.extractRole(refreshToken);
+        } catch (Exception e) {
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
 
         // Redis에 저장된 리프레시 토큰과 비교
         if (!jwtUtil.validateRefreshTokenInRedis(email, refreshToken)) {
             throw new CustomException(AuthErrorCode.TOKEN_MISMATCH);
+        }
+
+        // 기존 액세스 토큰 조회 및 블랙리스트에 추가
+        String oldAccessToken = jwtUtil.getStoredAccessToken(email);
+        if (oldAccessToken != null) {
+            jwtUtil.addToBlacklist(oldAccessToken);
         }
 
         // 새로운 액세스 토큰 생성
@@ -112,24 +142,25 @@ public class AuthService {
         int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
         addCookie(response, "accessToken", newAccessToken, accessTokenMaxAge);
 
-        // 리프레시 토큰 롤링: 항상 새로운 리프레시 토큰 생성
+        // 리프레시 토큰 롤링 적용
         String newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
-
-        // 기존 리프레시 토큰 블랙리스트에 추가
-        jwtUtil.addToBlacklist(refreshToken);
-
-        // 새 리프레시 토큰을 Redis에 저장
-        jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
 
         // 쿠키에 새 리프레시 토큰 저장
         int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
         addCookie(response, "refreshToken", newRefreshToken, refreshTokenMaxAge);
+
+        // 기존 리프레시 토큰을 블랙리스트에 추가하고 Redis에 새 토큰 저장
+        jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
 
         return new AuthResDto(newAccessToken, newRefreshToken);
     }
 
     // 로그인된 사용자의 정보를 반환하는 메서드
     public GetMemberResDto getLoggedInMember(String token) {
+
+        if (token == null || token.isEmpty()) {
+            throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
+        }
 
         // 토큰에서 "Bearer "를 제거
         String extractedToken = token.replace("Bearer ", "");
@@ -139,17 +170,22 @@ public class AuthService {
             throw new CustomException(AuthErrorCode.LOGOUT_TOKEN);
         }
 
-        // Redis에 저장된 토큰과 일치하는지 확인
-        String username = jwtUtil.extractEmail(extractedToken);
-
-        if (!jwtUtil.validateAccessTokenInRedis(username, extractedToken)) {
+        // 토큰에서 사용자 정보 추출
+        String email;
+        try {
+            email = jwtUtil.extractEmail(extractedToken);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(AuthErrorCode.EXPIRED_TOKEN);
+        } catch (Exception e) {
             throw new CustomException(AuthErrorCode.INVALID_TOKEN);
         }
 
-        // 토큰에서 사용자 정보 추출
-        TokenInfoResDto tokenInfo = extractTokenInfo(extractedToken);
+        // Redis에 저장된 토큰과 일치하는지 확인
+        if (!jwtUtil.validateAccessTokenInRedis(email, extractedToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
+        }
 
-        return memberRepository.findByEmail(tokenInfo.getEmail())
+        return memberRepository.findByEmail(email)
                 .map(GetMemberResDto::fromEntity)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
