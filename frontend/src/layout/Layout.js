@@ -2,6 +2,7 @@ import {Outlet, Navigate, useLocation} from "react-router-dom";
 import {useEffect, useState} from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import {Card} from "react-bootstrap";
 
 const Layout = () => {
     const [isChecked, setIsChecked] = useState(false);
@@ -24,8 +25,12 @@ const Layout = () => {
     return (
         <div className={"kw"}>
             <Header />
-            <Outlet />
-            <Footer />
+            <Card className={"p-4"} style={{ marginBottom: "65px" }}>
+                <Card.Body className={"px-5"} style={{ background: "#F9FAFB" }}>
+                    <Outlet />
+                    <Footer />
+                </Card.Body>
+            </Card>
         </div>
     );
 }
