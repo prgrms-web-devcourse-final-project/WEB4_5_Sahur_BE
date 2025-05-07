@@ -124,10 +124,8 @@ public class MemberController {
 
         EmailResDto response = mailService.verifyPasswordResetAuthCode(emailVerificationReqDto);
 
-        if (response.isSuccess())
-            return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
-        else
-            return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
+        if (response.isSuccess()) return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
+        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
     }
 
     // 비밀번호 재설정

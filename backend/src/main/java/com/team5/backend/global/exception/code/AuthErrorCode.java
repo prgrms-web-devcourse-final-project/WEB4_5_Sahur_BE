@@ -10,7 +10,8 @@ public enum AuthErrorCode implements ErrorCode {
     TOKEN_MISMATCH(401, "AUTH_004", "토큰이 일치하지 않습니다."),
     LOGOUT_TOKEN(401, "AUTH_005", "로그아웃된 토큰입니다."),
     INVALID_TOKEN(401, "AUTH_006", "유효하지 않은 토큰입니다."),
-    EXPIRED_TOKEN(401, "AUTH_007", "만료된 토큰입니다.");
+    EXPIRED_TOKEN(401, "AUTH_007", "만료된 토큰입니다."),
+    UNAUTHORIZED(401, "AUTH_008", "인증되지 않은 접근입니다.");
 
     private final int status;
     private final String code;
