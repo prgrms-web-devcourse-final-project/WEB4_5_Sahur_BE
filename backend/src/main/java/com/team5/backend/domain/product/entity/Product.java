@@ -43,5 +43,26 @@ public class Product {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    private Product(Category category, String title, String description, List<String> imageUrl, Integer price) {
+        this.category = category;
+        this.title = title;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.price = price;
+        this.dibCount = 0L;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public static Product create(Category category, String title, String description, List<String> imageUrl, Integer price) {
+        return new Product(category, title, description, imageUrl, price);
+    }
+
+    public void update(String title, String description, List<String> imageUrl, Integer price) {
+        this.title = title;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.price = price;
+    }
+
 }
 

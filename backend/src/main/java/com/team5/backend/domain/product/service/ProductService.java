@@ -34,15 +34,13 @@ public class ProductService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
 
-        Product product = Product.builder()
-                .category(category)
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .imageUrl(request.getImageUrl())
-                .price(request.getPrice())
-                .dibCount(0L)
-                .createdAt(LocalDateTime.now())
-                .build();
+        Product product = Product.create(
+                category,
+                request.getTitle(),
+                request.getDescription(),
+                request.getImageUrl(),
+                request.getPrice()
+        );
 
         Product savedProduct = productRepository.save(product);
         return ProductResDto.fromEntity(savedProduct);
@@ -80,13 +78,14 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-        product.setTitle(request.getTitle());
-        product.setDescription(request.getDescription());
-        product.setImageUrl(request.getImageUrl());
-        product.setPrice(request.getPrice());
+        product.update(
+                request.getTitle(),
+                request.getDescription(),
+                request.getImageUrl(),
+                request.getPrice()
+        );
 
-        Product updatedProduct = productRepository.save(product);
-        return ProductResDto.fromEntity(updatedProduct);
+        return ProductResDto.fromEntity(product);
     }
 
     /**
