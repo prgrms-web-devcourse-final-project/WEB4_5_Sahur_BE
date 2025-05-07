@@ -64,3 +64,4 @@ public class DibsController {
         return RsDataUtil.success("관심상품 전체 조회 완료", all);
     }
 }
+ 
