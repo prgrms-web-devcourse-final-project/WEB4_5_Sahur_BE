@@ -1,9 +1,11 @@
 package com.team5.backend.domain.product.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.product.dto.ProductCreateReqDto;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
+import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.service.ProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
 
 import java.util.List;
 
@@ -22,6 +28,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WithMockUser(roles = "ADMIN")
 @WebMvcTest(ProductController.class)
 class ProductControllerTest {
     @Autowired
@@ -31,6 +38,11 @@ class ProductControllerTest {
     @SuppressWarnings("removal")
     @MockBean
     private ProductService productService;
+
+    @SuppressWarnings("removal")
+    @MockBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
+
 
     @Test
     @DisplayName("상품 등록 - 성공")
@@ -42,7 +54,8 @@ class ProductControllerTest {
 
         mockMvc.perform(post("/api/v1/products")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .content(objectMapper.writeValueAsString(req))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value("상품 생성 성공"))
                 .andExpect(jsonPath("$.data.productId").value(1L));
@@ -51,11 +64,15 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 전체 조회")
     void getAllProducts() throws Exception {
-        ProductResDto dto = ProductResDto.builder().productId(1L).title("상품").build();
-        Page<ProductResDto> page = new PageImpl<>(List.of(dto));
+        Product product = Product.builder()
+                .productId(1L)
+                .title("상품")
+                .category(Category.builder().categoryId(1L).uid(100).build())
+                .build();
 
-        Mockito.when(productService.getAllProducts(any(), any(), any()))
-                .thenReturn(new PageImpl<>(List.of(new com.team5.backend.domain.product.entity.Product())));
+        Page<Product> page = new PageImpl<>(List.of(product));
+
+        Mockito.when(productService.getAllProducts(any(), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/products"))
                 .andExpect(status().isOk())
@@ -83,7 +100,8 @@ class ProductControllerTest {
 
         mockMvc.perform(put("/api/v1/products/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                        .content(objectMapper.writeValueAsString(req))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value("상품 수정 성공"));
     }
@@ -91,7 +109,8 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 삭제")
     void deleteProduct() throws Exception {
-        mockMvc.perform(delete("/api/v1/products/1"))
+        mockMvc.perform(delete("/api/v1/products/1")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value("상품 삭제 성공"));
     }

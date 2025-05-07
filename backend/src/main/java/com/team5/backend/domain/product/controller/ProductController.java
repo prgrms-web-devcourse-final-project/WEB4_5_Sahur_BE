@@ -5,6 +5,7 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.service.ProductService;
+import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,10 +64,10 @@ public class ProductController {
 
     @Operation(summary = "상품 삭제", description = "상품 ID로 상품을 삭제합니다.")
     @DeleteMapping("/{productId}")
-    public RsData<Void> deleteProduct(
+    public RsData<Empty> deleteProduct(
             @Parameter(description = "상품 ID") @PathVariable Long productId) {
         productService.deleteProduct(productId);
-        return RsDataUtil.success("상품 삭제 성공", null);
+        return RsDataUtil.success("상품 삭제 성공");
     }
 
     @Operation(summary = "상품 관심 등록 수 조회", description = "상품 ID로 상품의 관심 등록 수를 조회합니다.")
