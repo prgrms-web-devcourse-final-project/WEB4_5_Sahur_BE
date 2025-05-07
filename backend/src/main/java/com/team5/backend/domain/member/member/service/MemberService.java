@@ -6,10 +6,13 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.dto.ProductResDto;
+import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
+import com.team5.backend.global.util.ImageUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +20,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -26,13 +33,13 @@ public class MemberService {
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    private final ImageUtil imageUtil;
 
     private final HistoryRepository historyRepository;
 
     // 회원 생성
     @Transactional
-    public SignupResDto signup(SignupReqDto signupReqDto) {
-
+    public SignupResDto signup(SignupReqDto signupReqDto, MultipartFile profileImage) throws IOException {
         String email = signupReqDto.getEmail();
 
         // 이메일 중복 검사
@@ -54,13 +61,26 @@ public class MemberService {
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(signupReqDto.getPassword());
 
+        // 프로필 이미지 처리
+        String imageUrl = "/images/default-profile.png"; // 기본값
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // 이미지가 제공된 경우 업로드
+            imageUrl = imageUtil.saveImage(profileImage);
+            log.info("프로필 이미지 업로드: {}", imageUrl);
+        } else {
+            log.info("기본 이미지 설정");
+        }
+
+        Address address = signupReqDto.toAddress();
+
         Member member = Member.builder()
                 .email(email)
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(encodedPassword)
-                .address(signupReqDto.getAddress())
-                .imageUrl(signupReqDto.getImageUrl())
+                .address(address)
+                .imageUrl(imageUrl)
                 .role(Role.USER)
                 .emailVerified(true)  // 이미 인증이 완료된 상태이므로 true로 설정
                 .build();
@@ -87,7 +107,7 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public GetMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
+    public PatchMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
 
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -124,9 +144,9 @@ public class MemberService {
             existingMember.setPassword(encodedPassword);
         }
 
-        if (patchMemberReqDto.getAddress() != null) {
-            existingMember.setAddress(patchMemberReqDto.getAddress());
-        }
+//        if (patchMemberReqDto.getAddress() != null) {
+//            existingMember.setAddress(patchMemberReqDto.getAddress());
+//        }
 
         if (patchMemberReqDto.getImageUrl() != null) {
             existingMember.setImageUrl(patchMemberReqDto.getImageUrl());
@@ -134,7 +154,7 @@ public class MemberService {
 
         Member updatedMember = memberRepository.save(existingMember);
 
-        return GetMemberResDto.fromEntity(updatedMember);
+        return new PatchMemberResDto(updatedMember.getMemberId(), "회원 정보가 성공적으로 수정되었습니다.");
     }
 
     // 회원 삭제
@@ -192,6 +212,15 @@ public class MemberService {
         return PasswordResetResDto.builder()
                 .success(true)
                 .message("비밀번호가 성공적으로 재설정되었습니다.")
+                .build();
+    }
+
+    public NicknameCheckResDto checkNicknameDuplicate(String nickname) {
+
+        boolean exists = memberRepository.existsByNickname(nickname);
+
+        return NicknameCheckResDto.builder()
+                .exists(exists)
                 .build();
     }
 }

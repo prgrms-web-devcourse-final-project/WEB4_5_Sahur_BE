@@ -1,5 +1,6 @@
 package com.team5.backend.domain.member.member.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
@@ -9,7 +10,11 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -19,12 +24,14 @@ public class MemberController {
     private final MemberService memberService;
     private final AuthService authService;
     private final MailService mailService;
+    private final ObjectMapper objectMapper;
 
     // 회원 생성
-    @PostMapping("/auth/signup")
-    public RsData<SignupResDto> signup(@Valid @RequestBody SignupReqDto signupReqDto) {
+    @PostMapping(value = "/auth/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RsData<SignupResDto> signup(@RequestPart("memberData") @Valid SignupReqDto signupReqDto,
+                                       @RequestPart(value = "image", required = false) MultipartFile profileImage) throws IOException {
 
-        SignupResDto signupResDto = memberService.signup(signupReqDto);
+        SignupResDto signupResDto = memberService.signup(signupReqDto, profileImage);
         return new RsData<>("201", "회원가입에 성공했습니다.", signupResDto);
     }
 
@@ -40,10 +47,10 @@ public class MemberController {
 
     // 회원 수정
     @PatchMapping("/members/modify")
-    public RsData<GetMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token, @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
+    public RsData<PatchMemberResDto> updateMember(@RequestHeader(value = "Authorization", required = false) String token, @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
         GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
-        GetMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
+        PatchMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
 
         return new RsData<>("200", "회원 정보가 수정되었습니다.", updatedMember);
     }
@@ -99,6 +106,7 @@ public class MemberController {
         if (response.isSuccess()) return new RsData<>("200", "인증이 완료되었습니다.", response);
         else return new RsData<>("400", "인증번호가 유효하지 않거나 만료되었습니다.", response);
     }
+
     // 비밀번호 재설정 이메일 인증번호 전송
     @PostMapping("/auth/password/email/send")
     public RsData<EmailResDto> requestPasswordResetAuthCode(@RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
@@ -122,9 +130,19 @@ public class MemberController {
     // 비밀번호 재설정
     @PatchMapping("/members/password/reset")
     public RsData<PasswordResetResDto> resetPassword(@Valid @RequestBody PasswordResetReqDto passwordResetReqDto) {
+
         PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
 
         if (response.isSuccess()) return new RsData<>("200", "비밀번호가 성공적으로 재설정되었습니다.", response);
         else return new RsData<>("400", "비밀번호 재설정에 실패했습니다.", response);
+    }
+
+    @PostMapping("/members/nickname/check")
+    public RsData<NicknameCheckResDto> checkNicknameDuplicate(@RequestBody NicknameCheckReqDto nicknameCheckReqDto) {
+
+        NicknameCheckResDto response = memberService.checkNicknameDuplicate(nicknameCheckReqDto.getNickname());
+
+        if (response.isExists()) return new RsData<>("400", "이미 사용 중인 닉네임입니다.", response);
+        else return new RsData<>("200", "사용 가능한 닉네임입니다.", response);
     }
 }
