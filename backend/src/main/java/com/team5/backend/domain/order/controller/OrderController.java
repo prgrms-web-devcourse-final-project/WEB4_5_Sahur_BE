@@ -38,11 +38,11 @@ public class OrderController {
 	@Operation(summary = "주문 목록 조회", description = "모든 주문 목록을 조회하거나 주문번호, 상태로 필터링할 수 있습니다.")
 	@GetMapping
 	public RsData<Page<OrderListResDto>> getOrders(
-		@RequestParam(required = false) Long search,
+		@RequestParam(required = false) Long orderId,
 		@RequestParam(required = false) OrderStatus status,
 		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<OrderListResDto> dtoPage = orderService.getOrders(search, status, pageable);
+		Page<OrderListResDto> dtoPage = orderService.getOrders(orderId, status, pageable);
 		return RsDataUtil.success("주문 목록 조회에 성공했습니다.", dtoPage);
 	}
 
