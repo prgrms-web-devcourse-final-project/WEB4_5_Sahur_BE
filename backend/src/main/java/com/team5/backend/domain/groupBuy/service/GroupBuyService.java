@@ -231,6 +231,23 @@ public class GroupBuyService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<GroupBuyResDto> getRandomTop3GroupBuysBySameCategory(Long groupBuyId) {
+        // 1. 조회하려는 공동구매의 상품 카테고리 ID 가져오기
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        Long categoryId = groupBuy.getProduct().getCategory().getCategoryId();
+
+        // 2. 같은 카테고리의 다른 공동구매 3개 랜덤 조회
+        List<GroupBuy> randomGroupBuys = groupBuyRepository.findRandomTop3ByCategoryId(categoryId);
+
+        // 3. DTO로 변환 (마감임박 여부 포함)
+        return randomGroupBuys.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     /**
      * 공동구매 마감이 오늘인지 판단하고 DTO로 변환
      */
