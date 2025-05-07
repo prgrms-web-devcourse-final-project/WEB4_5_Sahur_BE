@@ -308,6 +308,7 @@ backend http_back_1
 
 docker run \
   -d \
+  --restart unless-stopped \
   --network common \
   -p 8090:80 \
   -v /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy:/usr/local/etc/haproxy \
