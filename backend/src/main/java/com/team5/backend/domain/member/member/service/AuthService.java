@@ -8,14 +8,11 @@ import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -115,38 +112,20 @@ public class AuthService {
         int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
         addCookie(response, "accessToken", newAccessToken, accessTokenMaxAge);
 
-        // 리프레시 토큰 갱신 필요 여부 확인
-        String newRefreshToken = refreshToken;
+        // 리프레시 토큰 롤링: 항상 새로운 리프레시 토큰 생성
+        String newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
 
-        if (isRefreshTokenNeedsRenewal(refreshToken)) {
-            // 새로운 리프레시 토큰 생성
-            newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
+        // 기존 리프레시 토큰 블랙리스트에 추가
+        jwtUtil.addToBlacklist(refreshToken);
 
-            // 쿠키에 새 리프레시 토큰 저장
-            int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
-            addCookie(response, "refreshToken", newRefreshToken, refreshTokenMaxAge);
+        // 새 리프레시 토큰을 Redis에 저장
+        jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
 
-            // Redis에 저장된 리프레시 토큰 업데이트
-            jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
-        }
+        // 쿠키에 새 리프레시 토큰 저장
+        int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
+        addCookie(response, "refreshToken", newRefreshToken, refreshTokenMaxAge);
 
         return new AuthResDto(newAccessToken, newRefreshToken);
-    }
-
-
-    // 리프레시 토큰 갱신 필요 여부 확인
-    private boolean isRefreshTokenNeedsRenewal(String refreshToken) {
-        try {
-            Date expiration = jwtUtil.extractExpiration(refreshToken);
-
-            // 만료까지 남은 시간 계산 (밀리초)
-            long timeToExpire = expiration.getTime() - System.currentTimeMillis();
-
-            // 만료 기간의 30% 이하로 남았으면 갱신
-            return timeToExpire < (jwtUtil.getRefreshTokenExpiration() * 0.3);
-        } catch (Exception e) {
-            return true;
-        }
     }
 
     // 로그인된 사용자의 정보를 반환하는 메서드
@@ -200,21 +179,5 @@ public class AuthService {
         cookie.setAttribute("SameSite", "None");
 
         response.addCookie(cookie);
-    }
-
-    // 쿠키에서 값을 추출하는 유틸리티 메서드
-    private String extractCookieValue(HttpServletRequest request, String cookieName) {
-
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-
-        return null;
     }
 }
