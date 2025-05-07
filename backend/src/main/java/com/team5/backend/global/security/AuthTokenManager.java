@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,6 +33,30 @@ public class AuthTokenManager {
         }
 
         return null;
+    }
+
+    // 인증 객체에서 토큰 정보 가져오기
+    public String extractToken(Authentication authentication) {
+
+        if (authentication == null) {
+            return null;
+        }
+
+        // Principal에서 이메일 정보 가져오기
+        String email = switch (authentication.getPrincipal()) {
+            case PrincipalDetails principalDetails -> principalDetails.getUsername();
+            case UserDetails userDetails -> userDetails.getUsername();
+            case String s -> s;
+            default -> null;
+        };
+
+        if (email == null) {
+            log.warn("인증 객체에서 이메일을 추출할 수 없습니다.");
+            return null;
+        }
+
+        // 이메일을 통해 Redis에서 액세스 토큰 조회
+        return jwtUtil.getStoredAccessToken(email);
     }
 
     // 요청에서 리프레시 토큰을 추출

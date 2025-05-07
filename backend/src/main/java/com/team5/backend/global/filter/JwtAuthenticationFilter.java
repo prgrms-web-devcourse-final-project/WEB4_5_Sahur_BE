@@ -8,8 +8,9 @@ import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.ErrorCode;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.exception.code.AuthErrorCode;
-import com.team5.backend.global.util.JwtUtil;
 import com.team5.backend.global.security.AuthTokenManager;
+import com.team5.backend.global.security.CustomUserDetailsService;
+import com.team5.backend.global.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +20,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -33,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final AuthTokenManager authTokenManager;
     private final ObjectMapper objectMapper;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -58,6 +64,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 액세스 토큰이 유효하고 Redis에 저장된 토큰과 일치하면 요청 진행
             if (!jwtUtil.isTokenExpired(accessToken) && jwtUtil.validateAccessTokenInRedis(email, accessToken)) {
+
+                try {
+                    // UserDetailsService를 통해 사용자 정보 로드
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+                    // 인증 객체 생성 및 Security Context에 설정
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // SecurityContextHolder에 인증 정보 설정
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } catch (Exception e) {
+                    log.error("인증 컨텍스트 설정 중 오류 발생", e);
+                    // 오류가 발생해도 요청은 계속 진행
+                }
+
                 filterChain.doFilter(request, response);
                 return ;
             }

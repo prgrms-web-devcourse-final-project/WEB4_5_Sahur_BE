@@ -8,6 +8,7 @@ import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
+import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,11 +47,10 @@ public class MemberController {
     // 회원 조회
     @Operation(summary = "회원 정보 조회", description = "로그인한 회원의 정보를 조회합니다.")
     @GetMapping("/members/me")
-    public RsData<GetMemberResDto> getMember(
-            @Parameter(description = "Access Token (Bearer 포함)") @RequestHeader(value = "Authorization", required = false) String token) {
+    public RsData<GetMemberResDto> getMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
 
-        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
-        GetMemberResDto memberResDto = memberService.getMemberById(loggedInMember.getMemberId());
+        Long memberId = userDetails.getMember().getMemberId();
+        GetMemberResDto memberResDto = memberService.getMemberById(memberId);
 
         return RsDataUtil.success("회원 정보를 성공적으로 조회했습니다.", memberResDto);
     }
@@ -57,12 +58,11 @@ public class MemberController {
     // 회원 수정
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
     @PatchMapping("/members/modify")
-    public RsData<PatchMemberResDto> updateMember(
-            @Parameter(description = "Access Token (Bearer 포함)") @RequestHeader(value = "Authorization", required = false) String token,
-            @Parameter(description = "수정할 회원 정보") @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
+    public RsData<PatchMemberResDto> updateMember(@AuthenticationPrincipal PrincipalDetails userDetails,
+                                                  @Parameter(description = "수정할 회원 정보") @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
 
-        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
-        PatchMemberResDto updatedMember = memberService.updateMember(loggedInMember.getMemberId(), patchMemberReqDto);
+        Long memberId = userDetails.getMember().getMemberId();
+        PatchMemberResDto updatedMember = memberService.updateMember(memberId, patchMemberReqDto);
 
         return RsDataUtil.success("회원 정보가 수정되었습니다.", updatedMember);
     }
@@ -70,10 +70,11 @@ public class MemberController {
     // 회원 탈퇴
     @Operation(summary = "회원 탈퇴", description = "회원 계정을 삭제하고 로그아웃 처리합니다.")
     @DeleteMapping("/members/delete")
-    public RsData<Void> deleteMember(
-            @Parameter(description = "Access Token (Bearer 포함)") @RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
+    public RsData<Void> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
 
-        memberService.deleteMember(token, response);
+        Long memberId = userDetails.getMember().getMemberId();
+        memberService.deleteMember(memberId, response);
+
         return new RsData<>("200-0", "로그아웃 및 회원 탈퇴가 완료되었습니다.", null);
     }
 
