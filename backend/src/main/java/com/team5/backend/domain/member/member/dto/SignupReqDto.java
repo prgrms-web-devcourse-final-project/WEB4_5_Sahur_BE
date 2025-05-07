@@ -1,10 +1,13 @@
 package com.team5.backend.domain.member.member.dto;
 
+import com.team5.backend.global.entity.Address;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
 @Getter
@@ -29,9 +32,20 @@ public class SignupReqDto {
             message = "비밀번호는 최소 8자, 영문/숫자/특수문자를 포함해야 합니다.")
     private String password;
 
-    @NotBlank(message = "주소는 필수 입력 항목입니다.")
-    private String address;
+    @NotBlank(message = "우편번호는 필수 입력 항목입니다.")
+    private String zipCode;
+
+    @NotBlank(message = "도로명/지번 주소는 필수 입력 항목입니다.")
+    private String streetAdr;
+
+    @NotBlank(message = "상세 주소는 필수 입력 항목입니다.")
+    private String detailAdr;
 
     @URL(message = "유효한 URL 형식이 아닙니다.")
     private String imageUrl;
+
+    // Address 객체로 변환하는 메소드
+    public Address toAddress() {
+        return new Address(zipCode, streetAdr, detailAdr);
+    }
 }

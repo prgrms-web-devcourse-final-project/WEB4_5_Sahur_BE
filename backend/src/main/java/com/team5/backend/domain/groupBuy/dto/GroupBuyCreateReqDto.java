@@ -11,8 +11,6 @@ public class GroupBuyCreateReqDto {
     @NotNull
     private Long productId;
     @NotNull
-    private Long categoryId;
-    @NotNull
     private Integer targetParticipants;
     @NotNull
     private Integer round;

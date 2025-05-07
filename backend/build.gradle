@@ -29,6 +29,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+//    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0'
+
     runtimeOnly("com.h2database:h2")
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -51,6 +54,9 @@ dependencies {
 
     // Oauth2
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // S3
+    implementation("software.amazon.awssdk:s3:2.31.35")
 }
 
 tasks.named('test') {

@@ -27,10 +27,6 @@ public class GroupBuy {
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "categoryId", nullable = false)
-    private Category category;
-
     @Column
     private Integer targetParticipants = 0;
 

@@ -1,22 +1,24 @@
 package com.team5.backend.domain.member.admin.service;
 
-import com.team5.backend.domain.member.admin.dto.GroupBuyRequestResDto;
 import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
-import com.team5.backend.domain.member.admin.entity.GroupBuyRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.admin.repository.GroupBuyRequestRepository;
 import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.AdminErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AdminService {
 
     private final ProductRequestRepository productRequestRepository;
-    private final GroupBuyRequestRepository groupBuyRequestRepository;
 
     public Page<ProductRequestResDto> getProductRequests(Pageable pageable, ProductRequestStatus status) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
@@ -29,11 +31,12 @@ public class AdminService {
         return pageResult.map(ProductRequestResDto::fromEntity);
     }
 
-    public Page<GroupBuyRequestResDto> getAllGroupBuyRequests(Pageable pageable) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+    @Transactional
+    public void updateProductRequestStatus(Long productRequestId, ProductRequestStatus newStatus) {
+        ProductRequest productRequest = productRequestRepository.findById(productRequestId)
+                .orElseThrow(() -> new CustomException(AdminErrorCode.PRODUCT_REQUEST_NOT_FOUND));
 
-        return groupBuyRequestRepository.findAll(sortedPageable)
-                .map(GroupBuyRequestResDto::fromEntity);
+        productRequest.changeStatus(newStatus);
     }
+
 }

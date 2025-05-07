@@ -10,5 +10,5 @@ variable "region" {
 
 variable "nickname" {
   description = "nickname"
-  default     = "미정"
+  default     = "devcos5-team05"
 }

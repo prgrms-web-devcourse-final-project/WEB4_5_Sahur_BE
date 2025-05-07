@@ -12,6 +12,7 @@ import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ class GroupBuyServiceTest {
     @Mock private ProductRepository productRepository;
     @Mock private HistoryRepository historyRepository;
     @Mock private CategoryRepository categoryRepository;
+    @Mock private JwtUtil jwtUtil;
 
     @InjectMocks
     private GroupBuyService groupBuyService;
@@ -73,7 +75,6 @@ class GroupBuyServiceTest {
                 GroupBuy.builder()
                         .groupBuyId(1L)
                         .product(testProduct)
-                        .category(testCategory)
                         .targetParticipants(10)
                         .currentParticipantCount(1)
                         .round(1)
@@ -84,7 +85,6 @@ class GroupBuyServiceTest {
                 GroupBuy.builder()
                         .groupBuyId(2L)
                         .product(testProduct)
-                        .category(testCategory)
                         .targetParticipants(15)
                         .currentParticipantCount(5)
                         .round(2)
@@ -100,7 +100,6 @@ class GroupBuyServiceTest {
     void createGroupBuy_shouldReturnSavedGroupBuyResDto() {
         GroupBuyCreateReqDto req = GroupBuyCreateReqDto.builder()
                 .productId(1L)
-                .categoryId(1L)
                 .targetParticipants(10)
                 .round(1)
                 .deadline(LocalDateTime.now().plusDays(3))
@@ -109,7 +108,6 @@ class GroupBuyServiceTest {
         GroupBuy saved = GroupBuy.builder()
                 .groupBuyId(1L)
                 .product(testProduct)
-                .category(testCategory)
                 .targetParticipants(10)
                 .status(GroupBuyStatus.ONGOING)
                 .build();
@@ -143,10 +141,10 @@ class GroupBuyServiceTest {
     void getGroupBuyById_shouldReturnDtoWhenFound() {
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuys.get(0)));
 
-        Optional<GroupBuyResDto> result = groupBuyService.getGroupBuyById(1L);
+        GroupBuyResDto result = groupBuyService.getGroupBuyById(1L);
 
-        assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getGroupBuyId());
+        assertTrue(result instanceof GroupBuyResDto);
+        assertEquals(1L, result.getGroupBuyId());
     }
 
     @Test
@@ -172,16 +170,27 @@ class GroupBuyServiceTest {
     }
 
     @Test
-    @DisplayName("사용자별 참여 공동구매 조회 - 최신순 정렬 포함")
-    void getGroupBuysByMemberId_shouldReturnPagedResult() {
+    @DisplayName("토큰 기반 공동구매 조회 - 최신순 정렬 포함")
+    void getGroupBuysByToken_shouldReturnPagedResult() {
+        // given
+        String token = "Bearer fake.jwt.token";
+        String extractedToken = "fake.jwt.token";
+
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<GroupBuy> mockPage = new PageImpl<>(groupBuys);
 
+        // when
+        when(jwtUtil.isTokenBlacklisted(extractedToken)).thenReturn(false);
+        when(jwtUtil.extractEmail(extractedToken)).thenReturn("user@example.com");
+        when(jwtUtil.validateAccessTokenInRedis("user@example.com", extractedToken)).thenReturn(true);
+        when(jwtUtil.extractMemberId(extractedToken)).thenReturn(1L);
         when(historyRepository.findDistinctGroupBuysByMemberId(1L, pageable)).thenReturn(mockPage);
 
-        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByMemberId(1L, pageable);
+        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByToken(token, pageable);
 
+        // then
         assertEquals(2, result.getTotalElements());
+        verify(jwtUtil).extractMemberId(extractedToken);
         verify(historyRepository).findDistinctGroupBuysByMemberId(1L, pageable);
     }
 
@@ -222,7 +231,7 @@ class GroupBuyServiceTest {
 
         assertEquals(30, result.getTargetParticipants());
         assertEquals(2, result.getRound());
-        assertNotNull(result.getProductId()); // productId가 null 아님 확인
+        assertNotNull(result.getProduct()); // product가 null 아님 확인
     }
 
     @Test
@@ -239,7 +248,6 @@ class GroupBuyServiceTest {
         GroupBuy groupBuy = GroupBuy.builder()
                 .groupBuyId(1L)
                 .product(testProduct) // 추가
-                .category(testCategory)
                 .deadline(LocalDateTime.now().plusHours(3))
                 .build();
 
