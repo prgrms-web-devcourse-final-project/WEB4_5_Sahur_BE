@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames.TOKEN;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -55,16 +56,15 @@ class DibsControllerTest {
                 .productId(100L)
                 .build();
 
-        when(dibsService.createDibs(any())).thenReturn(resDto);
+        when(dibsService.createDibs(eq(100L), eq(TOKEN))).thenReturn(resDto);
 
         // when & then
-        mockMvc.perform(post("/api/v1/dibs/products/100/dibs")
-                        .param("memberId", "1")
-                        .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/api/v1/dibs/products/100")
+                        .header("Authorization", TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dibsId").value(1L))
-                .andExpect(jsonPath("$.memberId").value(1L))
-                .andExpect(jsonPath("$.productId").value(100L));
+                .andExpect(jsonPath("$.data.dibsId").value(1L))
+                .andExpect(jsonPath("$.data.memberId").value(1L))
+                .andExpect(jsonPath("$.data.productId").value(100L));
     }
     @Test
     @DisplayName("관심상품 삭제 API")
@@ -74,7 +74,7 @@ class DibsControllerTest {
                         .param("memberId", "1"))
                 .andExpect(status().isNoContent());
 
-        verify(dibsService).deleteByProductAndMember(100L, 1L);
+        verify(dibsService).deleteByProductAndToken(100L, TOKEN);
     }
 
     @Test
@@ -85,7 +85,7 @@ class DibsControllerTest {
                 DibsResDto.builder().dibsId(1L).memberId(1L).productId(100L).build()
         );
 
-        when(dibsService.getAllDibsByMemberId(1L)).thenReturn(list);
+        when(dibsService.getAllDibsByToken(eq(TOKEN))).thenReturn(list);
 
         // when & then
         mockMvc.perform(get("/api/v1/dibs/members/1/dibs"))
@@ -102,14 +102,15 @@ class DibsControllerTest {
                 PageRequest.of(0, 6), 1
         );
 
-        when(dibsService.getPagedDibsByMemberId(eq(1L), any())).thenReturn(page);
+        when(dibsService.getPagedDibsByToken(eq(TOKEN), any())).thenReturn(page);
 
         // when & then
-        mockMvc.perform(get("/api/v1/dibs/members/1/dibs")
+        mockMvc.perform(get("/api/v1/dibs")
+                        .header("Authorization", TOKEN)
                         .param("paged", "true")
                         .param("page", "0")
                         .param("size", "6"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(1));
+                .andExpect(jsonPath("$.data.content.length()").value(1));
     }
 }

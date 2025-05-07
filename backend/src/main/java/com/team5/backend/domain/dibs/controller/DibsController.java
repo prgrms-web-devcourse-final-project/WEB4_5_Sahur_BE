@@ -25,40 +25,42 @@ public class DibsController {
 
     private final DibsService dibsService;
 
-    @Operation(summary = "관심상품 등록", description = "특정 회원이 특정 상품을 관심상품으로 등록합니다.")
-    @PostMapping("/products/{productId}/dibs")
+    @Operation(summary = "관심상품 등록", description = "토큰 기반으로 관심상품을 등록합니다.")
+    @PostMapping("/products/{productId}")
     public RsData<DibsResDto> createDibs(
-            @Parameter(description = "상품 ID") @PathVariable Long productId,
-            @Parameter(description = "회원 ID") @RequestParam Long memberId) {
+            @Parameter(description = "Access Token (Bearer 포함)", required = true)
+            @RequestHeader("Authorization") String token,
+            @Parameter(description = "상품 ID") @PathVariable Long productId) {
 
-        DibsCreateReqDto request = new DibsCreateReqDto(memberId, productId);
-        DibsResDto response = dibsService.createDibs(request);
+        DibsResDto response = dibsService.createDibs(productId, token);
         return RsDataUtil.success("관심상품 등록 완료", response);
     }
 
-    @Operation(summary = "관심상품 삭제", description = "특정 회원이 특정 상품의 관심상품 등록을 취소합니다.")
+    @Operation(summary = "관심상품 삭제", description = "토큰 기반으로 관심상품을 삭제합니다.")
     @DeleteMapping("/products/{productId}/dibs")
     public RsData<Empty> deleteDibs(
-            @Parameter(description = "상품 ID") @PathVariable Long productId,
-            @Parameter(description = "회원 ID") @RequestParam Long memberId) {
+            @Parameter(description = "Access Token (Bearer 포함)", required = true)
+            @RequestHeader("Authorization") String token,
+            @Parameter(description = "상품 ID") @PathVariable Long productId) {
 
-        dibsService.deleteByProductAndMember(productId, memberId);
+        dibsService.deleteByProductAndToken(productId, token);
         return RsDataUtil.success("관심상품 삭제 완료");
     }
 
-    @Operation(summary = "관심상품 목록 조회", description = "특정 회원의 관심상품 목록을 조회합니다.")
-    @GetMapping("/members/{memberId}/dibs")
-    public RsData<?> getDibsByMember(
-            @Parameter(description = "회원 ID") @PathVariable Long memberId,
+    @Operation(summary = "관심상품 목록 조회", description = "토큰 기반으로 관심상품 목록을 조회합니다.")
+    @GetMapping
+    public RsData<?> getDibsByToken(
+            @Parameter(description = "Access Token (Bearer 포함)", required = true)
+            @RequestHeader("Authorization") String token,
             @Parameter(description = "페이징 여부 (true 시 페이징)") @RequestParam(required = false) Boolean paged,
             @Parameter(description = "페이지 정보") @PageableDefault(size = 6) Pageable pageable) {
 
         if (Boolean.TRUE.equals(paged)) {
-            Page<DibsResDto> pagedDibs = dibsService.getPagedDibsByMemberId(memberId, pageable);
+            Page<DibsResDto> pagedDibs = dibsService.getPagedDibsByToken(token, pageable);
             return RsDataUtil.success("관심상품 페이징 조회 완료", pagedDibs);
         }
 
-        List<DibsResDto> all = dibsService.getAllDibsByMemberId(memberId);
+        List<DibsResDto> all = dibsService.getAllDibsByToken(token);
         return RsDataUtil.success("관심상품 전체 조회 완료", all);
     }
 }
