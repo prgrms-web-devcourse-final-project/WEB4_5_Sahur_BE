@@ -95,6 +95,15 @@ jobs:
           INSTANCE_ID=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=team05-main" "Name=instance-state-name,Values=running" --query "Reservations[].Instances[].InstanceId" --output text)
           echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
           echo $INSTANCE_ID
+      - name: prometheus.yml EC2로 전송
+        run: |
+          aws ssm send-command \
+          --region ${{ secrets.AWS_REGION }} \
+          --instance-ids ${{ env.INSTANCE_ID }} \
+          --document-name "AWS-RunShellScript" \
+          --comment "Upload prometheus.yml" \
+          --parameters 'commands=["mkdir -p /home/ubuntu/prometheus", "cat <<EOF > /home/ubuntu/prometheus/prometheus.yml'"$(cat backend/prometheus.yml)"'EOF"]' \
+          --output text
       - name: AWS SSM Send-Command
         uses: peterkimzz/aws-ssm-send-command@master
         id: ssm
