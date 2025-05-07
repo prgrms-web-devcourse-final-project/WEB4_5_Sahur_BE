@@ -1,9 +1,9 @@
 package com.team5.backend.global.handler;
 
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +18,7 @@ import java.io.IOException;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
+    private final AuthTokenManager authTokenManager;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -40,9 +41,12 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 member.getRole().name()
         );
 
-        // 쿠키 만료 시간을 JwtUtil에서 관리하는 토큰 만료 시간과 동일하게 설정
-        addCookie(response, "accessToken", accessToken, (int)(jwtUtil.getAccessTokenExpiration() / 1000));
-        addCookie(response, "refreshToken", refreshToken, (int)(jwtUtil.getRefreshTokenExpiration() / 1000));
+        // AuthTokenManager를 사용하여 쿠키 설정
+        int accessTokenMaxAge = (int)(jwtUtil.getAccessTokenExpiration() / 1000);
+        int refreshTokenMaxAge = (int)(jwtUtil.getRefreshTokenExpiration() / 1000);
+
+        authTokenManager.addCookie(response, "accessToken", accessToken, accessTokenMaxAge);
+        authTokenManager.addCookie(response, "refreshToken", refreshToken, refreshTokenMaxAge);
 
         // 리디렉션 URI 가져오기 (클라이언트에서 전달한 redirect_uri 파라미터 값)
         String targetUrl = determineTargetUrl(request, response, authentication);
@@ -67,19 +71,5 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String redirectUri = request.getParameter("redirect_uri");
 
         return redirectUri != null ? redirectUri : defaultRedirectUri;
-    }
-
-    // 쿠키 생성 메서드 (만료 시간 설정)
-    private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-
-        Cookie cookie = new Cookie(name, value);
-
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge); // 만료 시간 설정
-        cookie.setHttpOnly(true); // 자바스크립트에서 접근 불가
-        cookie.setSecure(true); // HTTPS 환경에서만 사용 가능
-        cookie.setAttribute("SameSite", "None");
-
-        response.addCookie(cookie);
     }
 }
