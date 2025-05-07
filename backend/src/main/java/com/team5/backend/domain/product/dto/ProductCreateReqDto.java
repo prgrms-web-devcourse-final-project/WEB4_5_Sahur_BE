@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +21,7 @@ public class ProductCreateReqDto {
     @NotNull(message = "상품 설명은 필수입니다.")
     private String description;
 
-    private String imageUrl;
+    private List<String> imageUrl;
 
     @NotNull(message = "가격은 필수입니다.")
     private Integer price;

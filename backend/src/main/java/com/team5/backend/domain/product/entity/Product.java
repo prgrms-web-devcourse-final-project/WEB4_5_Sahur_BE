@@ -1,15 +1,16 @@
 package com.team5.backend.domain.product.entity;
 
 import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.product.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "product")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -29,8 +30,9 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
-    @Column
-    private String imageUrl;
+    @Column(name = "imageUrl")
+    @Convert(converter = StringListConverter.class)
+    private List<String> imageUrl;
 
     @Column(nullable = false)
     private Integer price;
