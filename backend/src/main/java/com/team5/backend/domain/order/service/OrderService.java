@@ -26,6 +26,7 @@ import com.team5.backend.global.exception.code.OrderErrorCode;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class OrderService {
 
@@ -82,7 +83,6 @@ public class OrderService {
 		return OrderDetailResDto.from(order);
 	}
 
-	@Transactional
 	public Order updateOrder(Long orderId, OrderUpdateReqDto request) {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
