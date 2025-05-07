@@ -26,20 +26,13 @@ public class DeliveryService {
 	public Delivery createDelivery(Long orderId, DeliveryReqDto request) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new CustomException(DeliveryErrorCode.ORDER_NOT_FOUND));
-		Delivery delivery = Delivery.create(
-			order,
-			request.getAddress(),
-            request.getPccc(),
-			request.getContact(),
-            request.getStatus(),
-            request.getShipping()
-		);
+		Delivery delivery = Delivery.create(order, request);
 		return deliveryRepository.save(delivery);
 	}
 
 	@Transactional(readOnly = true)
 	public Delivery getDeliveryByOrder(Long orderId) {
-		return deliveryRepository.findByOrderOrderId(orderId)
+		return deliveryRepository.findByOrder_OrderId(orderId)
 			.orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 	}
 
@@ -51,13 +44,7 @@ public class DeliveryService {
 	public Delivery updateDelivery(Long deliveryId, DeliveryReqDto request) {
 		Delivery delivery = deliveryRepository.findById(deliveryId)
 			.orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
-		delivery.updateDeliveryInfo(
-			request.getAddress(),
-			request.getPccc(),
-			request.getContact(),
-            request.getStatus(),
-            request.getShipping()
-		);
+		delivery.updateDeliveryInfo(request);
 		return delivery;
 	}
 
