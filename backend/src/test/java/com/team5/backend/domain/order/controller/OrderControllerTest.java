@@ -75,7 +75,7 @@ class OrderControllerTest {
             .productId(3L)
             .title("상품명")
             .price(1000)
-            .imageUrl("http://image.url/test.png")
+            .imageUrl(List.of("http://image.url/test.png"))
             .build();
 
         GroupBuy groupBuy = GroupBuy.builder()

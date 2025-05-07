@@ -47,7 +47,7 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 등록 - 성공")
     void createProduct() throws Exception {
-        ProductCreateReqDto req = new ProductCreateReqDto(1L, "테스트", "설명", "이미지", 1000);
+        ProductCreateReqDto req = new ProductCreateReqDto(1L, "테스트", "설명",  List.of("이미지1", "이미지2"), 1000);
         ProductResDto res = ProductResDto.builder().productId(1L).title("테스트").build();
 
         Mockito.when(productService.createProduct(any())).thenReturn(res);
@@ -93,7 +93,7 @@ class ProductControllerTest {
     @Test
     @DisplayName("상품 수정")
     void updateProduct() throws Exception {
-        ProductUpdateReqDto req = new ProductUpdateReqDto("수정", "설명", "이미지", 2000);
+        ProductUpdateReqDto req = new ProductUpdateReqDto("수정", "설명",  List.of("이미지1", "이미지2"), 2000);
         ProductResDto dto = ProductResDto.builder().productId(1L).title("수정").build();
 
         Mockito.when(productService.updateProduct(eq(1L), any())).thenReturn(dto);

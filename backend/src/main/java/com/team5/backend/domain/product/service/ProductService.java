@@ -85,6 +85,7 @@ public class ProductService {
                 request.getPrice()
         );
 
+        productRepository.save(product);
         return ProductResDto.fromEntity(product);
     }
 

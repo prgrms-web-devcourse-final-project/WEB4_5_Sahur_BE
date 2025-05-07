@@ -52,7 +52,7 @@ class ProductServiceTest {
                 .category(testCategory)
                 .title("테스트 상품")
                 .description("설명")
-                .imageUrl("http://image.url")
+                .imageUrl(List.of("http://image.url"))
                 .price(1000)
                 .dibCount(0L)
                 .createdAt(LocalDateTime.now())
@@ -62,7 +62,7 @@ class ProductServiceTest {
     @Test
     @DisplayName("상품 등록 - 성공")
     void createProduct() {
-        ProductCreateReqDto req = new ProductCreateReqDto(1L, "테스트", "설명", "이미지", 1000);
+        ProductCreateReqDto req = new ProductCreateReqDto(1L, "테스트", "설명", List.of("이미지"), 1000);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(testCategory));
         when(productRepository.save(any())).thenReturn(testProduct);
@@ -99,7 +99,7 @@ class ProductServiceTest {
     @Test
     @DisplayName("상품 수정 - 성공")
     void updateProduct() {
-        ProductUpdateReqDto req = new ProductUpdateReqDto("수정된 제목", "수정된 설명", "수정이미지", 1500);
+        ProductUpdateReqDto req = new ProductUpdateReqDto("수정된 제목", "수정된 설명", List.of("수정된 이미지"), 1500);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
         when(productRepository.save(any())).thenReturn(testProduct);

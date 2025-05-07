@@ -98,14 +98,15 @@ public class BaseInitData implements CommandLineRunner {
                         .imageUrl("http://example.com/user" + (i + 1) + ".jpg")
                         .build());
 
-                Product product = productRepository.save(Product.builder()
-                        .category(category)
-                        .title(category.getCategory().name() + " 상품")
-                        .description("이것은 " + category.getCategory().name() + " 카테고리의 상품입니다.")
-                        .imageUrl("http://example.com/" + category.getCategory().name().toLowerCase() + ".jpg")
-                        .price(10000 * (i + 1))
-                        .createdAt(LocalDateTime.now())
-                        .build());
+                Product product = productRepository.save(
+                        Product.create(
+                                category,
+                                category.getCategory().name() + " 상품",
+                                "이것은 " + category.getCategory().name() + " 카테고리의 상품입니다.",
+                                List.of("http://example.com/" + category.getCategory().name().toLowerCase() + ".jpg"),
+                                10000 * (i + 1)
+                        )
+                );
 
                 GroupBuy groupBuy = groupBuyRepository.save(GroupBuy.builder()
                         .product(product)
