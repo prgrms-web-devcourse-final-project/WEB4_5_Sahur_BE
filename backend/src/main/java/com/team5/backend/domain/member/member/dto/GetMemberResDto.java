@@ -28,7 +28,7 @@ public class GetMemberResDto {
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .name(member.getName())
-                .address(member.getAddress())
+                .address(member.getAddress().toString())
                 .imageUrl(member.getImageUrl())
                 .role(member.getRole().name())
                 .createdAt(member.getCreatedAt())
