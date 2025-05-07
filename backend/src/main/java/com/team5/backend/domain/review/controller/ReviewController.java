@@ -88,7 +88,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "내 리뷰 조회", description = "현재 로그인한 회원이 작성한 리뷰를 최신순으로 조회합니다.")
-    @GetMapping("/my")
+    @GetMapping("/member/list")
     public RsData<Page<ReviewResDto>> getMyReviews(
             @RequestHeader("Authorization") String token,
             @PageableDefault(size = 5) Pageable pageable
