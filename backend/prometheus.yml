@@ -2,7 +2,7 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "spring-boot-backend"
+  - job_name: "prometheus"
     metrics_path: "/actuator/prometheus"
     static_configs:
       - targets: ["ha_proxy_1:80"]
