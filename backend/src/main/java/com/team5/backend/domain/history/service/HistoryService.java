@@ -9,6 +9,7 @@ import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
@@ -29,6 +30,7 @@ public class HistoryService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
     private final GroupBuyRepository groupBuyRepository;
+    private final OrderRepository orderRepository;
     private final JwtUtil jwtUtil;
 
     /**
@@ -114,5 +116,22 @@ public class HistoryService {
     @Transactional
     public void deleteHistory(Long id) {
         historyRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean checkReviewWritable(Long ProductId, String token) {
+        String rawToken = token.replace("Bearer ", "");
+
+        if (jwtUtil.isTokenBlacklisted(rawToken)) {
+            throw new CustomException(HistoryErrorCode.TOKEN_BLACKLISTED);
+        }
+
+        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
+            throw new CustomException(HistoryErrorCode.TOKEN_INVALID);
+        }
+
+        Long memberId = jwtUtil.extractMemberId(rawToken);
+        return historyRepository.findByMember_MemberIdAndProduct_ProductId(memberId, ProductId).getWritable();
+
     }
 }

@@ -14,7 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
 
 @Tag(name = "History", description = "구매 이력 관련 API")
 @RestController
@@ -71,4 +75,15 @@ public class HistoryController {
         historyService.deleteHistory(id);
         return RsDataUtil.success("구매 이력 삭제 완료");
     }
+
+    @GetMapping("/writable")
+    public ResponseEntity<Map<String, Boolean>> isReviewWritable(
+            @Parameter(description = "Access Token (Bearer 포함)", required = true)
+            @RequestHeader(value = "Authorization") String token,
+            @RequestParam Long productId) {
+
+        boolean writable = historyService.checkReviewWritable(productId, token);
+        return ResponseEntity.ok(Collections.singletonMap("writable", writable));
+    }
+
 }
