@@ -63,7 +63,7 @@ public class NotificationController {
         return RsDataUtil.success("알림 수정 성공", response);
     }
 
-    @Operation(summary = "알림 읽음 상태 수정 (부분)", description = "알림의 읽음 상태를 부분 수정합니다.")
+    @Operation(summary = "알림 읽음 처리", description = "알림의 읽음 상태를 부분 수정합니다.")
     @PatchMapping("/{id}")
     public RsData<NotificationResDto> patchNotification(@PathVariable Long id) {
         NotificationResDto response = notificationService.patchNotification(id);
@@ -78,7 +78,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "내 알림 목록 조회", description = "접속 중인 회원의 알림 목록을 최신순으로 조회합니다.")
-    @GetMapping("/members/list")
+    @GetMapping("/member/list")
     public RsData<Page<NotificationResDto>> getMyNotifications(
             @RequestHeader("Authorization") String token,
             @PageableDefault(size = 5) Pageable pageable

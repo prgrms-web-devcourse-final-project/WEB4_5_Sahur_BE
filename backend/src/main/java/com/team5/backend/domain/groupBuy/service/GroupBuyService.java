@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
@@ -8,14 +9,12 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +30,8 @@ public class GroupBuyService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
+    private final DibsRepository dibsRepository;
+    private final ReviewRepository reviewRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -62,66 +63,19 @@ public class GroupBuyService {
                 .status(GroupBuyStatus.ONGOING)
                 .build();
 
-        GroupBuy saved = groupBuyRepository.save(groupBuy);
-        return toDto(saved);
+        return toDto(groupBuyRepository.save(groupBuy));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<GroupBuyResDto> getAllONGINGGroupBuys(Pageable pageable, GroupBuySortField sortField) {
+        return groupBuyRepository.findByStatus(GroupBuyStatus.ONGOING, createSortedPageable(pageable, sortField))
+                .map(this::toDto);
     }
 
     @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getAllGroupBuys(Pageable pageable, GroupBuySortField sortField) {
-        Sort sort = getSortForField(sortField);
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-        Page<GroupBuy> pageResult = groupBuyRepository.findAll(sortedPageable);
-        return pageResult.map(this::toDto);
-    }
-
-    private Sort getSortForField(GroupBuySortField sortField) {
-        return switch (sortField) {
-            case LATEST -> Sort.by(Sort.Order.desc("createdAt"));
-            case POPULAR -> Sort.by(Sort.Order.desc("product.dibCount"));
-            default -> Sort.unsorted();
-        };
-    }
-
-    @Transactional(readOnly = true)
-    public GroupBuyResDto getGroupBuyById(Long id) {
-        return groupBuyRepository.findById(id)
-                .map(this::toDto)
-                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
-    }
-
-    @Transactional
-    public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
-        return groupBuyRepository.findById(id)
-                .map(existing -> {
-                    existing.setTargetParticipants(request.getTargetParticipants());
-                    existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
-                    existing.setRound(request.getRound());
-                    existing.setDeadline(request.getDeadline());
-                    existing.setStatus(request.getStatus());
-                    GroupBuy updated = groupBuyRepository.save(existing);
-                    return toDto(updated);
-                })
-                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
-    }
-
-    @Transactional
-    public GroupBuyResDto patchGroupBuy(Long id, GroupBuyPatchReqDto request) {
-        GroupBuy existing = groupBuyRepository.findById(id)
-                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
-
-        existing.setTargetParticipants(request.getTargetParticipants() != null ? request.getTargetParticipants() : existing.getTargetParticipants());
-        existing.setCurrentParticipantCount(request.getCurrentParticipantCount() != null ? request.getCurrentParticipantCount() : existing.getCurrentParticipantCount());
-        existing.setRound(request.getRound() != null ? request.getRound() : existing.getRound());
-        existing.setDeadline(request.getDeadline() != null ? request.getDeadline() : existing.getDeadline());
-        existing.setStatus(request.getStatus() != null ? request.getStatus() : existing.getStatus());
-
-        GroupBuy updated = groupBuyRepository.save(existing);
-        return toDto(updated);
-    }
-
-    @Transactional
-    public void deleteGroupBuy(Long id) {
-        groupBuyRepository.deleteById(id);
+        return groupBuyRepository.findAll(createSortedPageable(pageable, sortField))
+                .map(this::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -129,11 +83,8 @@ public class GroupBuyService {
         LocalDateTime startOfToday = LocalDateTime.now().toLocalDate().atStartOfDay();
         LocalDateTime endOfToday = startOfToday.plusDays(1).minusNanos(1);
 
-        Sort sort = getSortForField(sortField);
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-
-        Page<GroupBuy> pageResult = groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, sortedPageable);
-        return pageResult.map(this::toDto);
+        return groupBuyRepository.findByDeadlineBetween(startOfToday, endOfToday, createSortedPageable(pageable, sortField))
+                .map(this::toDto);
     }
 
     @Transactional(readOnly = true)
@@ -150,11 +101,77 @@ public class GroupBuyService {
 
         Long memberId = jwtUtil.extractMemberId(rawToken);
 
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        return historyRepository.findDistinctGroupBuysByMemberId(memberId, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")))
+                .map(this::toDto);
+    }
 
-        Page<GroupBuy> groupBuys = historyRepository.findDistinctGroupBuysByMemberId(memberId, sortedPageable);
-        return groupBuys.map(this::toDto);
+    @Transactional(readOnly = true)
+    public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, String token) {
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        boolean isTodayDeadline = groupBuy.getDeadline() != null &&
+                groupBuy.getDeadline().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
+
+        Double averageRate = reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId());
+        if (averageRate == null) averageRate = 0.0;
+
+        boolean isDibs = false;
+
+        if (token != null && token.startsWith("Bearer ")) {
+            String rawToken = token.replace("Bearer ", "");
+
+            if (jwtUtil.isTokenBlacklisted(rawToken)) {
+                throw new CustomException(GroupBuyErrorCode.TOKEN_BLACKLISTED);
+            }
+
+            if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
+                throw new CustomException(GroupBuyErrorCode.TOKEN_INVALID);
+            }
+
+            Long memberId = jwtUtil.extractMemberId(rawToken);
+            isDibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), memberId).isPresent();
+        }
+
+        return GroupBuyDetailResDto.fromEntity(groupBuy, isTodayDeadline, isDibs, averageRate);
+    }
+
+    @Transactional
+    public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
+        return groupBuyRepository.findById(id)
+                .map(existing -> {
+                    existing.setTargetParticipants(request.getTargetParticipants());
+                    existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
+                    existing.setRound(request.getRound());
+                    existing.setDeadline(request.getDeadline());
+                    existing.setStatus(request.getStatus());
+                    return toDto(groupBuyRepository.save(existing));
+                })
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+    }
+
+    @Transactional
+    public GroupBuyResDto patchGroupBuy(Long id, GroupBuyPatchReqDto request) {
+        GroupBuy existing = groupBuyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        if (request.getTargetParticipants() != null)
+            existing.setTargetParticipants(request.getTargetParticipants());
+        if (request.getCurrentParticipantCount() != null)
+            existing.setCurrentParticipantCount(request.getCurrentParticipantCount());
+        if (request.getRound() != null)
+            existing.setRound(request.getRound());
+        if (request.getDeadline() != null)
+            existing.setDeadline(request.getDeadline());
+        if (request.getStatus() != null)
+            existing.setStatus(request.getStatus());
+
+        return toDto(groupBuyRepository.save(existing));
+    }
+
+    @Transactional
+    public void deleteGroupBuy(Long id) {
+        groupBuyRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
@@ -176,12 +193,41 @@ public class GroupBuyService {
         groupBuy.setStatus(GroupBuyStatus.CLOSED);
     }
 
-    /**
-     * 공동구매 마감이 오늘인지 판단하고 DTO로 변환
-     */
+    @Transactional(readOnly = true)
+    public List<GroupBuyResDto> getTop3GroupBuysByDibs() {
+        return groupBuyRepository.findTop3ByDibsOrder(PageRequest.of(0, 3)).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupBuyResDto> getRandomTop3GroupBuysBySameCategory(Long groupBuyId) {
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        Long categoryId = groupBuy.getProduct().getCategory().getCategoryId();
+
+        return groupBuyRepository.findRandomTop3ByCategoryId(categoryId).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     private GroupBuyResDto toDto(GroupBuy groupBuy) {
         boolean isDeadlineToday = groupBuy.getDeadline() != null &&
                 groupBuy.getDeadline().toLocalDate().isEqual(LocalDate.now());
         return GroupBuyResDto.fromEntity(groupBuy, isDeadlineToday);
+    }
+
+    private Pageable createSortedPageable(Pageable pageable, GroupBuySortField sortField) {
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), getSortForField(sortField));
+    }
+
+    private Sort getSortForField(GroupBuySortField sortField) {
+        return switch (sortField) {
+            case LATEST -> Sort.by(Sort.Order.desc("createdAt"));
+            case POPULAR -> Sort.by(Sort.Order.desc("product.dibCount"));
+            case DEADLINE_SOON -> Sort.by(Sort.Order.asc("deadline"));
+            default -> Sort.unsorted();
+        };
     }
 }
