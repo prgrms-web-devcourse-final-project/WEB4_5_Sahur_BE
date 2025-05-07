@@ -1,0 +1,40 @@
+#CI/CD과정에 도커 컴포즈를 사용하지 않아 수동으로 도커 빌드한 모니터링 스크립트입니다.
+
+# 사전에 actuator 및 프로메테우스 gradle 의존성 추가 필요
+
+# 프로메테우스 yml 조회
+ls -l /home/ubuntu/prometheus/prometheus.yml
+
+# 프로메테우스 yml 삭제
+sudo rm -r /home/ubuntu/prometheus/prometheus.yml
+
+# 프로메테우스 yml 수동 추가
+cat <<EOF > /home/ubuntu/prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['172.17.0.1:8080', '172.17.0.1:8081']
+EOF
+
+# 프로메테우스 실행
+docker run -d \
+  --network common \
+  --name prom\
+  -p 9090:9090 \
+  -v /home/ubuntu/prometheus:/etc/prometheus \
+  prom/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --web.external-url=/prometheus
+
+# 그라파나 실행
+docker volume create grafana-storage
+docker run -d \
+  --network common \
+  --name grafana \
+  -p 4000:3000 \
+  -v grafana-storage:/var/lib/grafana \
+  grafana/grafana
