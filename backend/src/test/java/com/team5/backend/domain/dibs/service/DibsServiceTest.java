@@ -262,7 +262,6 @@ class DibsServiceTest {
                 .email("another@example.com")
                 .name("홍길동")
                 .password("password1234")
-                .address("서울시 마포구")
                 .role(Role.USER)
                 .emailVerified(true)
                 .build();
