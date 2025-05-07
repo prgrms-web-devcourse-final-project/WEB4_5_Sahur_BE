@@ -43,19 +43,6 @@ import jakarta.transaction.Transactional;
 @Transactional
 class OrderServiceTest {
 
-	@TestConfiguration
-	static class OAuth2MockConfig {
-		@Bean
-		public ClientRegistrationRepository clientRegistrationRepository() {
-			return Mockito.mock(ClientRegistrationRepository.class);
-		}
-
-		@Bean
-		public OAuth2AuthorizedClientService oAuth2AuthorizedClientService() {
-			return Mockito.mock(OAuth2AuthorizedClientService.class);
-		}
-	}
-
 	@Autowired
 	private OrderService orderService;
 
