@@ -3,6 +3,7 @@ package com.team5.backend.domain.delivery.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
@@ -28,6 +29,7 @@ public class DeliveryController {
 	private final DeliveryService deliveryService;
 
 	@Operation(summary = "주문별 배송 정보 등록", description = "해당 주문에 대한 배송 정보를 등록합니다.")
+	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/order/{orderId}")
 	public RsData<DeliveryResDto> createDelivery(
 		@Parameter(description = "주문 ID") @PathVariable Long orderId,
@@ -69,6 +71,7 @@ public class DeliveryController {
 	}
 
 	@Operation(summary = "배송 정보 삭제", description = "배송 정보를 삭제합니다.")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("/{deliveryId}")
 	public RsData<Empty> deleteDelivery(
 		@Parameter(description = "배송 ID") @PathVariable Long deliveryId
