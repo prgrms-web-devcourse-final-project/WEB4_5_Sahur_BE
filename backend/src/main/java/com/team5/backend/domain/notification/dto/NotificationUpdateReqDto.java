@@ -18,5 +18,5 @@ public class NotificationUpdateReqDto {
     @NotNull
     private String url;
     @NotNull
-    private Boolean read;
+    private Boolean isRead;
 }
