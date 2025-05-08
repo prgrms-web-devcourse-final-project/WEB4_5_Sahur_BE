@@ -64,5 +64,9 @@ public class Product {
         this.price = price;
     }
 
+    public void updateCategory(Category category) {
+        this.category = category;
+    }
+
 }
 
