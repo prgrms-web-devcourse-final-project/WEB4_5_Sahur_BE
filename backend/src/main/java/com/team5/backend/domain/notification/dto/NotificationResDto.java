@@ -17,7 +17,7 @@ public class NotificationResDto {
     private String title;
     private String message;
     private String url;
-    private Boolean read;
+    private Boolean isRead;
     private LocalDateTime createdAt;
 
     public static NotificationResDto fromEntity(Notification notification) {
@@ -28,7 +28,7 @@ public class NotificationResDto {
                 .title(notification.getTitle())
                 .message(notification.getMessage())
                 .url(notification.getUrl())
-                .read(notification.getRead())
+                .isRead(notification.getIsRead())
                 .createdAt(notification.getCreatedAt())
                 .build();
     }
