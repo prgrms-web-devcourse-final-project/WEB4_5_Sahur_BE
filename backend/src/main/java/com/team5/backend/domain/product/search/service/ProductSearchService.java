@@ -32,4 +32,8 @@ public class ProductSearchService {
     public List<ProductDocument> search(String keyword) {
         return productSearchRepository.findByTitleContainingOrDescriptionContaining(keyword, keyword);
     }
+
+    public void delete(Long productId) {
+        productSearchRepository.deleteById(productId.toString());
+    }
 }
