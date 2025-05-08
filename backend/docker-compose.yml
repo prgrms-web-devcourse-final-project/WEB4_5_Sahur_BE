@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   redis:
@@ -11,5 +11,33 @@ services:
     command: redis-server --appendonly yes --requirepass tkgnfm05
     restart: always
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.monitoring.collection.enabled=true
+    ports:
+      - "9200:9200"
+    networks:
+      - app-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-net
+
 volumes:
   redis-data:
+
+networks:
+  app-net:
+    driver: bridge
