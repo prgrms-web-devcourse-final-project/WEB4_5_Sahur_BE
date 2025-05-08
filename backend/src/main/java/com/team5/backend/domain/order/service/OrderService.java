@@ -4,15 +4,13 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderDetailResDto;
-import com.team5.backend.domain.order.dto.OrderListResDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.config.toss.TossPaymentConfig;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +32,7 @@ public class OrderService {
 	private final ProductRepository productRepository;
 
 	private final OrderIdGenerator orderIdGenerator;
+	private final TossPaymentConfig tossPaymentConfig;
 
 	public Order createOrder(OrderCreateReqDto request) {
 		Member member = memberRepository.findById(request.getMemberId())
@@ -98,5 +97,17 @@ public class OrderService {
 		Order order = orderRepository.findById(orderId)
 				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
 		order.markAsCanceled();
+	}
+
+	public OrderPaymentInfoResDto getOrderPaymentInfo(Long orderId) {
+		Order order = orderRepository.findById(orderId)
+				.orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
+
+		return OrderPaymentInfoResDto.builder()
+				.orderId(order.getOrderId())
+				.orderName(order.getProduct().getTitle())
+				.amount(order.getTotalPrice())
+				.clientKey(tossPaymentConfig.getClientKey())
+				.build();
 	}
 }

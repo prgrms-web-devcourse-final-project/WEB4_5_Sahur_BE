@@ -82,4 +82,11 @@ public class OrderController {
         orderService.cancelOrder(orderId);
         return RsDataUtil.success("주문이 성공적으로 취소되었습니다.");
     }
+
+    @Operation(summary = "결제용 주문 정보 조회", description = "해당 주문 ID의 결제에 필요한 주문 정보를 반환합니다.")
+    @GetMapping("/{orderId}/payment")
+    public RsData<?> getOrderPaymentInfo(@PathVariable Long orderId) {
+         OrderPaymentInfoResDto response = orderService.getOrderPaymentInfo(orderId);
+         return RsDataUtil.success("결제용 주문 정보 조회에 성공했습니다.", response);
+    }
 }
