@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class DibsCreateReqDto {
 
-    @NotNull(message = "회원 ID는 필수입니다.")
-    private Long memberId;
-
     @NotNull(message = "상품 ID는 필수입니다.")
     private Long productId;
 }
+ 

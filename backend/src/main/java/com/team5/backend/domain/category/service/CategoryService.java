@@ -6,6 +6,8 @@ import com.team5.backend.domain.category.dto.CategoryUpdateReqDto;
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.ProductErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,9 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
+    /**
+     * 카테고리 생성
+     */
     public CategoryResDto createCategory(CategoryCreateReqDto request) {
 
         Category category = Category.builder()
@@ -31,21 +36,30 @@ public class CategoryService {
         return CategoryResDto.fromEntity(saved);
     }
 
+    /**
+     * 전체 카테고리 목록 조회
+     */
     public List<CategoryResDto> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(CategoryResDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 카테고리 단건 조회
+     */
     public CategoryResDto getCategoryById(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
         return CategoryResDto.fromEntity(category);
     }
 
+    /**
+     * 카테고리 수정
+     */
     public CategoryResDto updateCategory(Long categoryId, CategoryUpdateReqDto request) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found with id " + categoryId));
+                .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
 
         category.updateCategoryInfo(request.getCategory(), request.getKeyword(), request.getUid());
 
@@ -53,8 +67,14 @@ public class CategoryService {
         return CategoryResDto.fromEntity(updated);
     }
 
+    /**
+     * 카테고리 삭제
+     */
     public void deleteCategory(Long categoryId) {
-        categoryRepository.deleteById(categoryId);
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
+
+        categoryRepository.delete(category);
     }
 
 }

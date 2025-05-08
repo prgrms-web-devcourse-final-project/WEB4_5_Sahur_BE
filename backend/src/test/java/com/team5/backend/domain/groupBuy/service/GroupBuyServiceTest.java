@@ -144,7 +144,7 @@ class GroupBuyServiceTest {
     @DisplayName("공동구매 단건 조회 - 존재하는 경우, 로그인 없이")
     void getGroupBuyById_shouldReturnDetailDtoWithoutLogin() {
         GroupBuy groupBuy = groupBuys.get(0);
-        groupBuy.getProduct().setCategory(testCategory);
+        groupBuy.getProduct().updateCategory(testCategory);
 
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuy));
         when(reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId())).thenReturn(4.5);
@@ -165,7 +165,7 @@ class GroupBuyServiceTest {
         String rawToken = "test.jwt.token";
 
         GroupBuy groupBuy = groupBuys.get(0);
-        groupBuy.getProduct().setCategory(testCategory);
+        groupBuy.getProduct().updateCategory(testCategory);
 
         // mocking
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuy));
@@ -345,7 +345,7 @@ class GroupBuyServiceTest {
     @DisplayName("같은 카테고리 랜덤 공동구매 3개 조회")
     void getRandomTop3GroupBuysBySameCategory_shouldReturn3Items() {
         GroupBuy base = groupBuys.get(0);
-        base.getProduct().setCategory(testCategory);
+        base.getProduct().updateCategory(testCategory);
 
         List<GroupBuy> randoms = List.of(base, groupBuys.get(1));
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(base));

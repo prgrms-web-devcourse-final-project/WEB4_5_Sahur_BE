@@ -3,8 +3,8 @@ package com.team5.backend.global.exception.code;
 import com.team5.backend.global.exception.ErrorCode;
 
 public enum ProductErrorCode implements ErrorCode {
-    PRODUCT_NOT_FOUND(404, "PRODUCT_001", "상품을 찾을 수 없습니다."),
-    CATEGORY_NOT_FOUND(404, "PRODUCT_002", "카테고리를 찾을 수 없습니다.");
+    PRODUCT_NOT_FOUND(404, "PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다."),
+    CATEGORY_NOT_FOUND(404, "CATEGORY_NOT_FOUND", "카테고리를 찾을 수 없습니다.");
 
     private final int status;
     private final String code;

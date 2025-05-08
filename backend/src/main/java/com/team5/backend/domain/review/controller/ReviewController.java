@@ -81,7 +81,7 @@ public class ReviewController {
     public RsData<Page<ReviewResDto>> getReviewsByProductId(
             @PathVariable Long productId,
             @RequestParam(defaultValue = "latest") String sortBy,
-            @PageableDefault(size = 5) Pageable pageable
+            @PageableDefault(size = 3) Pageable pageable
     ) {
         Page<ReviewResDto> response = reviewService.getReviewsByProductId(productId, pageable, sortBy);
         return RsDataUtil.success("상품 리뷰 조회 성공", response);

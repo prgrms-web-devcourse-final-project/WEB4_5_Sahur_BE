@@ -35,71 +35,71 @@ class OrderControllerTest {
 		OrderCreateReqDto request = new OrderCreateReqDto(1L, 1L, 1L, 1);
 
 		mockMvc.perform(post("/api/v1/orders")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문이 성공적으로 생성되었습니다."));
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문이 성공적으로 생성되었습니다."));
 	}
 
 	@Test
 	@DisplayName("GET /api/v1/orders - 주문 목록 조회 성공")
 	void getOrders_success() throws Exception {
 		mockMvc.perform(get("/api/v1/orders"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."))
-			.andExpect(jsonPath("$.data.content[0].orderId").exists());
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."))
+				.andExpect(jsonPath("$.data.content[0].orderId").exists());
 	}
 
 	@Test
 	@DisplayName("GET /api/v1/orders?search=1 - 주문번호로 주문 목록 조회 성공")
 	void getOrdersByOrderId_success() throws Exception {
 		mockMvc.perform(get("/api/v1/orders")
-				.param("search", "1"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
+						.param("search", "1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
 	}
 
 	@Test
 	@DisplayName("GET /api/v1/orders?status=PAID - 주문 상태별 주문 목록 조회 성공")
 	void getOrdersByStatus_success() throws Exception {
 		mockMvc.perform(get("/api/v1/orders")
-				.param("status", "PAID"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
+						.param("status", "PAID"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
 	}
 
 	@Test
 	@DisplayName("GET /api/v1/orders/members/{memberId} - 회원 주문 전체 조회")
 	void getMemberOrders_all_success() throws Exception {
 		mockMvc.perform(get("/api/v1/orders/members/1"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."))
-			.andExpect(jsonPath("$.data.content[0].nickname").value("수민짱"));
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."))
+				.andExpect(jsonPath("$.data.content[0].nickname").value("수민짱"));
 	}
 
 	@Test
 	@DisplayName("GET /api/v1/orders/members/{memberId}?status=inProgress - 상태 필터링 조회")
 	void getMemberOrders_status_inProgress_success() throws Exception {
 		mockMvc.perform(get("/api/v1/orders/members/1")
-				.param("status", "inProgress"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."));
+						.param("status", "inProgress"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."));
 	}
 
 	@Test
 	@DisplayName("GET /api/v1/orders/{id} - 주문 상세 조회 성공")
 	void getOrderDetail_success() throws Exception {
 		mockMvc.perform(get("/api/v1/orders/1"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문 상세 조회에 성공했습니다."))
-			.andExpect(jsonPath("$.data.orderId").value(1));
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문 상세 조회에 성공했습니다."))
+				.andExpect(jsonPath("$.data.orderId").value(1));
 	}
 
 	@Test
@@ -108,19 +108,19 @@ class OrderControllerTest {
 		OrderUpdateReqDto request = new OrderUpdateReqDto(3);
 
 		mockMvc.perform(patch("/api/v1/orders/1")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문 정보가 수정되었습니다."));
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문 정보가 수정되었습니다."));
 	}
 
 	@Test
 	@DisplayName("DELETE /api/v1/orders/{id} - 주문 취소 성공")
 	void cancelOrder_success() throws Exception {
 		mockMvc.perform(delete("/api/v1/orders/1"))
-			.andExpect(status().isNoContent())
-			.andExpect(jsonPath("$.code").value("200-0"))
-			.andExpect(jsonPath("$.msg").value("주문이 성공적으로 취소되었습니다."));
+				.andExpect(status().isNoContent())
+				.andExpect(jsonPath("$.code").value("200-0"))
+				.andExpect(jsonPath("$.msg").value("주문이 성공적으로 취소되었습니다."));
 	}
 }
