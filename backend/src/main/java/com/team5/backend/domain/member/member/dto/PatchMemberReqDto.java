@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
 
+@Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
