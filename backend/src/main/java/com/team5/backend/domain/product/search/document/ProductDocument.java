@@ -1,25 +1,26 @@
 package com.team5.backend.domain.product.search.document;
 
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Document(indexName = "products")
 @Data
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDocument {
     @Id
     private String id;
 
+    private Long categoryId;
     private String title;
     private String description;
+    private String imageUrl;
     private Integer price;
-    private List<String> tags;
+    private Long dibCount;
+    private LocalDateTime createdAt;
 }
