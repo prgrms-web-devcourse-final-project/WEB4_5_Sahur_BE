@@ -193,14 +193,6 @@ public class JwtUtil {
                 validateAccessTokenInRedis(email, token));
     }
 
-    // 리프레시 토큰 유효성 검증 (블랙리스트 확인 및 Redis 검증 추가)
-    public boolean validateRefreshToken(String refreshToken, String email) {
-        return (email.equals(extractEmail(refreshToken)) &&
-                !isTokenExpired(refreshToken) &&
-                !isRefreshTokenBlacklisted(refreshToken) &&
-                validateRefreshTokenInRedis(email, refreshToken));
-    }
-
     public Claims getClaims(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -248,55 +240,5 @@ public class JwtUtil {
                 refreshTokenExpiration,
                 TimeUnit.MILLISECONDS
         );
-    }
-
-    // 토큰에서 만료 시간(Date) 추출
-    public Date extractExpiration(String token) {
-        return getClaims(token).getExpiration();
-    }
-
-    // 만료된 토큰에서도 이메일 추출 (액세스 토큰 갱신에 사용)
-    public String extractEmailIgnoringExpiration(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(getSigningKey())
-                    .setAllowedClockSkewSeconds(refreshTokenExpiration / 1000) // 충분히 큰 값으로 설정
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    // 만료된 토큰에서도 memberId 추출
-    public Long extractMemberIdIgnoringExpiration(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(getSigningKey())
-                    .setAllowedClockSkewSeconds(refreshTokenExpiration / 1000)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("memberId", Long.class);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    // 만료된 토큰에서도 역할 추출
-    public String extractRoleIgnoringExpiration(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(getSigningKey())
-                    .setAllowedClockSkewSeconds(refreshTokenExpiration / 1000)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("role", String.class);
-        } catch (Exception e) {
-            return null;
-        }
     }
 }
