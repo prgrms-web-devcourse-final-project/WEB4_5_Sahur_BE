@@ -12,6 +12,8 @@ spring:
       host: redis_1
       port: 6379
       password: ${custom.db.password}
+    elasticsearch:
+      uris: http://localhost:9200
 
   jpa:
     hibernate:
