@@ -30,6 +30,16 @@ logging:
     org.hibernate.orm.jdbc.extract: INFO
     org.springframework.transaction.interceptor: INFO
 
+# 프로메테우스 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      access: unrestricted
+
 custom:
   site:
     domain: ${custom.prod.domain}
