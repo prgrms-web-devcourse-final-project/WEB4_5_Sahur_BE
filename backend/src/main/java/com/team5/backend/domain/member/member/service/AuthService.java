@@ -7,15 +7,12 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.util.JwtUtil;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
+import com.team5.backend.global.security.AuthTokenManager;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +21,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
+    private final AuthTokenManager authTokenManager;
 
     @Transactional
     public LoginResDto login(LoginReqDto loginReqDto, HttpServletResponse response) {
@@ -49,8 +47,8 @@ public class AuthService {
         int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
         int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
 
-        addCookie(response, "accessToken", accessToken, accessTokenMaxAge);
-        addCookie(response, "refreshToken", refreshToken, refreshTokenMaxAge);
+        authTokenManager.addCookie(response, "accessToken", accessToken, accessTokenMaxAge);
+        authTokenManager.addCookie(response, "refreshToken", refreshToken, refreshTokenMaxAge);
 
         // 로그인 응답 DTO 생성 및 반환
         return new LoginResDto(accessToken, refreshToken, member.getMemberId());
@@ -62,115 +60,31 @@ public class AuthService {
 
         String accessToken = token;
 
-        if (accessToken == null || accessToken.isEmpty()) {
-            throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
-        }
-
         // Bearer 접두사가 있는 경우 제거
         if (accessToken.startsWith("Bearer ")) {
             accessToken = accessToken.substring(7);
         }
 
-        // 토큰에서 이메일 추출
-        String email = jwtUtil.extractEmail(accessToken);
-
-        // 토큰 유효성 검증
-        if (!jwtUtil.validateToken(accessToken, email)) {
-            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
-        }
-
-        // 토큰 블랙리스트에 추가하여 무효화
-        jwtUtil.addToBlacklist(accessToken);
-
-        // Redis에서 리프레시 토큰 삭제
-        jwtUtil.removeRefreshToken(email);
-
-        addCookie(response, "accessToken", "", 0);
-        addCookie(response, "refreshToken", "", 0);
+        // TokenCookieUtil을 사용하여 토큰 무효화 및 쿠키 삭제
+        authTokenManager.invalidateTokens(accessToken, response);
     }
 
     // 토큰 갱신 메서드
     @Transactional
     public AuthResDto refreshToken(String refreshToken, HttpServletResponse response) {
-
-        // 리프레시 토큰 유효성 검증
-        if (jwtUtil.isTokenExpired(refreshToken) || jwtUtil.isTokenBlacklisted(refreshToken)) {
-            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
-        }
-
-        // 토큰에서 사용자 정보 추출
-        String email = jwtUtil.extractEmail(refreshToken);
-        Long memberId = jwtUtil.extractMemberId(refreshToken);
-        String role = jwtUtil.extractRole(refreshToken);
-
-        // Redis에 저장된 리프레시 토큰과 비교
-        if (!jwtUtil.validateRefreshTokenInRedis(email, refreshToken)) {
-            throw new CustomException(AuthErrorCode.TOKEN_MISMATCH);
-        }
-
-        // 새로운 액세스 토큰 생성
-        String newAccessToken = jwtUtil.generateAccessToken(memberId, email, role);
-
-        // 쿠키에 새 액세스 토큰 저장
-        int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
-        addCookie(response, "accessToken", newAccessToken, accessTokenMaxAge);
-
-        // 리프레시 토큰 갱신 필요 여부 확인
-        String newRefreshToken = refreshToken;
-
-        if (isRefreshTokenNeedsRenewal(refreshToken)) {
-            // 새로운 리프레시 토큰 생성
-            newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
-
-            // 쿠키에 새 리프레시 토큰 저장
-            int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
-            addCookie(response, "refreshToken", newRefreshToken, refreshTokenMaxAge);
-
-            // Redis에 저장된 리프레시 토큰 업데이트
-            jwtUtil.updateRefreshTokenInRedis(email, newRefreshToken);
-        }
-
-        return new AuthResDto(newAccessToken, newRefreshToken);
-    }
-
-
-    // 리프레시 토큰 갱신 필요 여부 확인
-    private boolean isRefreshTokenNeedsRenewal(String refreshToken) {
-        try {
-            Date expiration = jwtUtil.extractExpiration(refreshToken);
-
-            // 만료까지 남은 시간 계산 (밀리초)
-            long timeToExpire = expiration.getTime() - System.currentTimeMillis();
-
-            // 만료 기간의 30% 이하로 남았으면 갱신
-            return timeToExpire < (jwtUtil.getRefreshTokenExpiration() * 0.3);
-        } catch (Exception e) {
-            return true;
-        }
+        return authTokenManager.refreshTokens(null, refreshToken, response);
     }
 
     // 로그인된 사용자의 정보를 반환하는 메서드
     public GetMemberResDto getLoggedInMember(String token) {
 
-        // 토큰에서 "Bearer "를 제거
+        // Bearer 접두사가 있는 경우 제거
         String extractedToken = token.replace("Bearer ", "");
 
-        // 토큰이 블랙리스트에 있는지 확인
-        if (jwtUtil.isTokenBlacklisted(extractedToken)) {
-            throw new CustomException(AuthErrorCode.LOGOUT_TOKEN);
-        }
+        // TokenCookieUtil을 사용하여 토큰 검증
+        String email = authTokenManager.validateAccessToken(extractedToken);
 
-        // Redis에 저장된 토큰과 일치하는지 확인
-        String username = jwtUtil.extractEmail(extractedToken);
-
-        if (!jwtUtil.validateAccessTokenInRedis(username, extractedToken)) {
-            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
-        }
-
-        // 토큰에서 사용자 정보 추출
-        TokenInfoResDto tokenInfo = extractTokenInfo(extractedToken);
-
-        return memberRepository.findByEmail(tokenInfo.getEmail())
+        return memberRepository.findByEmail(email)
                 .map(GetMemberResDto::fromEntity)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
@@ -186,35 +100,5 @@ public class AuthService {
         String role = jwtUtil.extractRole(token);
 
         return new TokenInfoResDto(email, role);
-    }
-
-    // 쿠키 생성 메서드 (만료 시간 설정)
-    private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-
-        Cookie cookie = new Cookie(name, value);
-
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge); // 만료 시간 설정
-        cookie.setHttpOnly(true); // 자바스크립트에서 접근 불가
-        cookie.setSecure(true); // HTTPS 환경에서만 사용 가능
-        cookie.setAttribute("SameSite", "None");
-
-        response.addCookie(cookie);
-    }
-
-    // 쿠키에서 값을 추출하는 유틸리티 메서드
-    private String extractCookieValue(HttpServletRequest request, String cookieName) {
-
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-
-        return null;
     }
 }

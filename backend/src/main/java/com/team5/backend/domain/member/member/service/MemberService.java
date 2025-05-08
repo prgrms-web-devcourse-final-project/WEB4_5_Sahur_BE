@@ -8,7 +8,10 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.AuthErrorCode;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
+import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.util.ImageUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +39,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
     private final ImageUtil imageUtil;
+    private final AuthTokenManager authTokenManager;
 
     private final HistoryRepository historyRepository;
 
@@ -159,17 +165,36 @@ public class MemberService {
 
     // 회원 삭제
     @Transactional
-    public void deleteMember(String token, HttpServletResponse response) {
+    public void deleteMember(Long memberId, HttpServletResponse response) {
 
-        GetMemberResDto loggedInMember = authService.getLoggedInMember(token);
-
-        Member member = memberRepository.findById(loggedInMember.getMemberId())
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // 회원 데이터 삭제 전에 로그아웃 처리
-        authService.logout(token, response);
+        try {
 
-        // 회원 데이터 삭제
+            // 현재 사용자의 인증 정보 가져오기
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null) {
+                throw new CustomException(CommonErrorCode.UNAUTHORIZED);
+            }
+
+            // 토큰 정보 추출
+            String token = authTokenManager.extractToken(authentication);
+
+            if (token == null) {
+                throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
+            }
+
+            authService.logout(token, response);
+
+        } catch (CustomException e) {
+            log.error("회원 탈퇴 중 인증 관련 오류 발생: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("회원 탈퇴 중 예상치 못한 오류 발생", e);
+            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+        }
+
         memberRepository.delete(member);
     }
 
