@@ -195,18 +195,18 @@ public class BaseInitData implements CommandLineRunner {
                 notificationRepository.save(Notification.builder()
                         .member(buyer).type(NotificationType.ORDER)
                         .title("주문 완료 알림").message(product.getTitle() + " 주문이 완료되었습니다.")
-                        .url("/orders/" + order.getOrderId()).read(false).createdAt(LocalDateTime.now()).build());
+                        .url("/orders/" + order.getOrderId()).isRead(false).createdAt(LocalDateTime.now()).build());
 
                 if (i % 4 == 0) {
                     notificationRepository.save(Notification.builder()
                             .member(buyer).type(NotificationType.EVENT)
                             .title("이벤트 소식 #" + i + "").message("신규 혜택 오픈!")
-                            .url("/events/" + i).read(false).createdAt(LocalDateTime.now()).build());
+                            .url("/events/" + i).isRead(false).createdAt(LocalDateTime.now()).build());
                 } else {
                     notificationRepository.save(Notification.builder()
                             .member(requester).type(NotificationType.ETC)
                             .title("시스템 공지").message("정기 점검 예정 안내")
-                            .url("/notice").read(false).createdAt(LocalDateTime.now()).build());
+                            .url("/notice").isRead(false).createdAt(LocalDateTime.now()).build());
                 }
             }
         }
