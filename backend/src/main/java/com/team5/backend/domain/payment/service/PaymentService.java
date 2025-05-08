@@ -1,14 +1,5 @@
 package com.team5.backend.domain.payment.service;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
@@ -16,8 +7,15 @@ import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.PaymentErrorCode;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +66,7 @@ public class PaymentService {
 
 	@Transactional(readOnly = true)
 	public String getPaymentKeyByOrder(Long orderId) {
-		Payment payment = paymentRepository.findByOrderOrderId(orderId)
+		Payment payment = paymentRepository.findByOrder_OrderId(orderId)
 			.orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND_BY_ORDER));
 		return payment.getPaymentKey();
 	}

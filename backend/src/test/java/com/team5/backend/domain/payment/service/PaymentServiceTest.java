@@ -1,11 +1,11 @@
 package com.team5.backend.domain.payment.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
-import java.util.Optional;
-
+import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.repository.OrderRepository;
+import com.team5.backend.domain.payment.entity.Payment;
+import com.team5.backend.domain.payment.repository.PaymentRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,12 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.repository.OrderRepository;
-import com.team5.backend.domain.payment.entity.Payment;
-import com.team5.backend.domain.payment.repository.PaymentRepository;
-import com.team5.backend.global.exception.CustomException;
-import com.team5.backend.global.exception.code.PaymentErrorCode;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 class PaymentServiceTest {
 
@@ -92,7 +91,7 @@ class PaymentServiceTest {
 		Long orderId = 3L;
 		Payment payment = mock(Payment.class);
 		when(payment.getPaymentKey()).thenReturn("order-key");
-		when(paymentRepository.findByOrderOrderId(orderId)).thenReturn(Optional.of(payment));
+		when(paymentRepository.findByOrder_OrderId(orderId)).thenReturn(Optional.of(payment));
 
 		String result = paymentService.getPaymentKeyByOrder(orderId);
 
@@ -102,7 +101,7 @@ class PaymentServiceTest {
 	@Test
 	@DisplayName("주문 ID로 결제 키 조회 실패 - 결제 없음")
 	void getPaymentKeyByOrder_fail_notFound() {
-		when(paymentRepository.findByOrderOrderId(anyLong())).thenReturn(Optional.empty());
+		when(paymentRepository.findByOrder_OrderId(anyLong())).thenReturn(Optional.empty());
 
 		CustomException e = assertThrows(CustomException.class,
 			() -> paymentService.getPaymentKeyByOrder(123L));
