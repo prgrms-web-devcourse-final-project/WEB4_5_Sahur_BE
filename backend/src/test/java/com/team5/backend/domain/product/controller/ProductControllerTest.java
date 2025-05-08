@@ -80,6 +80,20 @@ class ProductControllerTest {
     }
 
     @Test
+    @DisplayName("상품이 없을 때 빈 리스트 응답")
+    void getAllProducts_EmptyList() throws Exception {
+        Page<Product> emptyPage = new PageImpl<>(List.of()); // 비어 있는 리스트
+
+        Mockito.when(productService.getAllProducts(any(), any(), any())).thenReturn(emptyPage);
+
+        mockMvc.perform(get("/api/v1/products"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.msg").value("상품 목록 조회 성공"))
+                .andExpect(jsonPath("$.data.content").isEmpty());
+    }
+
+
+    @Test
     @DisplayName("상품 단건 조회")
     void getProductById() throws Exception {
         ProductResDto dto = ProductResDto.builder().productId(1L).title("상품").build();
