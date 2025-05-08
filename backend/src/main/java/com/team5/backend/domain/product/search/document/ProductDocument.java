@@ -22,5 +22,9 @@ public class ProductDocument {
     private String imageUrl;
     private Integer price;
     private Long dibCount;
-    private LocalDateTime createdAt;
+    private String createdAt; // ES는 LocalDateTime을 못받음
+
+    public LocalDateTime getCreatedAtAsDateTime() {
+        return LocalDateTime.parse(this.createdAt);
+        }
 }

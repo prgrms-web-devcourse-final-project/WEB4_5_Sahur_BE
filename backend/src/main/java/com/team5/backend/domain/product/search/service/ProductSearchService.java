@@ -23,7 +23,7 @@ public class ProductSearchService {
                 .imageUrl(product.getImageUrl())
                 .price(product.getPrice())
                 .dibCount(product.getDibCount())
-                .createdAt(product.getCreatedAt())
+                .createdAt(product.getCreatedAt().toString())
                 .build();
 
         productSearchRepository.save(doc);
