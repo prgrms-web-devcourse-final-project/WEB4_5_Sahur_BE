@@ -3,6 +3,7 @@ package com.team5.backend.domain.groupBuy.service;
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
+import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
@@ -12,6 +13,7 @@ import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +36,8 @@ class GroupBuyServiceTest {
     @Mock private ProductRepository productRepository;
     @Mock private HistoryRepository historyRepository;
     @Mock private CategoryRepository categoryRepository;
+    @Mock private ReviewRepository reviewRepository;
+    @Mock private DibsRepository dibsRepository;
     @Mock private JwtUtil jwtUtil;
 
     @InjectMocks
@@ -137,15 +141,53 @@ class GroupBuyServiceTest {
     }
 
     @Test
-    @DisplayName("공동구매 단건 조회 - 존재하는 경우")
-    void getGroupBuyById_shouldReturnDtoWhenFound() {
-        when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuys.get(0)));
+    @DisplayName("공동구매 단건 조회 - 존재하는 경우, 로그인 없이")
+    void getGroupBuyById_shouldReturnDetailDtoWithoutLogin() {
+        GroupBuy groupBuy = groupBuys.get(0);
+        groupBuy.getProduct().updateCategory(testCategory);
 
-        GroupBuyResDto result = groupBuyService.getGroupBuyById(1L);
+        when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuy));
+        when(reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId())).thenReturn(4.5);
 
-        assertTrue(result instanceof GroupBuyResDto);
-        assertEquals(1L, result.getGroupBuyId());
+        GroupBuyDetailResDto result = groupBuyService.getGroupBuyById(groupBuy.getGroupBuyId(), null);
+
+        assertNotNull(result);
+        assertEquals(groupBuy.getGroupBuyId(), result.getGroupBuyId());
+        assertEquals(4.5, result.getAverageRate());
+        assertFalse(result.isDibs()); // 로그인 안 한 경우
     }
+
+    @Test
+    @DisplayName("공동구매 단건 조회 - 로그인 상태에서 Dibs 한 경우")
+    void getGroupBuyById_shouldReturnDetailDtoWithDibs() {
+        // given
+        String token = "Bearer test.jwt.token";
+        String rawToken = "test.jwt.token";
+
+        GroupBuy groupBuy = groupBuys.get(0);
+        groupBuy.getProduct().updateCategory(testCategory);
+
+        // mocking
+        when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuy));
+        when(reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId())).thenReturn(4.0);
+        when(jwtUtil.isTokenBlacklisted(rawToken)).thenReturn(false);
+        when(jwtUtil.extractEmail(rawToken)).thenReturn("user@example.com");
+        when(jwtUtil.validateAccessTokenInRedis("user@example.com", rawToken)).thenReturn(true);
+        when(jwtUtil.extractMemberId(rawToken)).thenReturn(testMember.getMemberId());
+        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), testMember.getMemberId()))
+                .thenReturn(Optional.ofNullable(mock(com.team5.backend.domain.dibs.entity.Dibs.class)));
+
+        // when
+        GroupBuyDetailResDto result = groupBuyService.getGroupBuyById(groupBuy.getGroupBuyId(), token);
+
+        // then
+        assertNotNull(result);
+        assertEquals(groupBuy.getGroupBuyId(), result.getGroupBuyId());
+        assertEquals(4.0, result.getAverageRate());
+        assertTrue(result.isDibs()); // Dibs 했으므로 true
+    }
+
+
 
     @Test
     @DisplayName("공동구매 수정 - 필드 전체 업데이트")
@@ -273,5 +315,45 @@ class GroupBuyServiceTest {
         GroupBuyStatusResDto result = groupBuyService.getGroupBuyStatus(1L);
 
         assertEquals(GroupBuyStatus.ONGOING, result.getStatus());
+    }
+
+    @Test
+    @DisplayName("공동구매 인기순 TOP3 조회 - Dib 기준")
+    void getTop3GroupBuysByDibs_shouldReturnList() {
+        when(groupBuyRepository.findTop3ByDibsOrder(any())).thenReturn(groupBuys);
+        List<GroupBuyResDto> result = groupBuyService.getTop3GroupBuysByDibs();
+        assertEquals(2, result.size());
+        verify(groupBuyRepository).findTop3ByDibsOrder(any());
+    }
+
+    @Test
+    @DisplayName("공동구매 마감 처리 - 상태 변경")
+    void closeGroupBuy_shouldSetStatusToClosed() {
+        GroupBuy gb = GroupBuy.builder()
+                .groupBuyId(1L)
+                .status(GroupBuyStatus.ONGOING)
+                .build();
+
+        when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(gb));
+
+        groupBuyService.closeGroupBuy(1L);
+
+        assertEquals(GroupBuyStatus.CLOSED, gb.getStatus());
+    }
+
+    @Test
+    @DisplayName("같은 카테고리 랜덤 공동구매 3개 조회")
+    void getRandomTop3GroupBuysBySameCategory_shouldReturn3Items() {
+        GroupBuy base = groupBuys.get(0);
+        base.getProduct().updateCategory(testCategory);
+
+        List<GroupBuy> randoms = List.of(base, groupBuys.get(1));
+        when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(base));
+        when(groupBuyRepository.findRandomTop3ByCategoryId(1L)).thenReturn(randoms);
+
+        List<GroupBuyResDto> result = groupBuyService.getRandomTop3GroupBuysBySameCategory(1L);
+
+        assertEquals(2, result.size());
+        verify(groupBuyRepository).findRandomTop3ByCategoryId(1L);
     }
 }

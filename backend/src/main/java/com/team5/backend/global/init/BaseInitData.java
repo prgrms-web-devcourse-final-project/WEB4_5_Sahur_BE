@@ -151,7 +151,7 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl("https://img.example.com/prod_" + i + ".jpg")
+                        .imageUrl( List.of("https://img.example.com/prod_" + i + ".jpg"))
                         .price((int)(100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))

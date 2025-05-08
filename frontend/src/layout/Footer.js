@@ -2,7 +2,7 @@ import {Col, Row, Stack} from "react-bootstrap";
 
 const Footer = () => {
     return (
-        <footer className="kw-footer fixed-bottom m-4">
+        <footer className="kw-footer mt-5 p-5">
             <Stack direction={"horizontal"}>
                 <div className={"ms-8"}>
                     <h5>퉁하자</h5>

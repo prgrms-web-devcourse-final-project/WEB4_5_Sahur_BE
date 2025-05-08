@@ -58,15 +58,15 @@
     font-weight: 700;
     line-height: normal;
   }
-  h3 {
-    margin: 0;
-    color: var(--Gray-300, #676e76);
-    font-family: Pretendard;
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-  }
+  //h3 {
+  //  margin: 0;
+  //  color: var(--Gray-300, #676e76);
+  //  font-family: Pretendard;
+  //  font-size: 16px;
+  //  font-style: normal;
+  //  font-weight: 700;
+  //  line-height: normal;
+  //}
   #header {
     position: sticky;
     top: 0;
@@ -330,8 +330,7 @@
     }
   }
   &-footer {
-    padding-bottom: 20px;
-    background: #E2E8F0;
+    background: #F3F4F6;
     address {
       margin: 0;
       text-align: center;

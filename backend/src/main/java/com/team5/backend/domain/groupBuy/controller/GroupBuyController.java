@@ -138,6 +138,15 @@ public class GroupBuyController {
         return RsDataUtil.success("Top 3 공동구매 조회 성공", responses);
     }
 
+    @Operation(summary = "같은 카테고리의 랜덤 공동구매 3개 조회", description = "현재 공동구매와 같은 카테고리의 진행 중인 공동구매를 무작위로 3개 반환합니다.")
+    @GetMapping("/{groupBuyId}/related")
+    public RsData<List<GroupBuyResDto>> getRandomTop3GroupBuysBySameCategory(
+            @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
+
+        List<GroupBuyResDto> relatedGroupBuys = groupBuyService.getRandomTop3GroupBuysBySameCategory(groupBuyId);
+        return RsDataUtil.success("같은 카테고리의 공동구매 3개 조회 성공", relatedGroupBuys);
+    }
+
 
 
 }

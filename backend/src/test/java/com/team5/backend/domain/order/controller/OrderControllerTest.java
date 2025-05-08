@@ -161,4 +161,5 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.code").value("200-0"))
                 .andExpect(jsonPath("$.msg").value("주문이 성공적으로 취소되었습니다."));
     }
+
 }

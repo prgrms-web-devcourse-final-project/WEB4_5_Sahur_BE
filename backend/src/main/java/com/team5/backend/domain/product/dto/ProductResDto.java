@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -13,7 +14,7 @@ public class ProductResDto {
     private Long categoryId;
     private String title;
     private String description;
-    private String imageUrl;
+    private List<String> imageUrl;
     private Integer price;
     private Long dibCount;
     private LocalDateTime createdAt;
