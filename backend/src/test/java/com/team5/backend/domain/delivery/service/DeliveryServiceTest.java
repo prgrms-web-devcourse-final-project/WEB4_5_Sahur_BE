@@ -1,21 +1,25 @@
 package com.team5.backend.domain.delivery.service;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.order.service.OrderService;
+import com.team5.backend.domain.product.search.repository.ProductSearchRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.DeliveryErrorCode;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 class DeliveryServiceTest {
+    @MockBean
+    private ProductSearchRepository productSearchRepository;
 
     @Autowired
     private DeliveryService deliveryService;
@@ -35,7 +41,9 @@ class DeliveryServiceTest {
     @Autowired
     private DeliveryRepository deliveryRepository;
 
-    Long orderId = 1L;
+    @Autowired
+    private OrderRepository orderRepository;
+
     Long deliveryId = 1L;
 
     @Test
@@ -81,6 +89,8 @@ class DeliveryServiceTest {
     @Test
     @DisplayName("주문별 배송 정보 조회 성공")
     void getDeliveryByOrder_success() {
+        Long orderId = orderRepository.findAll().getFirst().getOrderId();
+
         Delivery delivery = deliveryService.getDeliveryByOrder(orderId);
 
         assertThat(delivery).isNotNull();

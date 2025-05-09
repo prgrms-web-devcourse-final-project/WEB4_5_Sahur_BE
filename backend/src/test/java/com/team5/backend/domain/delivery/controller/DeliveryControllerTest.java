@@ -1,11 +1,6 @@
 package com.team5.backend.domain.delivery.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
-import com.team5.backend.domain.delivery.entity.DeliveryStatus;
-
-import com.team5.backend.domain.delivery.repository.DeliveryRepository;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +10,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
+import com.team5.backend.domain.delivery.repository.DeliveryRepository;
+import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.repository.OrderRepository;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,12 +38,21 @@ class DeliveryControllerTest {
     @Autowired
     private DeliveryRepository deliveryRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
+    private Order order;
+
+    @BeforeEach
+    void setUp() {
+        order = orderRepository.findAll().getFirst();
+    }
+
     @DisplayName("POST - 배송 등록 API")
     @Test
     void createDelivery() throws Exception {
         // 생성 전 orderId에 해당하는 배송 정보 삭제
-        Long orderId = 1L;
-        deliveryRepository.findByOrder_OrderId(orderId)
+        deliveryRepository.findByOrder_OrderId(order.getOrderId())
                 .ifPresent(deliveryRepository::delete);
         deliveryRepository.flush();
 
@@ -50,7 +64,7 @@ class DeliveryControllerTest {
                 "12345"
         );
 
-        mockMvc.perform(post("/api/v1/deliveries/order/{orderId}", orderId)
+        mockMvc.perform(post("/api/v1/deliveries/order/{orderId}", order.getOrderId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -61,9 +75,7 @@ class DeliveryControllerTest {
     @DisplayName("GET - 주문별 배송 정보 조회 API")
     @Test
     void getDeliveryByOrder() throws Exception {
-        Long orderId = 1L;
-
-        mockMvc.perform(get("/api/v1/deliveries/order/{orderId}", orderId))
+        mockMvc.perform(get("/api/v1/deliveries/order/{orderId}", order.getOrderId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
                 .andExpect(jsonPath("$.msg").value("주문별 배송 정보 조회 성공"))
