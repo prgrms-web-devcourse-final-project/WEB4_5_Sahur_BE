@@ -2,6 +2,9 @@ package com.team5.backend.domain.category.entity;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 public enum KeywordType {
     // 패션의류
@@ -97,5 +100,12 @@ public enum KeywordType {
     KeywordType(String displayName, CategoryType parent) {
         this.displayName = displayName;
         this.parent = parent;
+    }
+
+    /** 대분류(parent)에 속한 키워드 목록만 리턴 */
+    public static List<KeywordType> ofParent(CategoryType parent) {
+        return Arrays.stream(values())
+                .filter(k -> k.getParent() == parent)
+                .toList();
     }
 }
