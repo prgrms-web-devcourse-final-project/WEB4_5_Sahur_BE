@@ -1,12 +1,7 @@
-
 package com.team5.backend.domain.order.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team5.backend.domain.member.member.dto.GetMemberResDto;
-import com.team5.backend.domain.member.member.service.AuthService;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
-import com.team5.backend.domain.order.repository.OrderRepository;
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,11 +13,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team5.backend.domain.member.member.dto.GetMemberResDto;
+import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.repository.OrderRepository;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +43,7 @@ class OrderControllerTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @SuppressWarnings("removal")
     @MockBean
     private AuthService authService;
 
@@ -160,6 +164,16 @@ class OrderControllerTest {
                 .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.code").value("200-0"))
                 .andExpect(jsonPath("$.msg").value("주문이 성공적으로 취소되었습니다."));
+    }
+
+    @Test
+    @DisplayName("GET - 결제용 주문 정보 조회")
+    void getOrderPage_success() throws Exception {
+        mockMvc.perform(get("/api/v1/orders/{orderId}/payment", orderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.msg").value("결제용 주문 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.data.orderId").value(orderId));
     }
 
 }
