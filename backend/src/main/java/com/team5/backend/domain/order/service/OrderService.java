@@ -1,12 +1,5 @@
 package com.team5.backend.domain.order.service;
 
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -22,8 +15,13 @@ import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -35,6 +33,8 @@ public class OrderService {
 	private final GroupBuyRepository groupBuyRepository;
 	private final ProductRepository productRepository;
 
+	private final OrderIdGenerator orderIdGenerator;
+
 	public Order createOrder(OrderCreateReqDto request) {
 		Member member = memberRepository.findById(request.getMemberId())
 				.orElseThrow(() -> new CustomException(OrderErrorCode.MEMBER_NOT_FOUND));
@@ -45,15 +45,16 @@ public class OrderService {
 		Product product = productRepository.findById(request.getProductId())
 			.orElseThrow(() -> new CustomException(OrderErrorCode.PRODUCT_NOT_FOUND));
 
-		Order order = Order.create(member, groupBuy, product, request.getQuantity());
+		Long orderId = orderIdGenerator.generateOrderId();
+		Order order = Order.create(orderId, member, groupBuy, product, request.getQuantity());
 		return orderRepository.save(order);
 	}
 
 	@Transactional(readOnly = true)
-	public Page<OrderListResDto> getOrders(Long search, OrderStatus status, Pageable pageable) {
+	public Page<OrderListResDto> getOrders(Long orderId, OrderStatus status, Pageable pageable) {
 		Page<Order> orders = null;
-		if (search != null) {
-			orders = orderRepository.findByOrderId(search, pageable);
+		if (orderId != null) {
+			orders = orderRepository.findByOrderId(orderId, pageable);
 		} else if (status != null) {
 			orders = orderRepository.findByStatus(status, pageable);
 		} else {

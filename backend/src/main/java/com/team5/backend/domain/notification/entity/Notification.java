@@ -39,7 +39,7 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String url = "";
 
-    private Boolean read = false;
+    private Boolean isRead = false;
 
     @CreatedDate
     private LocalDateTime createdAt;

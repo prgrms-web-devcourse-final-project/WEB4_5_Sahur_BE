@@ -51,7 +51,7 @@ public class NotificationService {
                 .title(request.getTitle())
                 .message(request.getMessage())
                 .url(request.getUrl())
-                .read(false)
+                .isRead(false)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -88,7 +88,7 @@ public class NotificationService {
     public NotificationResDto updateNotification(Long id, NotificationUpdateReqDto request) {
         return notificationRepository.findById(id)
                 .map(existing -> {
-                    existing.setRead(request.getRead());
+                    existing.setIsRead(request.getIsRead());
                     existing.setTitle(request.getTitle());
                     existing.setMessage(request.getMessage());
                     existing.setUrl(request.getUrl());
@@ -116,7 +116,7 @@ public class NotificationService {
     public NotificationResDto patchNotification(Long id) {
         return notificationRepository.findById(id)
                 .map(existing -> {
-                    existing.setRead(true);
+                    existing.setIsRead(true);
                     Notification updated = notificationRepository.save(existing);
                     return NotificationResDto.fromEntity(updated);
                 })

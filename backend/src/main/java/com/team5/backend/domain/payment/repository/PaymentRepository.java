@@ -1,14 +1,13 @@
 package com.team5.backend.domain.payment.repository;
 
-import java.util.Optional;
-
+import com.team5.backend.domain.payment.entity.Payment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.team5.backend.domain.payment.entity.Payment;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
@@ -18,5 +17,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	)
 	Page<String> findPaymentKeysByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
-	Optional<Payment> findByOrderOrderId(Long orderId);
+	Optional<Payment> findByOrder_OrderId(Long orderId);
 }
