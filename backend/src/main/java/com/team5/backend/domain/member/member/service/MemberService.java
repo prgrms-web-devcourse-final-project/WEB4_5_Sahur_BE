@@ -131,36 +131,9 @@ public class MemberService {
         }
 
         // 변경할 필드만 수정
-        if (patchMemberReqDto.getEmail() != null) {
-            existingMember.setEmail(patchMemberReqDto.getEmail());
-        }
+        existingMember.updateMember(patchMemberReqDto, passwordEncoder);
 
-        if (patchMemberReqDto.getNickname() != null) {
-            existingMember.setNickname(patchMemberReqDto.getNickname());
-        }
-
-        if (patchMemberReqDto.getName() != null) {
-            existingMember.setName(patchMemberReqDto.getName());
-        }
-
-        if (patchMemberReqDto.getPassword() != null) {
-
-            // 비밀번호 암호화
-            String encodedPassword = passwordEncoder.encode(patchMemberReqDto.getPassword());
-            existingMember.setPassword(encodedPassword);
-        }
-
-//        if (patchMemberReqDto.getAddress() != null) {
-//            existingMember.setAddress(patchMemberReqDto.getAddress());
-//        }
-
-        if (patchMemberReqDto.getImageUrl() != null) {
-            existingMember.setImageUrl(patchMemberReqDto.getImageUrl());
-        }
-
-        Member updatedMember = memberRepository.save(existingMember);
-
-        return new PatchMemberResDto(updatedMember.getMemberId(), "회원 정보가 성공적으로 수정되었습니다.");
+        return new PatchMemberResDto(existingMember.getMemberId(), "회원 정보가 성공적으로 수정되었습니다.");
     }
 
     // 회원 삭제
@@ -226,10 +199,8 @@ public class MemberService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        // 3비밀번호 암호화 및 업데이트
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        member.setPassword(encodedPassword);
-        memberRepository.save(member);
+        // 비밀번호 암호화 및 업데이트
+        member.updatePassword(newPassword, passwordEncoder);
 
         // Redis에 저장된 인증 정보 삭제
         mailService.clearPasswordResetVerificationStatus(email);

@@ -73,8 +73,11 @@ public class ImageUtil {
                     imageFile.getSize()
             ));
 
+            // URL 생성 시 슬래시 중복 방지
+            String normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+
             // S3 객체 URL 반환
-            return baseUrl + "/" + fileName;
+            return normalizedBaseUrl + "/" + fileName;
 
         } catch (Exception e) {
             throw new IOException("S3 업로드 실패: " + e.getMessage(), e);

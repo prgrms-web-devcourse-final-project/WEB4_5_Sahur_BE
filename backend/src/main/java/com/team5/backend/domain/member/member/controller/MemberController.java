@@ -4,6 +4,7 @@ import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
+import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.exception.code.CommonErrorCode;
@@ -23,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Tag(name = "회원 API", description = "회원 관련 API")
+@Tag(name = "Member", description = "회원 관련 API")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -70,12 +71,12 @@ public class MemberController {
     // 회원 탈퇴
     @Operation(summary = "회원 탈퇴", description = "회원 계정을 삭제하고 로그아웃 처리합니다.")
     @DeleteMapping("/members/delete")
-    public RsData<Void> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
+    public RsData<Empty> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
 
         Long memberId = userDetails.getMember().getMemberId();
         memberService.deleteMember(memberId, response);
 
-        return new RsData<>("200-0", "로그아웃 및 회원 탈퇴가 완료되었습니다.", null);
+        return RsDataUtil.success("로그아웃 및 회원 탈퇴가 완료되었습니다.");
     }
 
     // 로그인
@@ -117,7 +118,7 @@ public class MemberController {
         EmailResDto response = mailService.sendAuthCode(emailSendReqDto);
 
         if (response.isSuccess()) return RsDataUtil.success("인증번호가 이메일로 전송되었습니다.", response);
-        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
+        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
     }
 
     // 이메일 인증번호 검증
@@ -129,7 +130,7 @@ public class MemberController {
         EmailResDto response = mailService.validationAuthCode(emailVerificationReqDto);
 
         if (response.isSuccess()) return RsDataUtil.success("인증이 완료되었습니다.", response);
-        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
+        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
     }
 
     // 비밀번호 재설정 이메일 인증번호 전송
@@ -141,7 +142,7 @@ public class MemberController {
         EmailResDto response = mailService.sendPasswordResetAuthCode(emailSendReqDto);
 
         if (response.isSuccess()) return RsDataUtil.success("비밀번호 재설정 인증번호가 이메일로 전송되었습니다.", response);
-        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
+        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
     }
 
     // 비밀번호 재설정 이메일 인증번호 검증
@@ -153,7 +154,7 @@ public class MemberController {
         EmailResDto response = mailService.verifyPasswordResetAuthCode(emailVerificationReqDto);
 
         if (response.isSuccess()) return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
-        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
+        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
     }
 
     // 비밀번호 재설정
@@ -165,7 +166,7 @@ public class MemberController {
         PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
 
         if (response.isSuccess()) return RsDataUtil.success("비밀번호가 성공적으로 재설정되었습니다.", response);
-        else return new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", CommonErrorCode.VALIDATION_ERROR.getMessage(), response);
+        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
     }
 
     @Operation(summary = "닉네임 중복 확인", description = "사용하려는 닉네임의 중복 여부를 확인합니다.")
@@ -175,7 +176,7 @@ public class MemberController {
 
         NicknameCheckResDto response = memberService.checkNicknameDuplicate(nicknameCheckReqDto.getNickname());
 
-        if (response.isExists()) return new RsData<>(MemberErrorCode.NICKNAME_ALREADY_USED.getStatus() + "-1", MemberErrorCode.NICKNAME_ALREADY_USED.getMessage(), response);
+        if (response.isExists()) return RsDataUtil.fail(MemberErrorCode.NICKNAME_ALREADY_USED, response);
         else return RsDataUtil.success("사용 가능한 닉네임입니다.", response);
     }
 }
