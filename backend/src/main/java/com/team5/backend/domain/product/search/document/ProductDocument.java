@@ -26,5 +26,5 @@ public class ProductDocument {
 
     public LocalDateTime getCreatedAtAsDateTime() {
         return LocalDateTime.parse(this.createdAt);
-        }
+    }
 }
