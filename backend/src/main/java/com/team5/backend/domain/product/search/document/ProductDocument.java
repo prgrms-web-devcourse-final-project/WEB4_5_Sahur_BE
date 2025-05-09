@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(indexName = "products")
 @Data
@@ -19,7 +20,7 @@ public class ProductDocument {
     private Long categoryId;
     private String title;
     private String description;
-    private String imageUrl;
+    private List<String> imageUrl;
     private Integer price;
     private Long dibCount;
     private String createdAt; // ES는 LocalDateTime을 못받음
