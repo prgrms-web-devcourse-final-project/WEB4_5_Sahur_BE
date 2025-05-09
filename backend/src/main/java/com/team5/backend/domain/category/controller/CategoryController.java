@@ -3,6 +3,9 @@ package com.team5.backend.domain.category.controller;
 import com.team5.backend.domain.category.dto.CategoryCreateReqDto;
 import com.team5.backend.domain.category.dto.CategoryResDto;
 import com.team5.backend.domain.category.dto.CategoryUpdateReqDto;
+import com.team5.backend.domain.category.dto.KeywordResDto;
+import com.team5.backend.domain.category.entity.CategoryType;
+import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.service.CategoryService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
@@ -17,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Tag(name = "Category", description = "카테고리 관련 API")
@@ -65,4 +69,14 @@ public class CategoryController {
         categoryService.deleteCategory(categoryId);
         return RsDataUtil.success("카테고리 삭제 성공");
     }
+
+    @Operation(summary = "카테고리(대분류)에 속한 키워드(중분류) 목록 조회",
+            description = "주어진 CategoryType(대분류)에 연결된 키워드(중분류) 목록을 반환합니다.")
+    @GetMapping("/{category}/keywords")
+    public RsData<List<KeywordResDto>> getKeywordsByCategory(
+            @Parameter(description = "대분류 카테고리 코드") @PathVariable CategoryType category) {
+        List<KeywordResDto> keywords = categoryService.getKeywordsByCategory(category);
+        return RsDataUtil.success("중분류(키워드) 목록 조회 성공", keywords);
+    }
+
 }

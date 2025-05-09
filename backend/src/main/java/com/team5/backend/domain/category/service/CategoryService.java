@@ -3,7 +3,10 @@ package com.team5.backend.domain.category.service;
 import com.team5.backend.domain.category.dto.CategoryCreateReqDto;
 import com.team5.backend.domain.category.dto.CategoryResDto;
 import com.team5.backend.domain.category.dto.CategoryUpdateReqDto;
+import com.team5.backend.domain.category.dto.KeywordResDto;
 import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.entity.CategoryType;
+import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
@@ -76,5 +79,15 @@ public class CategoryService {
 
         categoryRepository.delete(category);
     }
+
+    /**
+     * 카테고리(대분류)에 속한 키워드(중분류) 목록 조회
+     */
+    public List<KeywordResDto> getKeywordsByCategory(CategoryType category) {
+        return KeywordType.ofParent(category).stream()
+                .map(k -> new KeywordResDto(k.name(), k.getDisplayName()))
+                .toList();
+    }
+
 
 }
