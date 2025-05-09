@@ -111,7 +111,7 @@ public class BaseInitData implements CommandLineRunner {
                 if (type != CategoryType.ALL) {
                     categories.add(categoryRepository.save(Category.builder()
                             .category(type)
-                            .keyword(KeywordType.DEFAULT)
+                            .keyword(KeywordType.BED)
                             .uid(uid++)
                             .build()));
                 }
