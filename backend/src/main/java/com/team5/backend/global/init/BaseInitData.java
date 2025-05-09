@@ -20,6 +20,7 @@ import com.team5.backend.domain.notification.entity.*;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
 import com.team5.backend.domain.order.entity.*;
 import com.team5.backend.domain.order.repository.OrderRepository;
+import com.team5.backend.domain.order.service.OrderIdGenerator;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
 import com.team5.backend.domain.product.entity.Product;
@@ -99,6 +100,7 @@ public class BaseInitData implements CommandLineRunner {
             "아이 건강을 생각한 친환경 식기 세트.",
             "편리한 청소 기능이 탑재된 고양이 화장실."
     );
+    private final OrderIdGenerator orderIdGenerator;
 
     @Override
     public void run(String... args) {
@@ -149,7 +151,7 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl("https://img.example.com/prod_" + i + ".jpg")
+                        .imageUrl( List.of("https://img.example.com/prod_" + i + ".jpg"))
                         .price((int)(100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
@@ -165,7 +167,8 @@ public class BaseInitData implements CommandLineRunner {
                         .build());
 
                 Member buyer = members.get((i + 1) % members.size());
-                Order order = orderRepository.save(Order.create(buyer, groupBuy, product, 1));
+                Long orderId = orderIdGenerator.generateOrderId();
+                Order order = orderRepository.save(Order.create(orderId, buyer, groupBuy, product, 1));
                 paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
 
                 DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
@@ -192,18 +195,18 @@ public class BaseInitData implements CommandLineRunner {
                 notificationRepository.save(Notification.builder()
                         .member(buyer).type(NotificationType.ORDER)
                         .title("주문 완료 알림").message(product.getTitle() + " 주문이 완료되었습니다.")
-                        .url("/orders/" + order.getOrderId()).read(false).createdAt(LocalDateTime.now()).build());
+                        .url("/orders/" + order.getOrderId()).isRead(false).createdAt(LocalDateTime.now()).build());
 
                 if (i % 4 == 0) {
                     notificationRepository.save(Notification.builder()
                             .member(buyer).type(NotificationType.EVENT)
                             .title("이벤트 소식 #" + i + "").message("신규 혜택 오픈!")
-                            .url("/events/" + i).read(false).createdAt(LocalDateTime.now()).build());
+                            .url("/events/" + i).isRead(false).createdAt(LocalDateTime.now()).build());
                 } else {
                     notificationRepository.save(Notification.builder()
                             .member(requester).type(NotificationType.ETC)
                             .title("시스템 공지").message("정기 점검 예정 안내")
-                            .url("/notice").read(false).createdAt(LocalDateTime.now()).build());
+                            .url("/notice").isRead(false).createdAt(LocalDateTime.now()).build());
                 }
             }
         }

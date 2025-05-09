@@ -1,6 +1,7 @@
 package com.team5.backend.domain.order.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -18,7 +19,7 @@ public class OrderDetailResDto {
 	private Long groupBuyId;
 	private Long productId;
 	private String productTitle;
-	private String productImage;
+	private List<String> productImage;
 	private Integer totalPrice;
 	private OrderStatus status;
 	private Integer quantity;
