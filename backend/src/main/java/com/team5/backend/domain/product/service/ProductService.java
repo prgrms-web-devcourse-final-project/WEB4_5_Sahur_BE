@@ -14,10 +14,17 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.domain.product.search.repository.ProductSearchRepository;
+import com.team5.backend.domain.product.search.service.ProductSearchService;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductErrorCode;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +32,9 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductSearchRepository productSearchRepository;
+    private final ProductSearchService productSearchService;
+
 
     /**
      * 상품 등록
@@ -43,6 +53,9 @@ public class ProductService {
         );
 
         Product savedProduct = productRepository.save(product);
+        // Optionally, you can also index the product in Elasticsearch here
+        productSearchService.index(savedProduct);
+
         return ProductResDto.fromEntity(savedProduct);
     }
 
@@ -78,6 +91,11 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
+        boolean isUpdatedForSearch =
+                !product.getTitle().equals(request.getTitle()) ||
+                !product.getDescription().equals(request.getDescription()) ||
+                !product.getPrice().equals(request.getPrice());
+
         product.update(
                 request.getTitle(),
                 request.getDescription(),
@@ -85,8 +103,12 @@ public class ProductService {
                 request.getPrice()
         );
 
-        productRepository.save(product);
-        return ProductResDto.fromEntity(product);
+        Product updatedProduct = productRepository.save(product);
+        if (isUpdatedForSearch) {
+            productSearchService.index(updatedProduct);
+        }
+
+        return ProductResDto.fromEntity(updatedProduct);
     }
 
     /**
@@ -110,4 +132,6 @@ public class ProductService {
         return product.getDibCount();
     }
 }
+
+
 

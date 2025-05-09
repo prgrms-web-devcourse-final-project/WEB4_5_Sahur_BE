@@ -12,6 +12,9 @@ spring:
       host: localhost
       port: 6379
       password: ${custom.db.password}
+    elasticsearch:
+      uris: http://localhost:9200
+      # uris: http://elasticsearch:9200
 
   jpa:
     open-in-view: false
