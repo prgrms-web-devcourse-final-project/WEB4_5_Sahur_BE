@@ -64,7 +64,7 @@ class MemberControllerTest {
     @Mock
     private MailService mailService;
 
-    private Member testMember;
+    private Member member;
     private String accessToken;
     private final String TEST_EMAIL = "test@example.com";
     private final String TEST_PASSWORD = "password123!";
@@ -89,7 +89,7 @@ class MemberControllerTest {
 
         // 테스트용 회원 생성
         Address address = new Address("12345", "서울시 강남구", "테스트 123");
-        testMember = Member.builder()
+        member = Member.builder()
                 .memberId(1L)
                 .email(TEST_EMAIL)
                 .nickname(TEST_NICKNAME)
@@ -104,7 +104,7 @@ class MemberControllerTest {
                 .build();
 
         // SecurityContext에 인증 정보 설정
-        PrincipalDetails principalDetails = new PrincipalDetails(testMember, Collections.emptyMap());
+        PrincipalDetails principalDetails = new PrincipalDetails(member, Collections.emptyMap());
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 principalDetails, null, principalDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -201,7 +201,7 @@ class MemberControllerTest {
     void getMember() throws Exception {
 
         // Given
-        GetMemberResDto memberResDto = GetMemberResDto.fromEntity(testMember);
+        GetMemberResDto memberResDto = GetMemberResDto.fromEntity(member);
         when(memberService.getMemberById(anyLong())).thenReturn(memberResDto);
 
         // When, Then
@@ -210,9 +210,9 @@ class MemberControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value("회원 정보를 성공적으로 조회했습니다."))
-                .andExpect(jsonPath("$.data.memberId").value(testMember.getMemberId()))
-                .andExpect(jsonPath("$.data.email").value(testMember.getEmail()))
-                .andExpect(jsonPath("$.data.nickname").value(testMember.getNickname()));
+                .andExpect(jsonPath("$.data.memberId").value(member.getMemberId()))
+                .andExpect(jsonPath("$.data.email").value(member.getEmail()))
+                .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
     }
 
     @Test
@@ -220,12 +220,18 @@ class MemberControllerTest {
     void updateMember() throws Exception {
 
         // Given
-        PatchMemberReqDto patchMemberReqDto = new PatchMemberReqDto();
+        PatchMemberReqDto patchMemberReqDto = PatchMemberReqDto.builder()
+                .email("test@example.com")
+                .nickname("newNickname")
+                .name("새이름")
+                .password("Password123!")
+                .zipCode("12345")
+                .streetAdr("서울시 강남구")
+                .detailAdr("101호")
+                .imageUrl("https://example.com/profile.jpg")
+                .build();
 
-        patchMemberReqDto.setNickname("newNickname");
-        patchMemberReqDto.setName("새이름");
-
-        PatchMemberResDto patchMemberResDto = new PatchMemberResDto(testMember.getMemberId(), "회원 정보가 성공적으로 수정되었습니다.");
+        PatchMemberResDto patchMemberResDto = new PatchMemberResDto(member.getMemberId(), "회원 정보가 성공적으로 수정되었습니다.");
         when(memberService.updateMember(anyLong(), any(PatchMemberReqDto.class))).thenReturn(patchMemberResDto);
 
         // When, Then
@@ -236,7 +242,7 @@ class MemberControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.msg").value("회원 정보가 수정되었습니다."))
-                .andExpect(jsonPath("$.data.memberId").value(testMember.getMemberId()));
+                .andExpect(jsonPath("$.data.memberId").value(member.getMemberId()));
     }
 
     @Test

@@ -1,10 +1,12 @@
 package com.team5.backend.domain.member.member.entity;
 
+import com.team5.backend.domain.member.member.dto.PatchMemberReqDto;
 import com.team5.backend.global.entity.Address;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -53,8 +55,18 @@ public class Member {
     @Column(name = "emailVerified", nullable = false)
     private Boolean emailVerified;
 
-    // 프로필 이미지 업데이트
-    public void updateImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void updateMember(PatchMemberReqDto patchMemberReqDto, PasswordEncoder passwordEncoder) {
+
+        if (patchMemberReqDto.getEmail() != null) this.email = patchMemberReqDto.getEmail();
+        if (patchMemberReqDto.getNickname() != null) this.nickname = patchMemberReqDto.getNickname();
+        if (patchMemberReqDto.getName() != null) this.name = patchMemberReqDto.getName();
+        if (patchMemberReqDto.getPassword() != null) this.password = passwordEncoder.encode(patchMemberReqDto.getPassword());
+        if (patchMemberReqDto.getZipCode() != null || patchMemberReqDto.getStreetAdr() != null || patchMemberReqDto.getDetailAdr() != null)
+            this.address = patchMemberReqDto.toAddress();
+        if (patchMemberReqDto.getImageUrl() != null) this.imageUrl = patchMemberReqDto.getImageUrl();
+    }
+
+    public void updatePassword(String rawPassword, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(rawPassword);
     }
 }
