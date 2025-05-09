@@ -150,9 +150,11 @@ public class MemberService {
             existingMember.setPassword(encodedPassword);
         }
 
-//        if (patchMemberReqDto.getAddress() != null) {
-//            existingMember.setAddress(patchMemberReqDto.getAddress());
-//        }
+        // 주소 업데이트
+        if (patchMemberReqDto.getZipCode() != null || patchMemberReqDto.getStreetAdr() != null || patchMemberReqDto.getDetailAdr() != null) {
+            existingMember.setAddress(patchMemberReqDto.toAddress());
+        }
+
 
         if (patchMemberReqDto.getImageUrl() != null) {
             existingMember.setImageUrl(patchMemberReqDto.getImageUrl());
