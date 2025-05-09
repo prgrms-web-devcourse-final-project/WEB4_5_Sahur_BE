@@ -4,6 +4,7 @@ import com.team5.backend.domain.member.member.dto.*;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
+import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.exception.code.CommonErrorCode;
@@ -70,12 +71,12 @@ public class MemberController {
     // 회원 탈퇴
     @Operation(summary = "회원 탈퇴", description = "회원 계정을 삭제하고 로그아웃 처리합니다.")
     @DeleteMapping("/members/delete")
-    public RsData<Void> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
+    public RsData<Empty> deleteMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
 
         Long memberId = userDetails.getMember().getMemberId();
         memberService.deleteMember(memberId, response);
 
-        return new RsData<>("200-0", "로그아웃 및 회원 탈퇴가 완료되었습니다.", null);
+        return new RsData<>("200-0", "로그아웃 및 회원 탈퇴가 완료되었습니다.");
     }
 
     // 로그인

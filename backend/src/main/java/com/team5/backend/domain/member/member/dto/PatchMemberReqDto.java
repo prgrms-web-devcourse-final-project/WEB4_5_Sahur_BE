@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.URL;
 
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatchMemberReqDto {
