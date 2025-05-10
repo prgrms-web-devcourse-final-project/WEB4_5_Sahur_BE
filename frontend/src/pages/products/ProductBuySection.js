@@ -69,7 +69,7 @@ const ProductBuySection = () => {
                              modifiers: [{name: 'offset', options: {offset: [-50, 20]}}]
                          }}>
                     <div>
-                        <ShareCard />
+                        <ShareCard onClose={() => setShow(false)}/>
                     </div>
                 </Overlay>
             </Stack>

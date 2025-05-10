@@ -5,12 +5,14 @@ import Signup from "../pages/login/Signup";
 import Main from "../pages/main/Main";
 import Layout from "../layout/Layout";
 import ProductDetail from "../pages/products/ProductDetail";
+import PasswordReset from "../pages/login/PasswordReset";
 
 const BaseRoutes = () => {
     return (
         <Routes>
-            <Route exact path="login" element={<Login />} />
-            <Route exact path="signup" element={<Signup />} />
+            <Route exact path="/login" element={<Login />} />
+            <Route exact path="/signup" element={<Signup />} />
+            <Route exact path="/password-reset" element={<PasswordReset />} />
             <Route path="/" element={<Layout />} >
                 {/* 메인 도메인만 입력 시 로그인으로 이동*/}
                 <Route index element={<Navigate to="/main" replace />} />

@@ -18,11 +18,8 @@ const queryClient = new QueryClient({
 
 // Axios 요청 인터셉터 - 요청 전에 실행됨
 axios.interceptors.request.use(config => {
-    const token = localStorage.getItem('token');
-
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
+    //쿠키 인증 보안을 위해 추가
+    config.withCredentials = true;
 
     // Content-Type이 없으면 기본적으로 application/json으로 설정
     if (!config.headers['Content-Type']) {
@@ -35,14 +32,11 @@ axios.interceptors.request.use(config => {
 
 // Axios 응답 인터셉터 - 응답 후에 실행됨
 axios.interceptors.response.use(response => {
-    const token = response.headers['authorization'];
-    if (token) {
-        localStorage.setItem('token', token);
-    }
     return response;
 }, error => {
+    const skip = error.config?.skipAuthInterceptor;
     // 401 또는 403 에러인 경우 로그인 페이지로 리다이렉트
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    if (!skip && error.response && (error.response.status === 401 || error.response.status === 403)) {
         //이 부분은 원래는 navigate로 핸들링 해야하지만 현재 리액트 포팅 진행중이므로 window객체에 직접 접근함
         //추후 navigate로 포팅되어야 함
         window.location.href = "/login";
