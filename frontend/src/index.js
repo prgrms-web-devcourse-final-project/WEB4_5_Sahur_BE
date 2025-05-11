@@ -7,6 +7,7 @@ import {RecoilRoot} from "recoil";
 import {QueryClient, QueryClientProvider} from "react-query";
 import axios from "axios";
 
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || "https://api.devapi.store";
 // react-qeury사용을 위해 선언
 const queryClient = new QueryClient({
     defaultOptions: {
