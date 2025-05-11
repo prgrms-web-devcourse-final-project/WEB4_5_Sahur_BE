@@ -14,12 +14,11 @@ const BaseRoutes = () => {
             <Route exact path="/login" element={<Login />} />
             <Route exact path="/signup" element={<Signup />} />
             <Route exact path="/password-reset" element={<PasswordReset />} />
-            <Route path="/" element={<Layout />} >
-                {/* 메인 도메인만 입력 시 main으로 이동*/}
+            <Route path="/" element={<Layout />}>
                 <Route index element={<Navigate to="/main" replace />} />
-                <Route path="/main" element={<Main />} />
-                <Route path="/groupBuy/:groupBuyId" element={<GroupBuy />} />
-                <Route path="/groupBuy/:groupBuyId/payment" element={<Payment />} />
+                <Route path="main" element={<Main />} />
+                <Route path="groupBuy/:groupBuyId" element={<GroupBuy />} />
+                <Route path="groupBuy/:groupBuyId/payment" element={<Payment />} />
             </Route>
             {/* 에러페이지 */}
             <Route path={"*"} element={<Error404 />} />

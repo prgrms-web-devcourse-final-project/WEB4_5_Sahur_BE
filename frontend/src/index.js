@@ -32,18 +32,18 @@ axios.interceptors.request.use(config => {
 });
 
 // Axios 응답 인터셉터 - 응답 후에 실행됨
-axios.interceptors.response.use(response => {
-    return response;
-}, error => {
-    const skip = error.config?.skipAuthInterceptor;
-    // 401 또는 403 에러인 경우 로그인 페이지로 리다이렉트
-    if (!skip && error.response && (error.response.status === 401 || error.response.status === 403)) {
-        //이 부분은 원래는 navigate로 핸들링 해야하지만 현재 리액트 포팅 진행중이므로 window객체에 직접 접근함
-        //추후 navigate로 포팅되어야 함
-        window.location.href = "/login";
-    }
-    return Promise.reject(error);
-});
+// axios.interceptors.response.use(response => {
+//     return response;
+// }, error => {
+//     const skip = error.config?.skipAuthInterceptor;
+//     // 401 또는 403 에러인 경우 로그인 페이지로 리다이렉트
+//     if (!skip && error.response && (error.response.status === 401 || error.response.status === 403)) {
+//         //이 부분은 원래는 navigate로 핸들링 해야하지만 현재 리액트 포팅 진행중이므로 window객체에 직접 접근함
+//         //추후 navigate로 포팅되어야 함
+//         window.location.href = "/login";
+//     }
+//     return Promise.reject(error);
+// });
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
