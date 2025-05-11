@@ -1,7 +1,5 @@
 package com.team5.backend.global.exception;
 
-import com.team5.backend.global.dto.Empty;
-import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.code.CommonErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,37 +15,41 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<RsData<Empty>> handleCustomException(CustomException ex) {
-        ErrorCode errorCode = ex.getErrorCode();
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException ex) {
         return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(RsDataUtil.fail(errorCode));
+                .status(ex.getErrorCode().getStatus())
+                .body(new ErrorResponse(ex.getErrorCode()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RsData<Empty>> handleValidationException(MethodArgumentNotValidException e) {
-        String msg = e.getBindingResult().getFieldErrors()
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
+        String detailMsg = e.getBindingResult().getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + " : " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getStatus())
-                .body(new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", msg));
+                .body(new ErrorResponse(CommonErrorCode.VALIDATION_ERROR) {
+                    @Override
+                    public String getMessage() {
+                        return detailMsg;
+                    }
+                });
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<RsData<Empty>> handleAccessDeniedException(AccessDeniedException ex) {
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(RsDataUtil.fail(CommonErrorCode.UNAUTHORIZED));
+                .body(new ErrorResponse(CommonErrorCode.UNAUTHORIZED));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<RsData<Empty>> handleUnexpectedException(Exception ex) {
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception ex) {
         ex.printStackTrace();
         return ResponseEntity
                 .status(CommonErrorCode.INTERNAL_ERROR.getStatus())
-                .body(RsDataUtil.fail(CommonErrorCode.INTERNAL_ERROR));
+                .body(new ErrorResponse(CommonErrorCode.INTERNAL_ERROR));
     }
 }
