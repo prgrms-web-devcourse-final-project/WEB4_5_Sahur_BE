@@ -13,7 +13,7 @@ spring:
       port: 6379
       password: ${custom.db.password}
     elasticsearch:
-      uris: http://localhost:9200
+      uris: http://${custom.db.host}:9200
 
   jpa:
     hibernate:
