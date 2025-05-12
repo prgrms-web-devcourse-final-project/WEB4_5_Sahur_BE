@@ -1,5 +1,5 @@
 import {Card, Col, Row} from "react-bootstrap";
-import ProductCard from "./ProductCard";
+import ProductCard from "./GroupBuyCard";
 
 const PopularProductSection = () => {
     return (

@@ -1,5 +1,6 @@
 package com.team5.backend.domain.order.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -182,6 +183,7 @@ class OrderServiceTest {
                 .quantity(1)
                 .totalPrice(product.getPrice())
                 .status(OrderStatus.CANCELED)
+                .createdAt(LocalDateTime.now())
                 .build());
 
         Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "canceled", pageable);

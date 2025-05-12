@@ -5,10 +5,10 @@ import { ReactComponent as ParticipationIcon } from "../../assets/images/icon/pa
 import { ReactComponent as ClockIcon } from "../../assets/images/icon/clock.svg"
 import styles from "./Main.module.scss"
 
-const ProductCard = () => {
+const GroupBuyCard = () => {
     const navigate = useNavigate();
     return (
-        <Card className={`p-2 m-1 cursor-pointer ${styles.productCardBorder}`} onClick={() => navigate("/products/1")}>
+        <Card className={`p-2 m-1 cursor-pointer ${styles.groupBuyCardBorder}`} onClick={() => navigate("/groupBuy/1")}>
             <div className={styles.imageWrapper}>
                 <img src={sampleImg} alt="썸네일" className={styles.img} />
                 <Badge className={styles.badgeTopRight}>마감임박</Badge>
@@ -29,4 +29,4 @@ const ProductCard = () => {
     );
 }
 
-export default ProductCard
+export default GroupBuyCard;

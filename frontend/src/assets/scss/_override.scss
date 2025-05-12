@@ -13,6 +13,9 @@
   --major-low: #a6a6a6;
 }
 
+body {
+  background: var(--BackGround, #f6f7f9);
+}
 /* 
  * dragtable
  *

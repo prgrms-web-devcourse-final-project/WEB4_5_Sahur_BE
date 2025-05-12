@@ -1,7 +1,12 @@
 package com.team5.backend.domain.order.controller;
 
-import java.time.LocalDateTime;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team5.backend.domain.member.member.dto.GetMemberResDto;
+import com.team5.backend.domain.member.member.entity.Role;
+import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,19 +18,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team5.backend.domain.member.member.dto.GetMemberResDto;
-import com.team5.backend.domain.member.member.service.AuthService;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
-import com.team5.backend.domain.order.repository.OrderRepository;
+import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,7 +57,7 @@ class OrderControllerTest {
                 .name("테스트유저")
                 .address("서울시 강남구")
                 .imageUrl(null)
-                .role("USER")
+                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

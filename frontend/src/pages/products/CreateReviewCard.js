@@ -1,5 +1,5 @@
 import {Button, Card, Stack} from "react-bootstrap";
-import styles from './ProductDetail.module.scss'
+import styles from './GroupBuy.module.scss'
 
 const CreateReviewCard = () => {
     return (

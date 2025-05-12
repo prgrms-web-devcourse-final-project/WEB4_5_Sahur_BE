@@ -1,5 +1,5 @@
 import logo from "../assets/images/tung.png"
-import {Link, useLocation, useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import useConfirm from "../hooks/useConfirm";
 import {Stack} from "react-bootstrap";
 import axios from "axios";
@@ -29,14 +29,6 @@ import ShoppingKeyword from "./components/ShoppingKeyword";
 const Header = () => {
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
-    const { pathname } = useLocation();
-
-    const handleLogoutClick = async () => {
-        openConfirm({
-            title: "로그아웃 하시겠습니까?",
-            callback: () => logoutMutation.mutate()
-        })
-    }
 
     const logoutMutation = useMutation(() => axios.post("/auth/logout", {}), {
         onSuccess: (param) => {
