@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RsData<T> {
+
     private boolean success;
     private int status;
     private Error error;
@@ -26,4 +27,3 @@ public class RsData<T> {
         private String msg;
     }
 }
-
