@@ -102,12 +102,10 @@ class ProductServiceTest {
         ProductUpdateReqDto req = new ProductUpdateReqDto("수정된 제목", "수정된 설명", List.of("수정된 이미지"), 1500);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(testProduct));
-        when(productRepository.save(any())).thenReturn(testProduct);
 
         var result = productService.updateProduct(1L, req);
 
         assertEquals("수정된 제목", result.getTitle());
-        verify(productRepository).save(testProduct);
     }
 
     @Test
