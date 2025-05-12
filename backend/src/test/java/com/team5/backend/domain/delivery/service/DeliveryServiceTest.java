@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,6 @@ import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.order.service.OrderService;
-import com.team5.backend.domain.product.search.repository.ProductSearchRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.DeliveryErrorCode;
 
@@ -29,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 @Transactional
 class DeliveryServiceTest {
-    @MockBean
-    private ProductSearchRepository productSearchRepository;
 
     @Autowired
     private DeliveryService deliveryService;
@@ -56,7 +52,6 @@ class DeliveryServiceTest {
                 "서울시 어쩌구",
                 12345,
                 "01012345678",
-                DeliveryStatus.PREPARING,
                 "12345"
         );
 
@@ -77,7 +72,6 @@ class DeliveryServiceTest {
                 "서울시 어쩌구",
                 12345,
                 "01012345678",
-                DeliveryStatus.PREPARING,
                 "12345"
         );
 
@@ -123,15 +117,13 @@ class DeliveryServiceTest {
                 "서울시 00구",
                 77777,
                 "01012345678",
-                DeliveryStatus.COMPLETED,
                 "98765"
         );
-        Delivery result = deliveryService.updateDelivery(deliveryId, request);
+        Delivery result = deliveryService.updateDeliveryInfo(deliveryId, request);
 
         assertThat(result.getAddress()).isEqualTo("서울시 00구");
         assertThat(result.getPccc()).isEqualTo(77777);
         assertThat(result.getContact()).isEqualTo("01012345678");
-        assertThat(result.getStatus()).isEqualTo(DeliveryStatus.COMPLETED);
         assertThat(result.getShipping()).isEqualTo("98765");
     }
 
@@ -142,13 +134,37 @@ class DeliveryServiceTest {
                 "부산시 00구",
                 55555,
                 "01099998888",
-                DeliveryStatus.INDELIVERY,
                 "12121"
         );
 
         CustomException e = assertThrows(CustomException.class,
-                () -> deliveryService.updateDelivery(999L, request));
+                () -> deliveryService.updateDeliveryInfo(999L, request));
         assertEquals(DeliveryErrorCode.DELIVERY_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("배송 상태 전이 성공 - INDELIVERY → COMPLETED")
+    void updateDeliveryStatusToNext_success_inDeliveryToCompleted() {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow();
+        delivery.updateDeliveryStatus(DeliveryStatus.INDELIVERY);
+
+        DeliveryStatus result = deliveryService.updateDeliveryStatus(deliveryId);
+
+        assertThat(result).isEqualTo(DeliveryStatus.COMPLETED);
+    }
+
+    @Test
+    @DisplayName("배송 상태 전이 실패 - COMPLETED 상태에서 다음 단계 없음")
+    void updateDeliveryStatusToNext_fail_invalidTransition() {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow();
+        delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
+
+        CustomException e = assertThrows(CustomException.class,
+                () -> deliveryService.updateDeliveryStatus(deliveryId));
+
+        assertEquals(DeliveryErrorCode.INVALID_STATUS_TRANSITION, e.getErrorCode());
     }
 
     @Test

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.order.entity.Order;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,7 +62,6 @@ class DeliveryControllerTest {
                 "서울시 강남구",
                 12345,
                 "01012345678",
-                DeliveryStatus.PREPARING,
                 "12345"
         );
 
@@ -92,7 +93,7 @@ class DeliveryControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(11));
     }
 
-    @DisplayName("PATCH - 배송 정보 수정 API")
+    @DisplayName("PUT - 배송 정보 수정 API")
     @Test
     void updateDelivery() throws Exception {
         Long deliveryId = 1L;
@@ -100,17 +101,33 @@ class DeliveryControllerTest {
                 "서울시 강남구",
                 12345,
                 "01012345678",
-                DeliveryStatus.PREPARING,
                 "TRK1234567890"
         );
 
-        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId)
+        mockMvc.perform(put("/api/v1/deliveries/{deliveryId}", deliveryId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
                 .andExpect(jsonPath("$.msg").value("배송 정보 수정 성공"))
                 .andExpect(jsonPath("$.data.shipping").value("TRK1234567890"));
+    }
+
+    @DisplayName("PATCH - 배송 상태 변경 API")
+    @Test
+    void updateDeliveryStatusToNext() throws Exception {
+        Long deliveryId = 1L;
+
+        // 테스트 전에 상태 PREPARING 초기화
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
+        delivery.updateDeliveryStatus(DeliveryStatus.PREPARING);
+        deliveryRepository.save(delivery);
+
+        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.msg").value("배송 상태 변경 완료"))
+                .andExpect(jsonPath("$.data").value("INDELIVERY"));
     }
 
     @DisplayName("DELETE - 배송 정보 삭제 API")
