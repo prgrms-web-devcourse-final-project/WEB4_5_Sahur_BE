@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RsData<Map<String, String>>> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<RsData<Empty>> handleValidationException(MethodArgumentNotValidException e) {
         String msg = e.getBindingResult().getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + " : " + error.getDefaultMessage())
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getStatus())
-                .body(RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, Map.of("validationMessage", msg)));
+                .body(RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, msg));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
