@@ -10,7 +10,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -25,7 +24,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RsData<Empty>> handleValidationException(MethodArgumentNotValidException e) {
+    public ResponseEntity<RsData<Map<String, String>>> handleValidationException(MethodArgumentNotValidException e) {
         String msg = e.getBindingResult().getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + " : " + error.getDefaultMessage())
@@ -33,7 +32,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(CommonErrorCode.VALIDATION_ERROR.getStatus())
-                .body(new RsData<>(CommonErrorCode.VALIDATION_ERROR.getStatus() + "-1", msg));
+                .body(RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, Map.of("validationMessage", msg)));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
