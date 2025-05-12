@@ -5,8 +5,7 @@ import java.util.Optional;
 public enum DeliveryStatus {
     PREPARING,    // 배송 준비
     INDELIVERY,   // 배송 중
-    COMPLETED,    // 배송 완료
-    CANCELED;     // 배송 취소
+    COMPLETED;    // 배송 완료
 
     public Optional<DeliveryStatus> next() {
         return switch (this) {
