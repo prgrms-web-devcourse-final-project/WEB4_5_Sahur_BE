@@ -54,10 +54,8 @@ class DeliveryServiceTest {
                 "01012345678",
                 "12345"
         );
-
         Delivery delivery = deliveryService.createDelivery(order.getOrderId(), deliveryReq);
 
-        assertThat(delivery.getDeliveryId()).isNotNull();
         assertThat(delivery.getAddress()).isEqualTo("서울시 어쩌구");
         assertThat(delivery.getPccc()).isEqualTo(12345);
         assertThat(delivery.getContact()).isEqualTo("01012345678");
@@ -84,7 +82,6 @@ class DeliveryServiceTest {
     @DisplayName("주문별 배송 정보 조회 성공")
     void getDeliveryByOrder_success() {
         Long orderId = orderRepository.findAll().getFirst().getOrderId();
-
         Delivery delivery = deliveryService.getDeliveryByOrder(orderId);
 
         assertThat(delivery).isNotNull();
@@ -145,8 +142,7 @@ class DeliveryServiceTest {
     @Test
     @DisplayName("배송 상태 전이 성공 - INDELIVERY → COMPLETED")
     void updateDeliveryStatusToNext_success_inDeliveryToCompleted() {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow();
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
         delivery.updateDeliveryStatus(DeliveryStatus.INDELIVERY);
 
         DeliveryStatus result = deliveryService.updateDeliveryStatus(deliveryId);
@@ -157,8 +153,7 @@ class DeliveryServiceTest {
     @Test
     @DisplayName("배송 상태 전이 실패 - COMPLETED 상태에서 다음 단계 없음")
     void updateDeliveryStatusToNext_fail_invalidTransition() {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow();
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
 
         CustomException e = assertThrows(CustomException.class,

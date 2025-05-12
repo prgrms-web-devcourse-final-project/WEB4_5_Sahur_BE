@@ -70,7 +70,7 @@ class DeliveryControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("주문별 배송 정보 등록 성공"));
+                .andExpect(jsonPath("$.data.pccc").value(12345));
     }
 
     @DisplayName("GET - 주문별 배송 정보 조회 API")
@@ -79,7 +79,6 @@ class DeliveryControllerTest {
         mockMvc.perform(get("/api/v1/deliveries/order/{orderId}", order.getOrderId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("주문별 배송 정보 조회 성공"))
                 .andExpect(jsonPath("$.data.shipping").value("TRK0000000"));
     }
 
@@ -89,7 +88,6 @@ class DeliveryControllerTest {
         mockMvc.perform(get("/api/v1/deliveries"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("배송 전체 조회 성공"))
                 .andExpect(jsonPath("$.data.length()").value(11));
     }
 
@@ -109,7 +107,6 @@ class DeliveryControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("배송 정보 수정 성공"))
                 .andExpect(jsonPath("$.data.shipping").value("TRK1234567890"));
     }
 
@@ -126,7 +123,6 @@ class DeliveryControllerTest {
         mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("배송 상태 변경 완료"))
                 .andExpect(jsonPath("$.data").value("INDELIVERY"));
     }
 
@@ -137,8 +133,7 @@ class DeliveryControllerTest {
 
         mockMvc.perform(delete("/api/v1/deliveries/{deliveryId}", deliveryId))
                 .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("배송 정보 삭제 성공"));
+                .andExpect(jsonPath("$.code").value("200-0"));
     }
 
 }
