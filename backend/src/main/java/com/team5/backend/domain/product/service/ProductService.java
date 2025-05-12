@@ -103,12 +103,11 @@ public class ProductService {
                 request.getPrice()
         );
 
-        Product updatedProduct = productRepository.save(product);
         if (isUpdatedForSearch) {
-            productSearchService.index(updatedProduct);
+            productSearchService.index(product);
         }
 
-        return ProductResDto.fromEntity(updatedProduct);
+        return ProductResDto.fromEntity(product);
     }
 
     /**
