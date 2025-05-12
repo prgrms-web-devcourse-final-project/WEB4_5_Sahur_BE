@@ -1,4 +1,4 @@
-package com.team5.backend.domain.delivery.entity;
+package com.team5.backend.domain.order.entity;
 
 public enum FilterStatus {
     IN_PROGRESS,
