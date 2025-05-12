@@ -64,6 +64,6 @@ dependencies {
     // S3
     implementation("software.amazon.awssdk:s3:2.31.35")
 
-//    // elasticsearch
-//    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+    // elasticsearch
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
 }
