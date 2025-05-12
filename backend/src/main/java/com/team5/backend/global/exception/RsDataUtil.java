@@ -9,42 +9,38 @@ public class RsDataUtil {
         return RsData.<Empty>builder()
                 .success(false)
                 .status(errorCode.getStatus())
-                .error(RsData.Error.builder()
-                        .code(errorCode.getCode())
-                        .msg(errorCode.getMessage())
-                        .build())
+                .msg(errorCode.getCode())
+                .message(errorCode.getMessage())
                 .data(null)
                 .build();
     }
 
-    public static <T> RsData<T> fail(ErrorCode errorCode, T data) {
+    public static <T> RsData<T> fail(ErrorCode errorCode, String customMessage) {
         return RsData.<T>builder()
                 .success(false)
                 .status(errorCode.getStatus())
-                .error(RsData.Error.builder()
-                        .code(errorCode.getCode())
-                        .msg(errorCode.getMessage())
-                        .build())
-                .data(data)
+                .msg(errorCode.getCode())
+                .message(customMessage)
+                .data(null)
                 .build();
     }
 
-    @SuppressWarnings("unused")
     public static <T> RsData<T> success(String msg, T data) {
         return RsData.<T>builder()
                 .success(true)
                 .status(200)
-                .error(null)
+                .msg("SUCCESS")
+                .message(msg)
                 .data(data)
                 .build();
     }
 
-    @SuppressWarnings("unused")
     public static RsData<Empty> success(String msg) {
         return RsData.<Empty>builder()
                 .success(true)
                 .status(200)
-                .error(null)
+                .msg("SUCCESS")
+                .message(msg)
                 .data(null)
                 .build();
     }

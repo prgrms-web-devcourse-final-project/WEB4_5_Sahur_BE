@@ -34,6 +34,8 @@ public class JwtUtil {
     private static final String REDIS_REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String REDIS_BLACKLIST_PREFIX = "blacklist:";
     private static final String REDIS_REFRESH_BLACKLIST_PREFIX = "refresh_blacklist:";
+    private static final String REDIS_REMEMBER_ME_PREFIX = "remember_me:";
+    private static final long REMEMBER_ME_EXPIRATION = 1209600000;
 
     // 액세스 토큰 생성
     public String generateAccessToken(Long memberId, String email, String role) {
@@ -240,5 +242,47 @@ public class JwtUtil {
                 refreshTokenExpiration,
                 TimeUnit.MILLISECONDS
         );
+    }
+
+    // Remember Me 토큰 생성
+    public String generateRememberMeToken(Long memberId, String email, String role) {
+
+        String token = generateToken(memberId, email, role, REMEMBER_ME_EXPIRATION);
+
+        // Redis에 Remember Me 토큰 저장
+        redisTemplate.opsForValue().set(
+                REDIS_REMEMBER_ME_PREFIX + email,
+                token,
+                REMEMBER_ME_EXPIRATION,
+                TimeUnit.MILLISECONDS
+        );
+
+        return token;
+    }
+
+    // Redis에서 Remember Me 토큰 검증
+    public boolean validateRememberMeTokenInRedis(String email, String rememberMeToken) {
+
+        String storedToken = redisTemplate.opsForValue().get(REDIS_REMEMBER_ME_PREFIX + email);
+        return rememberMeToken.equals(storedToken);
+    }
+
+    // Remember Me 토큰 조회
+    public String getStoredRememberMeToken(String email) {
+        return redisTemplate.opsForValue().get(REDIS_REMEMBER_ME_PREFIX + email);
+    }
+
+    // Remember Me 토큰 블랙리스트에 추가
+    public void invalidateRememberMeToken(String email) {
+
+        String rememberMeToken = getStoredRememberMeToken(email);
+        if (rememberMeToken != null) {
+            redisTemplate.delete(REDIS_REMEMBER_ME_PREFIX + email);
+        }
+    }
+
+    // Remember Me 만료 시간 가져오기
+    public long getRememberMeExpiration() {
+        return REMEMBER_ME_EXPIRATION;
     }
 }

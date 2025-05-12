@@ -15,15 +15,7 @@ public class RsData<T> {
 
     private boolean success;
     private int status;
-    private Error error;
+    private String msg;     // errorCode.getCode()
+    private String message; // errorCode.getMessage() 또는 상세 메시지
     private T data;
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Error {
-        private String code;
-        private String msg;
-    }
 }
