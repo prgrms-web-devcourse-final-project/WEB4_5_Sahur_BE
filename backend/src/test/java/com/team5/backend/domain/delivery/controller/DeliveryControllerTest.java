@@ -88,7 +88,16 @@ class DeliveryControllerTest {
         mockMvc.perform(get("/api/v1/deliveries"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.data.length()").value(11));
+                .andExpect(jsonPath("$.data.totalElements").value(20));
+    }
+
+    @DisplayName("GET - 배송중인 상품 개수 조회")
+    @Test
+    void getDeliveryCountByStatus() throws Exception {
+        mockMvc.perform(get("/api/v1/deliveries/count"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.data").isNumber());
     }
 
     @DisplayName("PUT - 배송 정보 수정 API")

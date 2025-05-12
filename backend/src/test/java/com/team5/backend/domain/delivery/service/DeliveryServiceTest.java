@@ -108,6 +108,16 @@ class DeliveryServiceTest {
     }
 
     @Test
+    @DisplayName("배송중인 상품 개수 조회 성공")
+    void countDeliveriesByStatus_success() {
+        DeliveryStatus status = DeliveryStatus.INDELIVERY;
+        long count = deliveryService.countDeliveriesByStatus(status);
+
+        assertThat(count).isInstanceOf(Long.class);
+        assertThat(count).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
     @DisplayName("배송 정보 수정 성공")
     void updateDelivery_success() {
         DeliveryReqDto request = new DeliveryReqDto(
