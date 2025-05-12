@@ -13,11 +13,12 @@ public class RsDataUtil {
         return new RsData<>(errorCode.getStatus() + "-1", errorCode.getMessage(), data);
     }
 
-    public static <T> RsData<T> success(String msg, T data) {
-        return new RsData<>("200-0", msg, data);
-    }
 
     public static RsData<Empty> success(String msg) {
         return new RsData<>("200-0", msg);
+    }
+
+    public static <T> RsData<T> success(String msg, T data) {
+        return new RsData<>("200-0", msg, data);
     }
 }
