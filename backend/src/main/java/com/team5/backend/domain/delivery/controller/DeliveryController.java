@@ -4,11 +4,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -80,15 +82,26 @@ public class DeliveryController {
         return RsDataUtil.success("배송 상태별 개수 조회 성공", count);
     }
 
-    @Operation(summary = "배송 정보 수정", description = "배송 정보를 수정합니다.")
-    @PatchMapping("/{deliveryId}")
+    @Operation(summary = "배송 정보 수정", description = "배송 정보 전체를 수정합니다.")
+    @PutMapping("/{deliveryId}")
     public RsData<DeliveryResDto> updateDelivery(
             @Parameter(description = "배송 ID") @PathVariable Long deliveryId,
             @RequestBody @Valid DeliveryReqDto request
     ) {
-        Delivery delivery = deliveryService.updateDelivery(deliveryId, request);
+        Delivery delivery = deliveryService.updateDeliveryInfo(deliveryId, request);
         DeliveryResDto response = DeliveryResDto.fromEntity(delivery);
         return RsDataUtil.success("배송 정보 수정 성공", response);
+    }
+
+    @Operation(summary = "배송 상태 변경", description = "배송 상태만 수정 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{deliveryId}")
+    public RsData<DeliveryStatus> updateDeliveryStatus(
+            @PathVariable Long deliveryId,
+            @RequestParam @Valid DeliveryStatus status
+    ) {
+        DeliveryStatus currentStatus = deliveryService.updateDeliveryStatus(deliveryId, status);
+        return RsDataUtil.success("배송 상태 변경 완료", currentStatus);
     }
 
     @Operation(summary = "배송 정보 삭제", description = "배송 정보를 삭제합니다.")
