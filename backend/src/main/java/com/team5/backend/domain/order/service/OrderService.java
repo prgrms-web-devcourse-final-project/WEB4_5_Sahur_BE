@@ -10,6 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
+import com.team5.backend.domain.delivery.entity.FilterStatus;
+import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -39,6 +42,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
+    private final DeliveryRepository deliveryRepository;
 
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
@@ -72,12 +76,14 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderListResDto> getOrdersByMember(Long memberId, String status, Pageable pageable) {
+    public Page<OrderListResDto> getOrdersByMember(Long memberId, FilterStatus status, Pageable pageable) {
         Page<Order> orders = null;
-        if ("inProgress".equalsIgnoreCase(status)) {
+        if (FilterStatus.IN_PROGRESS.equals(status)) {
             List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
             orders = orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
-        } else if ("canceled".equalsIgnoreCase(status)) {
+        } else if (FilterStatus.DONE.equals(status)) {
+            orders = deliveryRepository.findOrdersByDeliveryStatusAndMemberId(DeliveryStatus.COMPLETED, memberId, pageable);
+        } else if (FilterStatus.CANCELED.equals(status)) {
             orders = orderRepository.findByMember_MemberIdAndStatusIn(memberId, List.of(OrderStatus.CANCELED), pageable);
         } else {
             orders = orderRepository.findByMember_MemberId(memberId, pageable);

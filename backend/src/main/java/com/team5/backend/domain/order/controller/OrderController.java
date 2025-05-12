@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.team5.backend.domain.delivery.entity.FilterStatus;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderCreateResDto;
@@ -73,8 +74,8 @@ public class OrderController {
     @GetMapping("/me")
     public RsData<Page<OrderListResDto>> getMemberOrders(
             @RequestHeader(value = "Authorization", required = false) String token,
-            @RequestParam(required = false) String status,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(required = false) FilterStatus status,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Long memberId = authService.getLoggedInMember(token).getMemberId();
         Page<OrderListResDto> dtoPage = orderService.getOrdersByMember(memberId, status, pageable);

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.team5.backend.domain.delivery.entity.FilterStatus;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -164,7 +165,7 @@ class OrderServiceTest {
     @Test
     @DisplayName("회원 주문 조회 성공 - inProgress 상태 필터링")
     void getOrdersByMember_inProgress_success() {
-        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "inProgress", pageable);
+        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), FilterStatus.IN_PROGRESS, pageable);
 
         assertThat(result.getContent())
                 .isNotEmpty()
@@ -186,7 +187,7 @@ class OrderServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "canceled", pageable);
+        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), FilterStatus.CANCELED, pageable);
 
         assertThat(result.getContent())
                 .extracting(OrderListResDto::getStatus)
