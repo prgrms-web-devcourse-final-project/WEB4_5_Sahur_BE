@@ -194,6 +194,13 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("이번 달 총 매출 조회 성공")
+    void getMonthlyCompletedSales_success() {
+        Long sum = orderService.getMonthlyCompletedSales();
+        assertThat(sum).isGreaterThanOrEqualTo(0L);
+    }
+
+    @Test
     @DisplayName("주문 상세 조회 성공")
     void getOrderDetail_success() {
         OrderDetailResDto response = orderService.getOrderDetail(order.getOrderId());

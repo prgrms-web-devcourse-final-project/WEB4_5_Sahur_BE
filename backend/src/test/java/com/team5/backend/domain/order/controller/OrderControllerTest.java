@@ -1,12 +1,7 @@
 package com.team5.backend.domain.order.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team5.backend.domain.member.member.dto.GetMemberResDto;
-import com.team5.backend.domain.member.member.entity.Role;
-import com.team5.backend.domain.member.member.service.AuthService;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
-import com.team5.backend.domain.order.repository.OrderRepository;
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,11 +13,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team5.backend.domain.member.member.dto.GetMemberResDto;
+import com.team5.backend.domain.member.member.entity.Role;
+import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.repository.OrderRepository;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,7 +80,7 @@ class OrderControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("주문이 성공적으로 생성되었습니다."));
+                .andExpect(jsonPath("$.data.quantity").value(1));
     }
 
     @Test
@@ -85,8 +89,7 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."))
-                .andExpect(jsonPath("$.data.content[0].orderId").exists());
+                .andExpect(jsonPath("$.data.totalElements").value(20));
     }
 
     @Test
@@ -96,7 +99,7 @@ class OrderControllerTest {
                         .param("orderId", orderId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
+                .andExpect(jsonPath("$.data.orderId").value(orderId));
     }
 
     @Test
@@ -106,7 +109,7 @@ class OrderControllerTest {
                         .param("status", "PAID"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("주문 목록 조회에 성공했습니다."));
+                .andExpect(jsonPath("$.data").value("주문 목록 조회에 성공했습니다."));
     }
 
     @Test
@@ -129,6 +132,15 @@ class OrderControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200-0"))
                 .andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."));
+    }
+
+    @Test
+    @DisplayName("GET - 이번달 총 매출 조회 성공")
+    void getMonthlySales_success() throws Exception {
+        mockMvc.perform(get("/api/v1/orders/monthly-sales"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.data").isNumber());
     }
 
     @Test
