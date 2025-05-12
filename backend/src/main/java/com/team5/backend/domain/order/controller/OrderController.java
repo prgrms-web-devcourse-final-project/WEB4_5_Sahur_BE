@@ -81,6 +81,13 @@ public class OrderController {
         return RsDataUtil.success("회원 주문 목록 조회에 성공했습니다.", dtoPage);
     }
 
+    @Operation(summary = "이번 달 총 매출 조회", description = "주문 상태가 PAID (결제 완료)인 주문들에 대한 매출 총 합")
+    @GetMapping("/monthly-sales")
+    public RsData<Long> getMonthlySales() {
+        Long totalSales = orderService.getMonthlyCompletedSales();
+        return RsDataUtil.success("이번 달 총 매출 조회 성공", totalSales);
+    }
+
     @Operation(summary = "주문 상세 조회", description = "주문 ID를 통해 상세 정보를 조회합니다.")
     @GetMapping("/{orderId}")
     public RsData<OrderDetailResDto> getOrderDetail(

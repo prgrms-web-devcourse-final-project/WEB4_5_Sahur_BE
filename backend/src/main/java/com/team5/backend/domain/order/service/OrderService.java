@@ -1,5 +1,8 @@
 package com.team5.backend.domain.order.service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -80,6 +83,18 @@ public class OrderService {
             orders = orderRepository.findByMember_MemberId(memberId, pageable);
         }
         return orders.map(OrderListResDto::from);
+    }
+
+    public Long getMonthlyCompletedSales() {
+        LocalDateTime start = YearMonth.now().atDay(1).atStartOfDay();
+        LocalDateTime end = YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX);
+
+        List<Order> paidOrders = orderRepository
+                .findAllByStatusAndCreatedAtBetween(OrderStatus.PAID, start, end);
+
+        return paidOrders.stream()
+                .mapToLong(Order::getTotalPrice)
+                .sum();
     }
 
     @Transactional(readOnly = true)
