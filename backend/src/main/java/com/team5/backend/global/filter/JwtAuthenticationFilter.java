@@ -45,11 +45,51 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String accessToken = authTokenManager.extractAccessToken(request);
+        String refreshToken = authTokenManager.extractRefreshToken(request);
+        String rememberMeToken = authTokenManager.extractRememberMeToken(request); // Remember Me 토큰 추출
 
         // 토큰이 존재하지 않으면 필터 체인을 계속 진행
         if (accessToken == null) {
+
+            // 리프레시 토큰도 없지만 Remember Me 토큰이 있는 경우 - 자동 로그인 시도
+            if (refreshToken == null && rememberMeToken != null) {
+                try {
+                    log.info("Remember Me 토큰으로 자동 로그인 시도");
+
+                    // Remember Me 토큰 검증 및 자동 로그인 처리
+                    AuthResDto authResDto = authTokenManager.autoLoginWithRememberMe(rememberMeToken, response);
+
+                    // 새 액세스 토큰으로 사용자 정보 로드
+                    String email = jwtUtil.extractEmail(authResDto.getAccessToken());
+
+                    // UserDetailsService를 통해 사용자 정보 로드
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+                    // 인증 객체 생성 및 Security Context에 설정
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // SecurityContextHolder에 인증 정보 설정
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // 토큰 갱신 응답 전송
+                    sendTokenRefreshResponse(response, authResDto.getAccessToken(), authResDto.getRefreshToken());
+                    return ;
+                } catch (Exception e) {
+
+                    log.info("Remember Me 토큰으로 자동 로그인 실패: {}", e.getMessage());
+                    // Remember Me 쿠키 삭제
+                    authTokenManager.addCookie(response, "remember-me", "", 0);
+
+                    // 인증되지 않은 상태로 진행
+                    filterChain.doFilter(request, response);
+                    return ;
+                }
+            }
+
+            // 토큰이 없으면 필터 체인을 계속 진행
             filterChain.doFilter(request, response);
-            return ;
+            return;
         }
 
         try {
@@ -77,7 +117,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // SecurityContextHolder에 인증 정보 설정
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (Exception e) {
-                    log.error("인증 컨텍스트 설정 중 오류 발생", e);
+                    log.info("인증 컨텍스트 설정 중 오류 발생", e);
                     // 오류가 발생해도 요청은 계속 진행
                 }
 
@@ -86,7 +126,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // 이 시점까지 왔다면 액세스 토큰이 만료되었거나 Redis에 없음 → 리프레시 토큰으로 갱신 시도
-            String refreshToken = authTokenManager.extractRefreshToken(request);
             log.info("자동 갱신 시도 - 액세스 토큰 만료 또는 불일치. 리프레시 토큰 존재: {}", refreshToken != null);
 
             if (refreshToken != null) {
@@ -97,7 +136,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 클라이언트에게 토큰이 갱신되었음을 알리는 응답
                     sendTokenRefreshResponse(response, authResDto.getAccessToken(), authResDto.getRefreshToken());
                 } catch (Exception e) {
-                    log.error("리프레시 토큰 처리 중 오류 발생", e);
+                    log.info("리프레시 토큰 처리 중 오류 발생", e);
                     sendTokenErrorResponse(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
                 }
             } else {
@@ -108,7 +147,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             // 액세스 토큰이 만료된 경우
             log.info("액세스 토큰 만료 감지 - 갱신 시도");
-            String refreshToken = authTokenManager.extractRefreshToken(request);
 
             if (refreshToken != null) {
                 try {
@@ -118,7 +156,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // 클라이언트에게 토큰이 갱신되었음을 알리는 응답
                     sendTokenRefreshResponse(response, authResDto.getAccessToken(), authResDto.getRefreshToken());
                 } catch (Exception ex) {
-                    log.error("리프레시 토큰 처리 중 오류 발생", ex);
+                    log.info("리프레시 토큰 처리 중 오류 발생", ex);
                     sendTokenErrorResponse(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
                 }
             } else {
@@ -126,7 +164,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 sendTokenErrorResponse(response, AuthErrorCode.REFRESH_TOKEN_NOT_FOUND);
             }
         } catch (Exception e) {
-            log.error("토큰 처리 중 예외 발생", e);
+            log.info("토큰 처리 중 예외 발생", e);
             sendTokenErrorResponse(response, AuthErrorCode.INVALID_TOKEN);
         }
     }
