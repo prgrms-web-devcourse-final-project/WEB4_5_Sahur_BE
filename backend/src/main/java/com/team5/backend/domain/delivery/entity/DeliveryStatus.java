@@ -1,8 +1,18 @@
 package com.team5.backend.domain.delivery.entity;
 
+import java.util.Optional;
+
 public enum DeliveryStatus {
     PREPARING,    // 배송 준비
     INDELIVERY,   // 배송 중
     COMPLETED,    // 배송 완료
-    CANCELED      // 배송 취소
+    CANCELED;     // 배송 취소
+
+    public Optional<DeliveryStatus> next() {
+        return switch (this) {
+            case PREPARING -> Optional.of(INDELIVERY);
+            case INDELIVERY -> Optional.of(COMPLETED);
+            default -> Optional.empty();
+        };
+    }
 }

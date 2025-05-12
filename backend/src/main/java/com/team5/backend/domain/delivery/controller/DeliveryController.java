@@ -97,10 +97,9 @@ public class DeliveryController {
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{deliveryId}")
     public RsData<DeliveryStatus> updateDeliveryStatus(
-            @PathVariable Long deliveryId,
-            @RequestParam @Valid DeliveryStatus status
+            @PathVariable Long deliveryId
     ) {
-        DeliveryStatus currentStatus = deliveryService.updateDeliveryStatus(deliveryId, status);
+        DeliveryStatus currentStatus = deliveryService.updateDeliveryStatus(deliveryId);
         return RsDataUtil.success("배송 상태 변경 완료", currentStatus);
     }
 

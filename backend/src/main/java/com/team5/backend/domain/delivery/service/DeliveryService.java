@@ -53,23 +53,16 @@ public class DeliveryService {
         return delivery;
     }
 
-    public DeliveryStatus updateDeliveryStatus(Long deliveryId, DeliveryStatus newStatus) {
+    public DeliveryStatus updateDeliveryStatus(Long deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
-        DeliveryStatus currentStatus = delivery.getStatus();
+        DeliveryStatus current = delivery.getStatus();
+        DeliveryStatus next = current.next()
+                .orElseThrow(() -> new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION));
 
-        if (!isValidStatusTransition(currentStatus, newStatus)) {
-            throw new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION);
-        }
-
-        delivery.updateDeliveryStatus(newStatus);
-        return delivery.getStatus();
-    }
-
-    private boolean isValidStatusTransition(DeliveryStatus current, DeliveryStatus next) {
-        return (current == DeliveryStatus.PREPARING && next == DeliveryStatus.INDELIVERY) ||
-                (current == DeliveryStatus.INDELIVERY && next == DeliveryStatus.COMPLETED);
+        delivery.updateDeliveryStatus(next);
+        return next;
     }
 
     public void deleteDelivery(Long deliveryId) {
