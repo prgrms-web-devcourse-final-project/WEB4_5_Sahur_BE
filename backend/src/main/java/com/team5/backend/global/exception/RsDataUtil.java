@@ -29,6 +29,7 @@ public class RsDataUtil {
                 .build();
     }
 
+    @SuppressWarnings("unused")
     public static <T> RsData<T> success(String msg, T data) {
         return RsData.<T>builder()
                 .success(true)
@@ -38,6 +39,7 @@ public class RsDataUtil {
                 .build();
     }
 
+    @SuppressWarnings("unused")
     public static RsData<Empty> success(String msg) {
         return RsData.<Empty>builder()
                 .success(true)
@@ -46,4 +48,5 @@ public class RsDataUtil {
                 .data(null)
                 .build();
     }
+
 }
