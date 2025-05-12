@@ -19,7 +19,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByMember_MemberId(Long memberId, Pageable pageable);
 
-    Page<Order> findByMember_MemberIdAndStatusIn(Long memberId, List<OrderStatus> status, Pageable pageable);
+    Page<Order> findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(Long memberId, List<OrderStatus> status, Pageable pageable);
 
     List<Order> findAllByStatusAndCreatedAtBetween(OrderStatus status, LocalDateTime start, LocalDateTime end);
 }
