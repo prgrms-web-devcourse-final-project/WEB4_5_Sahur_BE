@@ -37,6 +37,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.RequiredArgsConstructor;
 
+import jakarta.validation.Valid;
+
 @Tag(name = "Order", description = "주문 관련 API")
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -49,7 +51,9 @@ public class OrderController {
     @Operation(summary = "주문 생성", description = "회원이 상품을 주문합니다.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RsData<OrderCreateResDto> createOrder(@RequestBody OrderCreateReqDto request) {
+    public RsData<OrderCreateResDto> createOrder(
+            @RequestBody @Valid OrderCreateReqDto request
+    ) {
         Order order = orderService.createOrder(request);
         return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
     }
@@ -59,7 +63,7 @@ public class OrderController {
     public RsData<Page<OrderListResDto>> getOrders(
             @RequestParam(required = false) Long orderId,
             @RequestParam(required = false) OrderStatus status,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<OrderListResDto> dtoPage = orderService.getOrders(orderId, status, pageable);
         return RsDataUtil.success("주문 목록 조회에 성공했습니다.", dtoPage);
@@ -79,7 +83,9 @@ public class OrderController {
 
     @Operation(summary = "주문 상세 조회", description = "주문 ID를 통해 상세 정보를 조회합니다.")
     @GetMapping("/{orderId}")
-    public RsData<OrderDetailResDto> getOrderDetail(@PathVariable Long orderId) {
+    public RsData<OrderDetailResDto> getOrderDetail(
+            @PathVariable Long orderId
+    ) {
         OrderDetailResDto response = orderService.getOrderDetail(orderId);
         return RsDataUtil.success("주문 상세 조회에 성공했습니다.", response);
     }
@@ -88,7 +94,7 @@ public class OrderController {
     @PatchMapping("/{orderId}")
     public RsData<OrderUpdateResDto> updateOrder(
             @PathVariable Long orderId,
-            @RequestBody OrderUpdateReqDto request
+            @RequestBody @Valid OrderUpdateReqDto request
     ) {
         Order order = orderService.updateOrder(orderId, request);
         return RsDataUtil.success("주문 정보가 수정되었습니다.", OrderUpdateResDto.from(order));
@@ -97,14 +103,18 @@ public class OrderController {
     @Operation(summary = "주문 취소", description = "주문을 취소합니다.")
     @DeleteMapping("/{orderId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public RsData<Empty> cancelOrder(@PathVariable Long orderId) {
+    public RsData<Empty> cancelOrder(
+            @PathVariable Long orderId
+    ) {
         orderService.cancelOrder(orderId);
         return RsDataUtil.success("주문이 성공적으로 취소되었습니다.");
     }
 
     @Operation(summary = "결제용 주문 정보 조회", description = "해당 주문 ID의 결제에 필요한 주문 정보를 반환합니다.")
     @GetMapping("/{orderId}/payment")
-    public RsData<OrderPaymentInfoResDto> getOrderPaymentInfo(@PathVariable Long orderId) {
+    public RsData<OrderPaymentInfoResDto> getOrderPaymentInfo(
+            @PathVariable Long orderId
+    ) {
         OrderPaymentInfoResDto response = orderService.getOrderPaymentInfo(orderId);
         return RsDataUtil.success("결제용 주문 정보 조회에 성공했습니다.", response);
     }
