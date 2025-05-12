@@ -6,6 +6,7 @@ import com.team5.backend.domain.product.dto.ProductCreateReqDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.domain.product.search.service.ProductSearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,9 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
     @Mock private CategoryRepository categoryRepository;
+
+    @Mock
+    private ProductSearchService productSearchService;
 
     @InjectMocks
     private ProductService productService;

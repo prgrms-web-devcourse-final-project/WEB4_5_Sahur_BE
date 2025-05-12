@@ -1,8 +1,8 @@
-
 package com.team5.backend.domain.order.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.member.member.dto.GetMemberResDto;
+import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
@@ -40,6 +40,7 @@ class OrderControllerTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @SuppressWarnings("removal")
     @MockBean
     private AuthService authService;
 
@@ -56,7 +57,7 @@ class OrderControllerTest {
                 .name("테스트유저")
                 .address("서울시 강남구")
                 .imageUrl(null)
-                .role("USER")
+                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -160,6 +161,16 @@ class OrderControllerTest {
                 .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.code").value("200-0"))
                 .andExpect(jsonPath("$.msg").value("주문이 성공적으로 취소되었습니다."));
+    }
+
+    @Test
+    @DisplayName("GET - 결제용 주문 정보 조회")
+    void getOrderPage_success() throws Exception {
+        mockMvc.perform(get("/api/v1/orders/{orderId}/payment", orderId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.msg").value("결제용 주문 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.data.orderId").value(orderId));
     }
 
 }

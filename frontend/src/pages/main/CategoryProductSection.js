@@ -1,7 +1,7 @@
 import {Button, Card, Col, Pagination, Row, Stack} from "react-bootstrap";
 import clsx from "clsx";
 import styles from "./Main.module.scss";
-import ProductCard from "./ProductCard";
+import ProductCard from "./GroupBuyCard";
 import {useState} from "react";
 import PaginationSection from "./PaginationSection";
 

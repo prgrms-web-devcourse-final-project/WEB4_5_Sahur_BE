@@ -1,6 +1,6 @@
 import {Button, Card, Col, Overlay, Row, Stack} from "react-bootstrap";
 import ProductReviewItem from "./ProductReviewItem";
-import styles from "./ProductDetail.module.scss"
+import styles from "./GroupBuy.module.scss"
 import {useRef, useState} from "react";
 import CreateReviewCard from "./CreateReviewCard";
 

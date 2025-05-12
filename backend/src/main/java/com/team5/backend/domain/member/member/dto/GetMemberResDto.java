@@ -1,6 +1,7 @@
 package com.team5.backend.domain.member.member.dto;
 
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Role;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ public class GetMemberResDto {
     private String name;
     private String address;
     private String imageUrl;
-    private String role;
+    private Role role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -30,7 +31,7 @@ public class GetMemberResDto {
                 .name(member.getName())
                 .address(member.getAddress().toString())
                 .imageUrl(member.getImageUrl())
-                .role(member.getRole().name())
+                .role(member.getRole())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
                 .build();
