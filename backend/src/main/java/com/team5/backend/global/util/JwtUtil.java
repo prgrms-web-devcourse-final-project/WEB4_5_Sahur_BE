@@ -304,4 +304,8 @@ public class JwtUtil {
 
         return token;
     }
+
+    public long getTemporaryTokenExpiration() {
+        return temporaryTokenExpiration;
+    }
 }

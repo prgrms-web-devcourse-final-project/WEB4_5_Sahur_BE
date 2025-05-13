@@ -26,13 +26,18 @@ public class AuthService {
     @Transactional
     public LoginResDto login(LoginReqDto loginReqDto, HttpServletResponse response) {
 
-        // 이메일로 회원 조회
-        Member member = memberRepository.findByEmail(loginReqDto.getEmail())
+        // 이메일로 회원 조회 (삭제된 회원 포함)
+        Member member = memberRepository.findByEmailAllMembers(loginReqDto.getEmail())
                 .orElseThrow(() -> new CustomException(AuthErrorCode.INVALID_LOGIN_INFO));
 
         // 비밀번호 확인
         if (!passwordEncoder.matches(loginReqDto.getPassword(), member.getPassword())) {
             throw new CustomException(AuthErrorCode.INVALID_LOGIN_INFO);
+        }
+
+        // 탈퇴한 회원인 경우 - 임시 토큰 발급
+        if (member.getDeleted()) {
+            return deleteMemberLogin(member, response);
         }
 
         // 액세스 토큰 및 리프레시 토큰 생성
@@ -57,6 +62,23 @@ public class AuthService {
 
         // 로그인 응답 DTO 생성 및 반환
         return new LoginResDto(accessToken, refreshToken, member.getMemberId());
+    }
+
+    private LoginResDto deleteMemberLogin(Member member, HttpServletResponse response) {
+
+        // 짧은 유효기간의 임시 액세스 토큰 생성 (리프레시 토큰 없음)
+        String tempAccessToken = jwtUtil.generateTemporaryAccessToken(
+                member.getMemberId(),
+                member.getEmail(),
+                member.getRole().name()
+        );
+
+        // 쿠키에 임시 토큰 설정 (5분)
+        int tempTokenMaxAge = (int) (jwtUtil.getTemporaryTokenExpiration() / 1000);
+        authTokenManager.addCookie(response, "accessToken", tempAccessToken, tempTokenMaxAge);
+
+        // 리프레시 토큰은 null로 반환 (복구 목적으로만 사용)
+        return new LoginResDto(tempAccessToken, null, member.getMemberId());
     }
 
     // 로그아웃 메서드
