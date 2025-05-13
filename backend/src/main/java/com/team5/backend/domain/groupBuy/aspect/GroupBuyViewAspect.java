@@ -41,8 +41,8 @@ public class GroupBuyViewAspect {
      * 공동구매 조회 후 반환 시 상품의 카테고리 키워드를 기준으로 Redis의 Sorted Set에 점수 1점 추가.
      * ex) ZINCRBY keyword_rank 1 "강아지간식"
      */
-    @AfterReturning(pointcut = "onGroupBuyView()")
-    public void afterGroupBuyViewed(JoinPoint joinPoint) {
+    @AfterReturning(pointcut = "onGroupBuyView()", returning = "result")
+    public void afterGroupBuyViewed(JoinPoint joinPoint, Object result) {
         Object[] args = joinPoint.getArgs();
         if (args.length == 0 || !(args[0] instanceof Long)) return;
 
