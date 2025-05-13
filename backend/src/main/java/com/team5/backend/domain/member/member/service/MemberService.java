@@ -226,6 +226,30 @@ public class MemberService {
                 .build();
     }
 
+    @Transactional
+    public MemberRestoreResDto restoreMember(Long memberId) {
+
+        // 삭제된 회원을 포함하여 조회
+        Member member = memberRepository.findByIdAllMembers(memberId)
+                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 회원이 삭제된 상태인지 확인
+        if (!member.getDeleted()) {
+            throw new CustomException(MemberErrorCode.MEMBER_NOT_DELETED);
+        }
+
+        // 회원 복구 처리
+        member.restore();
+        memberRepository.save(member);
+
+        log.info("회원 ID {} 복구 처리 완료", member.getMemberId());
+
+        return MemberRestoreResDto.builder()
+                .memberId(member.getMemberId())
+                .message("회원 복구가 성공적으로 완료되었습니다.")
+                .build();
+    }
+
     // 회원 탈퇴 30일 후 하드 딜리트 진행(매일 자정 수행)
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
