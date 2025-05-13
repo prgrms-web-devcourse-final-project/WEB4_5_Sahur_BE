@@ -6,6 +6,7 @@ import com.team5.backend.domain.groupBuy.service.GroupBuyService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -114,14 +116,14 @@ public class GroupBuyController {
 
     @Operation(summary = "회원별 참여 공동구매 조회", description = "회원이 참여한 공동구매 목록을 조회합니다.")
     @GetMapping("/member")
-    public RsData<Page<GroupBuyResDto>> getGroupBuysByMemberId(
-            @Parameter(description = "Access Token (Bearer 포함)", required = true)
-            @RequestHeader(value = "Authorization", required = false) String token,
+    public RsData<Page<GroupBuyResDto>> getGroupBuysByMember(
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @PageableDefault(size = 5) Pageable pageable) {
 
-        Page<GroupBuyResDto> responses = groupBuyService.getGroupBuysByToken(token, pageable);
+        Page<GroupBuyResDto> responses = groupBuyService.getGroupBuysByMember(userDetails, pageable);
         return RsDataUtil.success("회원 참여 공동구매 조회 성공", responses);
     }
+
 
     @Operation(summary = "공동구매 마감 처리", description = "공동구매를 CLOSED 상태로 마감합니다.")
     @PatchMapping("/{groupBuyId}/close")
