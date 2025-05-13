@@ -65,6 +65,6 @@ dependencies {
     implementation("software.amazon.awssdk:s3:2.31.35")
 
     // elasticsearch
-    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
-    implementation("org.elasticsearch.client:elasticsearch-rest-client:8.12.0")
+//    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
+//    implementation("org.elasticsearch.client:elasticsearch-rest-client:8.12.0")
 }
