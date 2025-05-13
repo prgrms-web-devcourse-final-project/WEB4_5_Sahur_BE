@@ -14,6 +14,7 @@ spring:
       password: ${custom.db.password}
 #    elasticsearch:
 #      uris: http://${custom.db.host}:9200
+
   jpa:
     hibernate:
       ddl-auto: create
