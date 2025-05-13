@@ -2,7 +2,7 @@ package com.team5.backend.domain.groupBuy.dto;
 
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
-import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.dto.ProductDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class GroupBuyDetailResDto {
     private Long groupBuyId;
-    private Product product;
+    private ProductDto product;
     private Double averageRate;
     private Integer targetParticipants;
     private Integer currentParticipantCount;
@@ -23,10 +23,9 @@ public class GroupBuyDetailResDto {
     private boolean isDibs;
 
     public static GroupBuyDetailResDto fromEntity(GroupBuy groupBuy, boolean isTodayDeadline, boolean isDibs, Double averageRate) {
-
         return GroupBuyDetailResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
-                .product(groupBuy.getProduct())
+                .product(ProductDto.fromEntity(groupBuy.getProduct()))
                 .averageRate(averageRate)
                 .targetParticipants(groupBuy.getTargetParticipants())
                 .currentParticipantCount(groupBuy.getCurrentParticipantCount())

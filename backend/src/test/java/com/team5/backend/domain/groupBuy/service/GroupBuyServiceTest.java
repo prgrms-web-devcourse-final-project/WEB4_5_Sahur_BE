@@ -348,12 +348,15 @@ class GroupBuyServiceTest {
         base.getProduct().updateCategory(testCategory);
 
         List<GroupBuy> randoms = List.of(base, groupBuys.get(1));
+        Pageable pageable = PageRequest.of(0, 3);
+
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(base));
-        when(groupBuyRepository.findRandomTop3ByCategoryId(1L)).thenReturn(randoms);
+        when(groupBuyRepository.findRandomTop3ByCategoryIdExcludingSelf(1L, 1L, pageable)).thenReturn(randoms);
 
         List<GroupBuyResDto> result = groupBuyService.getRandomTop3GroupBuysBySameCategory(1L);
 
         assertEquals(2, result.size());
-        verify(groupBuyRepository).findRandomTop3ByCategoryId(1L);
+        verify(groupBuyRepository).findRandomTop3ByCategoryIdExcludingSelf(1L, 1L, pageable);
     }
+
 }
