@@ -5,6 +5,8 @@ import com.team5.backend.global.entity.Address;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.SoftDeleteType;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SoftDelete(strategy = SoftDeleteType.DELETED)
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +44,10 @@ public class Member {
     @UpdateTimestamp
     @Column(name = "updatedAt", nullable = false)
     private LocalDateTime updatedAt;
+
+    // 삭제 시간을 기록하는 필드
+    @Column(name = "deletedAt")
+    private LocalDateTime deletedAt;
 
     @Embedded
     private Address address;
@@ -68,5 +75,10 @@ public class Member {
 
     public void updatePassword(String rawPassword, PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(rawPassword);
+    }
+
+    @PreRemove
+    public void onDelete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }
