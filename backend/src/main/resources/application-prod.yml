@@ -13,7 +13,7 @@ spring:
       port: 6379
       password: ${custom.db.password}
     elasticsearch:
-      url: http://${custom.db.host}:9200
+      uris: http://ela.devapi.store/
   jpa:
     hibernate:
       ddl-auto: create
