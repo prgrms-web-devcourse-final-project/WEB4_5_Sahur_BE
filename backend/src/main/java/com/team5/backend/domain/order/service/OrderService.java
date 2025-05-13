@@ -32,7 +32,9 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -137,5 +139,23 @@ public class OrderService {
                 .amount(order.getTotalPrice())
                 .clientKey(tossPaymentConfig.getClientKey())
                 .build();
+    }
+
+    public void deleteExpiredOrders() {
+        LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
+        List<Order> expiredOrders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.BEFOREPAID, oneHourAgo);
+
+        for (Order order : expiredOrders) {
+            log.info("[Order Cleanup] 삭제할 주문: orderId={}, createdAt={}", order.getOrderId(), order.getCreatedAt());
+
+            if (order.getDelivery() != null) {
+                log.info("[Order Cleanup] 연결된 배송 정보도 삭제: deliveryId={}", order.getDelivery().getDeliveryId());
+                deliveryRepository.delete(order.getDelivery());
+            }
+            orderRepository.delete(order);
+            log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", order.getOrderId());
+        }
+
+        log.info("[Order Cleanup] 총 {}건의 주문이 삭제되었습니다.", expiredOrders.size());
     }
 }
