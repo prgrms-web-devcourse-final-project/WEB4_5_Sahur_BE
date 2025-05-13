@@ -7,6 +7,7 @@ import com.team5.backend.domain.member.member.dto.EmailVerificationReqDto;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.CommonErrorCode;
+import com.team5.backend.global.exception.code.MemberErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -146,11 +147,9 @@ public class MailService {
                     .message("인증 코드가 전송되었습니다.")
                     .build();
         } catch (MailException | MessagingException e) {
-            log.error("인증번호 메일 발송 실패: " + email, e);
-            return EmailResDto.builder()
-                    .success(false)
-                    .message("이메일 주소가 유효하지 않거나 메일 서버에 문제가 발생했습니다.")
-                    .build();
+
+            log.info("인증번호 메일 발송 실패: " + email, e);
+            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }
     }
 
@@ -181,10 +180,7 @@ public class MailService {
                     .build();
         }
 
-        return EmailResDto.builder()
-                .success(false)
-                .message("이메일 인증에 실패하였습니다.")
-                .build();
+        throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
     }
 
     @Transactional
@@ -194,11 +190,7 @@ public class MailService {
 
         // 이메일이 존재하는지 확인
         if (!memberRepository.existsByEmail(email)) {
-
-            return EmailResDto.builder()
-                    .success(false)
-                    .message("해당 이메일을 가진 회원이 존재하지 않습니다.")
-                    .build();
+            throw new CustomException(MemberErrorCode.MEMBER_NOT_FOUND);
         }
 
         // 기존에 저장된 인증 코드가 있으면 삭제
@@ -213,7 +205,6 @@ public class MailService {
         // 인증코드가 있는 메일 발송
         MimeMessage message = createPasswordResetMail(email, authCode);
         try {
-
             javaMailSender.send(message);
 
             // Redis에 인증 코드 저장(만료 시간 설정)
@@ -227,7 +218,7 @@ public class MailService {
                     .build();
         } catch (MailException e) {
 
-            log.error("비밀번호 재설정 인증번호 메일 발송 실패: " + email, e);
+            log.info("비밀번호 재설정 인증번호 메일 발송 실패: " + email, e);
             throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }
     }
@@ -260,10 +251,7 @@ public class MailService {
                     .build();
         }
 
-        return EmailResDto.builder()
-                .success(false)
-                .message("인증번호가 유효하지 않거나 만료되었습니다.")
-                .build();
+        throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
     }
 
     // 회원가입 용 인증 상태 확인
