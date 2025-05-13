@@ -8,12 +8,15 @@ import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -53,11 +56,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String targetUrl = determineTargetUrl(request, response, authentication);
 
         // 리디렉션 URI에 토큰 추가
-        if (targetUrl.contains("?")) {
-            targetUrl += "&accessToken=" + accessToken + "&refreshToken=" + refreshToken;
-        } else {
-            targetUrl += "?accessToken=" + accessToken + "&refreshToken=" + refreshToken;
-        }
+        targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
+                .queryParam("accessToken", accessToken)
+                .queryParam("refreshToken", refreshToken)
+                .build().toUriString();
 
         // 리디렉션 수행
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
@@ -69,8 +71,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 세션에 저장된 원래 리디렉션 URI 가져오기, 없으면 기본값 사용
         String defaultRedirectUri = AppConfig.getSiteFrontUrl() + "/member/login";
-        String redirectUri = request.getParameter("redirect_uri");
 
-        return redirectUri != null ? redirectUri : defaultRedirectUri;
+        // 로그인 시도 시 파라미터로 전달된 redirect_uri가 있는지 확인
+        String sessionRedirectUri = (String) request.getSession().getAttribute("redirect_uri");
+        String paramRedirectUri = request.getParameter("redirect_uri");
+
+        String redirectUri = paramRedirectUri != null ? paramRedirectUri :
+                sessionRedirectUri != null ? sessionRedirectUri :
+                        defaultRedirectUri;
+
+        log.info("결정된 리디렉션 URL: {}, AppConfig.getSiteFrontUrl(): {}", redirectUri, AppConfig.getSiteFrontUrl());
+
+        return redirectUri;
     }
 }

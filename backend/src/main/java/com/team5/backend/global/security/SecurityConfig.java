@@ -41,9 +41,12 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOauth2UserService))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)
+                        // OAuth2 로그인 페이지 경로 설정
+                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/oauth2/authorization"))
+                        // OAuth2 콜백 경로 설정
+                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/*"))
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .rememberMe(rememberMe -> rememberMe
