@@ -7,8 +7,6 @@ import com.team5.backend.domain.member.member.service.MemberService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
-import com.team5.backend.global.exception.code.CommonErrorCode;
-import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -77,6 +75,17 @@ public class MemberController {
         memberService.deleteMember(memberId, response);
 
         return RsDataUtil.success("로그아웃 및 회원 탈퇴가 완료되었습니다.");
+    }
+
+    // 회원 복구
+    @Operation(summary = "회원 복구", description = "탈퇴한 회원을 복구합니다. 탈퇴한 회원이 로그인하면 발급되는 임시 토큰을 통해서만 호출할 수 있습니다.")
+    @PostMapping("/restore")
+    public RsData<MemberRestoreResDto> restoreMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
+
+        Long memberId = userDetails.getMember().getMemberId();
+        MemberRestoreResDto memberRestoreResDto = memberService.restoreMember(memberId);
+
+        return RsDataUtil.success("회원 복구가 완료되었습니다.", memberRestoreResDto);
     }
 
     // 로그인
