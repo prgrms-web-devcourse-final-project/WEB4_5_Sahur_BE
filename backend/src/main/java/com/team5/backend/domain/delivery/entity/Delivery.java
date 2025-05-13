@@ -62,7 +62,7 @@ public class Delivery {
     }
 
     public static Delivery create(Order order, DeliveryReqDto request) {
-        return new Delivery(
+        Delivery delivery = new Delivery(
                 order,
                 request.toAddress(),
                 request.getPccc(),
@@ -70,6 +70,8 @@ public class Delivery {
                 DeliveryStatus.PREPARING,
                 request.getShipping()
         );
+        order.setDelivery(delivery);
+        return delivery;
     }
 
     public void updateDeliveryInfo(DeliveryReqDto request) {
@@ -82,4 +84,10 @@ public class Delivery {
     public void updateDeliveryStatus(DeliveryStatus status) {
         this.status = status;
     }
+
+    public void setOrder(Order order) {
+        this.order = order;
+        order.setDelivery(this);
+    }
+
 }

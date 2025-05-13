@@ -85,7 +85,6 @@ public class OrderService {
             orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, statusList, pageable);
         } else if (FilterStatus.DONE.equals(status)) {
             orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
-            System.out.println(orders.getContent().getFirst());
         } else if (FilterStatus.CANCELED.equals(status)) {
             orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
         } else {

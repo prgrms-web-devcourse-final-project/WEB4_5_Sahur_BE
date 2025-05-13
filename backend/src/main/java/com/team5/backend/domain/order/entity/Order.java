@@ -97,4 +97,9 @@ public class Order {
         }
         this.status = OrderStatus.CANCELED;
     }
+    
+    public void setDelivery(Delivery delivery) {
+        this.delivery = delivery;
+    }
+
 }

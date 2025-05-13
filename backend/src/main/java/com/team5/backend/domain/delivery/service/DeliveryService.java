@@ -62,6 +62,7 @@ public class DeliveryService {
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION));
 
         delivery.updateDeliveryStatus(next);
+        delivery.getOrder().setDelivery(delivery);  // 동기화
         return next;
     }
 

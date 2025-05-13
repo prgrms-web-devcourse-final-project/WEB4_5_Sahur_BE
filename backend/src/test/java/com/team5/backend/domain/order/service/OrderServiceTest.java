@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
@@ -30,7 +31,6 @@ import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
-import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 
@@ -186,25 +186,20 @@ class OrderServiceTest {
     @Test
     @DisplayName("회원 주문 조회 성공 - FilterStatus = DONE")
     void getOrdersByMember_status_done_success() {
-        Order paidOrder = orderRepository.save(Order.builder()
-                .orderId(999999L)
-                .member(member)
-                .product(product)
-                .groupBuy(groupBuy)
-                .quantity(1)
-                .totalPrice(product.getPrice())
-                .status(OrderStatus.PAID)
-                .createdAt(LocalDateTime.now())
-                .build());
+        Order order = orderService.createOrder(new OrderCreateReqDto(member.getMemberId(), groupBuy.getGroupBuyId(), product.getProductId(), 3));
+        order.markAsPaid();
+        orderRepository.save(order);
 
-        deliveryRepository.save(Delivery.builder()
-                .order(paidOrder)
-                .status(DeliveryStatus.COMPLETED)
-                .address(new Address("12345", "서울시 강남구", "테스트 123"))
-                .contact("01012345678")
-                .shipping("롯데택배")
-                .pccc(12345)
-                .build());
+        Delivery delivery = Delivery.create(order, new DeliveryReqDto(
+                "12345",
+                "서울시 광진구",
+                "상세 주소 123",
+                12345,
+                "01012345678",
+                "TRK12345678")
+        );
+        delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
+        deliveryRepository.save(delivery);
 
         Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), FilterStatus.DONE, pageable);
 
