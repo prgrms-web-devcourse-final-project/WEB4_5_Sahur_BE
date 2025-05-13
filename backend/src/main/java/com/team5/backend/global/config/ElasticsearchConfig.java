@@ -1,25 +1,22 @@
 //package com.team5.backend.global.config;
 //
-//import org.apache.http.HttpHost;
-//import org.elasticsearch.client.RestClient;
-//import org.elasticsearch.client.RestHighLevelClient;
 //import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
+//import org.springframework.data.elasticsearch.client.ClientConfiguration;
+//import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
+//import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 //
 //@Configuration
-//public class ElasticsearchConfig {
+//@EnableElasticsearchRepositories
+//public class ElasticsearchConfig extends ElasticsearchConfiguration {
 //
-//    @Value("${spring.data.elasticsearch.url}")
-//    private String elasticsearchHost;
+//    @Value("${spring.data.elasticsearch.uris}")
+//    private String host;
 //
-//    @Bean
-//    public RestClient restClient() {
-//        return RestClient.builder(new HttpHost(elasticsearchHost, 9200, "http")).build();
-//    }
-//
-//    @Bean
-//    public RestHighLevelClient elasticsearchClient(RestClient restClient) {
-//        return new RestHighLevelClient(RestClient.builder(new HttpHost(elasticsearchHost, 9200, "http")));
+//    @Override
+//    public ClientConfiguration clientConfiguration() {
+//        return ClientConfiguration.builder()
+//                .connectedTo(host)
+//                .build();
 //    }
 //}
