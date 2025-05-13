@@ -5,9 +5,12 @@ docker run -d \
   --restart unless-stopped \
   --network common \
   -p 9200:9200 \
-  -e discovery.type=single-node \
+  -e "discovery.type=single-node" \
   -e xpack.security.enabled=false \
   -e xpack.monitoring.collection.enabled=true \
+  -e "xpack.security.http.ssl.enabled=false" \
+  -e "xpack.security.transport.ssl.enabled=false" \
+  -e "network.host=0.0.0.0" \
   -v es-data:/usr/share/elasticsearch/data \
   docker.elastic.co/elasticsearch/elasticsearch:8.12.0
 
