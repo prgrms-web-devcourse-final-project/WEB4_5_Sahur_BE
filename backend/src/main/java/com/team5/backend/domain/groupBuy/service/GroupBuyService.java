@@ -207,10 +207,14 @@ public class GroupBuyService {
 
         Long categoryId = groupBuy.getProduct().getCategory().getCategoryId();
 
-        return groupBuyRepository.findRandomTop3ByCategoryId(categoryId).stream()
+        // Pageable 객체로 limit 3 적용
+        Pageable limit3 = PageRequest.of(0, 3);
+
+        return groupBuyRepository.findRandomTop3ByCategoryIdExcludingSelf(categoryId, groupBuyId ,limit3).stream()
                 .map(this::toDto)
                 .toList();
     }
+
 
     private GroupBuyResDto toDto(GroupBuy groupBuy) {
         boolean isDeadlineToday = groupBuy.getDeadline() != null &&
