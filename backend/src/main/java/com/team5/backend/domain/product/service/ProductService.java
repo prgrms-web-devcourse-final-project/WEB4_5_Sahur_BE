@@ -64,13 +64,7 @@ public class ProductService {
      */
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(String category, String keyword, Pageable pageable) {
-        if (category != null) {
-            return productRepository.findByCategory_Category(category, pageable);
-        } else if (keyword != null) {
-            return productRepository.findByCategory_Keyword(keyword, pageable);
-        } else {
-            return productRepository.findAll(pageable);
-        }
+        return productRepository.findAllByFilter(category, keyword, pageable);
     }
 
     /**
