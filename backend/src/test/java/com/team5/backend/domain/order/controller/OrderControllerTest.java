@@ -82,7 +82,7 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data.quantity").value(1));
     }
 
@@ -91,7 +91,7 @@ class OrderControllerTest {
     void getOrders_success() throws Exception {
         mockMvc.perform(get("/api/v1/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @Test
@@ -100,7 +100,7 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders")
                         .param("orderId", orderId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data.content[0].orderId").value(orderId));
     }
 
@@ -110,7 +110,7 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders")
                         .param("status", "PAID"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @Test
@@ -118,8 +118,7 @@ class OrderControllerTest {
     void getMemberOrders_all_success() throws Exception {
         mockMvc.perform(get("/api/v1/orders/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("회원 주문 목록 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data.content[0].nickname").value("수민짱"));
     }
 
@@ -129,7 +128,7 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders/me")
                         .param("status", "IN_PROGRESS"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @DisplayName("GET - 상태 필터링 조회: DONE")
@@ -138,7 +137,7 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders/me")
                         .param("status", "DONE"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @DisplayName("GET - 상태 필터링 조회: CANCELED")
@@ -147,7 +146,7 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/v1/orders/me")
                         .param("status", "CANCELED"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @Test
@@ -155,7 +154,7 @@ class OrderControllerTest {
     void getMonthlySales_success() throws Exception {
         mockMvc.perform(get("/api/v1/orders/monthly-sales"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data").isNumber());
     }
 
@@ -164,7 +163,7 @@ class OrderControllerTest {
     void getOrderDetail_success() throws Exception {
         mockMvc.perform(get("/api/v1/orders/{orderId}", orderId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data.orderId").value(orderId));
     }
 
@@ -177,7 +176,7 @@ class OrderControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data.orderId").value(orderId));
     }
 
@@ -186,7 +185,7 @@ class OrderControllerTest {
     void cancelOrder_success() throws Exception {
         mockMvc.perform(delete("/api/v1/orders/{orderId}", orderId))
                 .andExpect(status().isNoContent())
-                .andExpect(jsonPath("$.code").value("200-0"));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @Test
@@ -194,8 +193,7 @@ class OrderControllerTest {
     void getOrderPage_success() throws Exception {
         mockMvc.perform(get("/api/v1/orders/{orderId}/payment", orderId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("결제용 주문 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.status").value("200"))
                 .andExpect(jsonPath("$.data.orderId").value(orderId));
     }
 
