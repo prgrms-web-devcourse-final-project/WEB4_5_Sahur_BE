@@ -3,8 +3,10 @@ package com.team5.backend.domain.member.member.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class EmailSendReqDto {
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")

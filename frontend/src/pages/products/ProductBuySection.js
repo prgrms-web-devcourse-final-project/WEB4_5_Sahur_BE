@@ -1,5 +1,5 @@
 import {Badge, Button, Overlay, ProgressBar, Stack} from "react-bootstrap";
-import styles from "./ProductDetail.module.scss";
+import styles from "./GroupBuy.module.scss";
 import Rating from "react-rating";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faStar as faStarSolid} from "@fortawesome/free-solid-svg-icons";
@@ -18,11 +18,13 @@ import {ReactComponent as ShareIcon} from "../../assets/images/icon/share.svg";
 import {useRef, useState} from "react";
 import CreateReviewCard from "./CreateReviewCard";
 import ShareCard from "./ShareCard";
+import {useNavigate} from "react-router-dom";
 
 const ProductBuySection = () => {
     const [isZzim, setZzim] = useState(false)        ;
     const [show, setShow] = useState(false);
-    const target = useRef(null);
+    const target = useRef(null);;
+    const navigate = useNavigate()
     return (
         <Stack gap={3} >
             <Stack direction={"horizontal"} gap={3}>
@@ -57,7 +59,7 @@ const ProductBuySection = () => {
                 </Stack>
             </div>
             <Stack direction={"horizontal"} gap={2} >
-                <Button className={"w-100"}>공동 구매 참여하기</Button>
+                <Button className={"w-100"} onClick={() => navigate('payment')}>공동 구매 참여하기</Button>
                 <span style={{ width: "42px", height: "100%", cursor: "pointer" }} onClick={() => setZzim(prev => !prev)}>
                     {isZzim ? <RedLikeIcon width={"100%"} height={"100%"} /> : <EmptyLikeIcon width={"100%"} height={"100%"}/>}
                 </span>
@@ -69,7 +71,7 @@ const ProductBuySection = () => {
                              modifiers: [{name: 'offset', options: {offset: [-50, 20]}}]
                          }}>
                     <div>
-                        <ShareCard />
+                        <ShareCard onClose={() => setShow(false)}/>
                     </div>
                 </Overlay>
             </Stack>

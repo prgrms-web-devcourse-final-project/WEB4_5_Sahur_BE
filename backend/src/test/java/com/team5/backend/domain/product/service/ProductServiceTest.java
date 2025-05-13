@@ -35,6 +35,9 @@ class ProductServiceTest {
     @Mock
     private ProductSearchService productSearchService;
 
+    @Mock
+    private ProductSearchService productSearchService;
+
     @InjectMocks
     private ProductService productService;
 

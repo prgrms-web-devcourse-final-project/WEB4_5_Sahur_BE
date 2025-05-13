@@ -50,7 +50,7 @@ class NotificationServiceTest {
                 .title("알림 제목")
                 .message("알림 내용")
                 .url("/test")
-                .read(false)
+                .isRead(false)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -106,7 +106,7 @@ class NotificationServiceTest {
     @DisplayName("알림 전체 업데이트")
     void updateNotification() {
         NotificationUpdateReqDto dto = NotificationUpdateReqDto.builder()
-                .read(true)
+                .isRead(true)
                 .title("변경된 제목")
                 .message("변경된 내용")
                 .url("/changed")
@@ -117,7 +117,7 @@ class NotificationServiceTest {
 
         NotificationResDto result = notificationService.updateNotification(1L, dto);
 
-        assertTrue(result.getRead());
+        assertTrue(result.getIsRead());
         assertEquals("변경된 제목", result.getTitle());
     }
 
@@ -139,7 +139,7 @@ class NotificationServiceTest {
 
         NotificationResDto result = notificationService.patchNotification(1L);
 
-        assertTrue(result.getRead());
+        assertTrue(result.getIsRead());
     }
 
     @Test

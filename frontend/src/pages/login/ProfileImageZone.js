@@ -2,15 +2,9 @@ import React, {useEffect, useRef, useState} from 'react';
 import noImage from "../../assets/images/no-image.png"
 import {Button} from "react-bootstrap";
 
-function ProfileImageZone({ profileImageUrl, handleProfileImageChange }) {
+function ProfileImageZone({ handleProfileImageChange }) {
     const fileInputRef = useRef(null);
     const [previewUrl, setPreviewUrl] = useState();
-
-    useEffect(() => {
-        if (profileImageUrl) {
-            setPreviewUrl(profileImageUrl)
-        }
-    }, [profileImageUrl])
 
     const handleButtonClick = () => {
         fileInputRef.current.click(); // 버튼 클릭 시 숨겨진 파일 선택창 열기

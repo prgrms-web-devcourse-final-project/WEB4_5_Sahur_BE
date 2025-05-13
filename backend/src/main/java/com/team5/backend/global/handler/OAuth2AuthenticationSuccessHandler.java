@@ -1,6 +1,7 @@
 package com.team5.backend.global.handler;
 
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.global.app.AppConfig;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
@@ -67,7 +68,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         Authentication authentication) {
 
         // 세션에 저장된 원래 리디렉션 URI 가져오기, 없으면 기본값 사용
-        String defaultRedirectUri = "http://localhost:3000/member/login";
+        String defaultRedirectUri = AppConfig.getSiteFrontUrl() + "/member/login";
         String redirectUri = request.getParameter("redirect_uri");
 
         return redirectUri != null ? redirectUri : defaultRedirectUri;

@@ -1,0 +1,54 @@
+.deliveryForm {
+  display: flex;
+  gap: 17px;
+  flex-direction: column;
+  padding: 15px;
+}
+
+.paymentDesc {
+  background: #FEFCE8;
+  margin: 20px;
+  padding: 15px;
+}
+
+.paymentDescTitle {
+  font-family: Noto Sans KR;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 20px;
+  color: #854D0E;
+}
+
+.paymentDescSubTitle {
+  font-family: Noto Sans KR;
+  font-weight: 350;
+  font-size: 14px;
+  line-height: 20px;
+  color: #A16207;
+}
+
+.paymentBody {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--BackGround, #f6f7f9);
+}
+
+.sectionDivider {
+  border-bottom: 1px solid #dee2e6; /* 연한 회색 */
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.blueCard {
+  border-radius: 8px;
+  padding: 12px;
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+
+.orderBottom {
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+}
