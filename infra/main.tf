@@ -395,11 +395,11 @@ resource "aws_instance" "team05-db" {
   # EC2 인스턴스 유형
   instance_type = "t3.micro"
   # 사용할 서브넷 ID
-  subnet_id = aws_subnet.team05-subnet_db.id
+  subnet_id = aws_subnet.team05-subnet_app.id
   # 적용할 보안 그룹 ID
   vpc_security_group_ids = [aws_security_group.team05-sg.id]
   # 퍼블릭 IP 연결 설정
-  associate_public_ip_address = false
+  associate_public_ip_address = true
 
   # 인스턴스에 IAM 역할 연결
   iam_instance_profile = aws_iam_instance_profile.team05-instance-profile.name
@@ -412,7 +412,7 @@ resource "aws_instance" "team05-db" {
   # 루트 볼륨 설정
   root_block_device {
     volume_type = "gp3"
-    volume_size = 12 # 볼륨 크기를 12GB로 설정
+    volume_size = 24 # 볼륨 크기를 12GB로 설정
   }
 
   user_data = <<-EOF
