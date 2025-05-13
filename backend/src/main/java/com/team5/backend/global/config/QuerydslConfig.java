@@ -1,5 +1,3 @@
-// src/main/java/com/team5/backend/global/config/QuerydslConfig.java
-
 package com.team5.backend.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
