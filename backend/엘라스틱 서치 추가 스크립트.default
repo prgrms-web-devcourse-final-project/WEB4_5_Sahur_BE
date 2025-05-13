@@ -1,0 +1,22 @@
+#CI/CD과정에 도커 컴포즈를 사용하지 않아 수동으로 도커 빌드한 엘라스틱 서치 스크립트입니다.
+
+docker run -d \
+  --name elastic \
+  --restart unless-stopped \
+  --network common \
+  -p 9200:9200 \
+  -e discovery.type=single-node \
+  -e xpack.security.enabled=false \
+  -e xpack.monitoring.collection.enabled=true \
+  -v es-data:/usr/share/elasticsearch/data \
+  docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+
+======================================================
+
+docker run -d \
+  --name kibana \
+  --restart unless-stopped \
+  --network common \
+  -p 5601:5601 \
+  -e ELASTICSEARCH_HOSTS=http://elastic:9200 \
+  docker.elastic.co/kibana/kibana:8.12.0
