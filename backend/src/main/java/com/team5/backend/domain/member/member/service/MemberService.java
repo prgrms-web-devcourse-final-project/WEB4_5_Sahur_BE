@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -161,14 +163,20 @@ public class MemberService {
             authService.logout(token, response);
 
         } catch (CustomException e) {
-            log.error("회원 탈퇴 중 인증 관련 오류 발생: {}", e.getMessage());
+
+            log.info("회원 탈퇴 중 인증 관련 오류 발생: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("회원 탈퇴 중 예상치 못한 오류 발생", e);
+
+            log.info("회원 탈퇴 중 예상치 못한 오류 발생", e);
             throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }
 
-        memberRepository.delete(member);
+        // 소프트 딜리트 적용
+        member.softDelete();
+        memberRepository.save(member);
+
+        log.info("회원 ID {} 소프트 딜리트 처리 완료. 30일 후 영구 삭제 예정", memberId);
     }
 
     public Page<ProductResDto> getReviewableProductsByMember(Long memberId, Pageable pageable) {
@@ -216,5 +224,16 @@ public class MemberService {
         return NicknameCheckResDto.builder()
                 .exists(exists)
                 .build();
+    }
+
+    // 회원 탈퇴 30일 후 하드 딜리트 진행(매일 자정 수행)
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void hardDeleteMembers() {
+
+        LocalDateTime thirtyDays = LocalDateTime.now().minusDays(30);
+        int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDays);
+
+        log.info("삭제된 회원 수: {}", deletedCount);
     }
 }

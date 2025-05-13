@@ -230,6 +230,7 @@ public class BaseInitData implements CommandLineRunner {
                 .nickname(nickname)
                 .address(address)
                 .role(Role.USER)
+                .deleted(false)
                 .emailVerified(true)
                 .imageUrl("http://example.com/" + imageFile)
                 .build());
