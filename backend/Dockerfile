@@ -33,4 +33,4 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 실행할 JAR 파일 지정
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "app.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=dev", "app.jar"]
