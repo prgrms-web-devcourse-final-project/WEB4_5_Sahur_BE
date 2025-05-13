@@ -59,7 +59,9 @@ class DeliveryControllerTest {
         deliveryRepository.flush();
 
         DeliveryReqDto request = new DeliveryReqDto(
+                "12345",
                 "서울시 강남구",
+                "테스트 123",
                 12345,
                 "01012345678",
                 "12345"
@@ -105,10 +107,12 @@ class DeliveryControllerTest {
     void updateDelivery() throws Exception {
         Long deliveryId = 1L;
         DeliveryReqDto request = new DeliveryReqDto(
+                "12345",
                 "서울시 강남구",
+                "테스트 123",
                 12345,
                 "01012345678",
-                "TRK1234567890"
+                "12345"
         );
 
         mockMvc.perform(put("/api/v1/deliveries/{deliveryId}", deliveryId)

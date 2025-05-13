@@ -49,14 +49,16 @@ class DeliveryServiceTest {
         Order order = orderService.createOrder(orderReq);
 
         DeliveryReqDto deliveryReq = new DeliveryReqDto(
+                "12345",
                 "서울시 어쩌구",
+                "테스트 123",
                 12345,
                 "01012345678",
                 "12345"
         );
         Delivery delivery = deliveryService.createDelivery(order.getOrderId(), deliveryReq);
 
-        assertThat(delivery.getAddress()).isEqualTo("서울시 어쩌구");
+        assertThat(delivery.getAddress().toString()).isEqualTo("서울시 어쩌구 테스트 123");
         assertThat(delivery.getPccc()).isEqualTo(12345);
         assertThat(delivery.getContact()).isEqualTo("01012345678");
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.PREPARING);
@@ -67,7 +69,9 @@ class DeliveryServiceTest {
     @DisplayName("배송 등록 실패 - 존재하지 않는 주문 ID로 요청")
     void createDelivery_fail() {
         DeliveryReqDto request = new DeliveryReqDto(
+                "12345",
                 "서울시 어쩌구",
+                "테스트 123",
                 12345,
                 "01012345678",
                 "12345"
@@ -121,14 +125,16 @@ class DeliveryServiceTest {
     @DisplayName("배송 정보 수정 성공")
     void updateDelivery_success() {
         DeliveryReqDto request = new DeliveryReqDto(
+                "12345",
                 "서울시 00구",
+                "테스트 123",
                 77777,
                 "01012345678",
                 "98765"
         );
         Delivery result = deliveryService.updateDeliveryInfo(deliveryId, request);
 
-        assertThat(result.getAddress()).isEqualTo("서울시 00구");
+        assertThat(result.getAddress().toString()).isEqualTo("서울시 00구 테스트 123");
         assertThat(result.getPccc()).isEqualTo(77777);
         assertThat(result.getContact()).isEqualTo("01012345678");
         assertThat(result.getShipping()).isEqualTo("98765");
@@ -138,7 +144,9 @@ class DeliveryServiceTest {
     @DisplayName("배송 정보 수정 실패 - 존재하지 않는 배송 ID로 요청")
     void updateDelivery_fail() {
         DeliveryReqDto request = new DeliveryReqDto(
-                "부산시 00구",
+                "12345",
+                "서울시 00구",
+                "테스트 123",
                 55555,
                 "01099998888",
                 "12121"

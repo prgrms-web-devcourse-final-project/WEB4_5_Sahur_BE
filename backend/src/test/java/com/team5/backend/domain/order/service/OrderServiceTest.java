@@ -30,6 +30,7 @@ import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
+import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 
@@ -199,7 +200,7 @@ class OrderServiceTest {
         deliveryRepository.save(Delivery.builder()
                 .order(paidOrder)
                 .status(DeliveryStatus.COMPLETED)
-                .address("서울시 강남구")
+                .address(new Address("12345", "서울시 강남구", "테스트 123"))
                 .contact("01012345678")
                 .shipping("롯데택배")
                 .pccc(12345)
