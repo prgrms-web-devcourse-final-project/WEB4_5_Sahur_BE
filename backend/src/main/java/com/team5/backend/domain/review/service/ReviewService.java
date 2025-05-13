@@ -11,6 +11,7 @@ import com.team5.backend.domain.review.dto.ReviewPatchReqDto;
 import com.team5.backend.domain.review.dto.ReviewResDto;
 import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
 import com.team5.backend.domain.review.entity.Review;
+import com.team5.backend.domain.review.entity.ReviewSortField;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ReviewErrorCode;
@@ -150,16 +151,14 @@ public class ReviewService {
      * 특정 상품(productId)의 리뷰 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<ReviewResDto> getReviewsByProductId(Long productId, Pageable pageable, String sortBy) {
-        Sort sort = "rate".equalsIgnoreCase(sortBy)
-                ? Sort.by(Sort.Order.desc("rate"))
-                : Sort.by(Sort.Order.desc("createdAt"));
-
+    public Page<ReviewResDto> getReviewsByProductId(Long productId, Pageable pageable, ReviewSortField sortField) {
+        Sort sort = sortField.toSort();
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         return reviewRepository.findByProductProductId(productId, sortedPageable)
                 .map(ReviewResDto::fromEntity);
     }
+
 
     /**
      * 특정 회원의 리뷰 목록 조회 (토큰 기반)

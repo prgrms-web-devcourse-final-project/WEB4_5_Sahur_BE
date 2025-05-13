@@ -8,6 +8,7 @@ import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.dto.*;
 import com.team5.backend.domain.review.entity.Review;
+import com.team5.backend.domain.review.entity.ReviewSortField;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -184,7 +185,7 @@ class ReviewServiceTest {
 
         when(reviewRepository.findByProductProductId(eq(1L), any(Pageable.class))).thenReturn(page);
 
-        Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, "latest");
+        Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, ReviewSortField.LATEST);
 
         assertEquals("셋째", result.getContent().get(0).getComment());
         assertEquals("둘째", result.getContent().get(1).getComment());
@@ -214,7 +215,7 @@ class ReviewServiceTest {
 
         when(reviewRepository.findByProductProductId(eq(1L), any(Pageable.class))).thenReturn(page);
 
-        Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, "rate");
+        Page<ReviewResDto> result = reviewService.getReviewsByProductId(1L, pageable, ReviewSortField.RATE);
 
         assertEquals(5, result.getContent().get(0).getRate());
         assertEquals("높음", result.getContent().get(0).getComment());

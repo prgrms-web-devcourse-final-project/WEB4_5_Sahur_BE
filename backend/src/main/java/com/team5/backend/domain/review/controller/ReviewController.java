@@ -1,6 +1,7 @@
 package com.team5.backend.domain.review.controller;
 
 import com.team5.backend.domain.review.dto.*;
+import com.team5.backend.domain.review.entity.ReviewSortField;
 import com.team5.backend.domain.review.service.ReviewService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
@@ -80,12 +81,13 @@ public class ReviewController {
     @GetMapping("/product/{productId}/list")
     public RsData<Page<ReviewResDto>> getReviewsByProductId(
             @PathVariable Long productId,
-            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "LATEST") ReviewSortField sortBy,
             @PageableDefault(size = 3) Pageable pageable
     ) {
         Page<ReviewResDto> response = reviewService.getReviewsByProductId(productId, pageable, sortBy);
         return RsDataUtil.success("상품 리뷰 조회 성공", response);
     }
+
 
     @Operation(summary = "내 리뷰 조회", description = "현재 로그인한 회원이 작성한 리뷰를 최신순으로 조회합니다.")
     @GetMapping("/member/list")
