@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 인기 키워드 조회 API 컨트롤러.
+ * Redis Sorted Set에서 스코어 순으로 상위 키워드를 조회한다.
+ */
 @RestController
 @RequestMapping("/api/v1/keywords")
 @RequiredArgsConstructor
@@ -22,6 +26,11 @@ public class KeywordController {
 
     private final StringRedisTemplate redisTemplate;
 
+    /**
+     * 인기 키워드 목록 조회
+     * @param limit 반환할 키워드 개수 (기본값 10)
+     * @return 상위 키워드 리스트 (score 포함)
+     */
     @GetMapping("/popular")
     public List<KeywordResDto> getPopularKeywords(@RequestParam(defaultValue = "10") int limit) {
         Set<ZSetOperations.TypedTuple<String>> results =
