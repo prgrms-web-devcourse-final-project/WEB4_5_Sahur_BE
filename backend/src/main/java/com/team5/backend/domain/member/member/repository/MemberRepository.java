@@ -18,8 +18,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail(String email);
 
+    // 30일 이상 지난 탈퇴 회원 하드 딜리트
     @Modifying
     @Transactional
     @Query("DELETE FROM Member m WHERE m.deleted = true AND m.deletedAt < :deletedAt")
-    int hardDeleteByDeletedAt(@Param("threshold") LocalDateTime deletedAt);
+    int hardDeleteByDeletedAt(@Param("deletedAt") LocalDateTime deletedAt);
 }

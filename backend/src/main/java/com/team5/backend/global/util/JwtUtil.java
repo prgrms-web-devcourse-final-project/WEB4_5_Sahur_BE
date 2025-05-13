@@ -28,6 +28,9 @@ public class JwtUtil {
     @Value("${custom.jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
+    @Value("${custom.jwt.temporary-token-expiration}")
+    private long temporaryTokenExpiration;
+
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String REDIS_ACCESS_TOKEN_PREFIX = "access:";
@@ -284,5 +287,21 @@ public class JwtUtil {
     // Remember Me 만료 시간 가져오기
     public long getRememberMeExpiration() {
         return REMEMBER_ME_EXPIRATION;
+    }
+
+    // 임시 액세스 토큰 생성
+    public String generateTemporaryAccessToken(Long memberId, String email, String role) {
+
+        String token = generateToken(memberId, email, role, temporaryTokenExpiration);
+
+        // Redis에 액세스 토큰 저장
+        redisTemplate.opsForValue().set(
+                REDIS_ACCESS_TOKEN_PREFIX + email,
+                token,
+                temporaryTokenExpiration,
+                TimeUnit.MILLISECONDS
+        );
+
+        return token;
     }
 }
