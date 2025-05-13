@@ -82,7 +82,8 @@ public class OrderService {
             List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
             orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, statusList, pageable);
         } else if (FilterStatus.DONE.equals(status)) {
-            orders = deliveryRepository.findOrdersByDeliveryStatusAndMemberId(DeliveryStatus.COMPLETED, memberId, pageable);
+            orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
+            System.out.println(orders.getContent().getFirst());
         } else if (FilterStatus.CANCELED.equals(status)) {
             orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
         } else {
