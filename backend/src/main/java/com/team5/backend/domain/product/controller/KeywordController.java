@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,10 +32,11 @@ public class KeywordController {
      * @param limit 반환할 키워드 개수 (기본값 10)
      * @return 상위 키워드 리스트 (score 포함)
      */
-    @GetMapping("/popular")
-    public List<KeywordResDto> getPopularKeywords(@RequestParam(defaultValue = "10") int limit) {
-        Set<ZSetOperations.TypedTuple<String>> results =
-                redisTemplate.opsForZSet().reverseRangeWithScores("keyword_rank", 0, limit - 1);
+    @GetMapping("/popular/hourly")
+    public List<KeywordResDto> getHourlyPopularKeywords(@RequestParam(defaultValue = "10") int limit) {
+        String hourKey = "keyword_rank:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
+        Set<ZSetOperations.TypedTuple<String>> results = redisTemplate.opsForZSet()
+                .reverseRangeWithScores(hourKey, 0, limit - 1);
 
         if (results == null) return Collections.emptyList();
 
@@ -42,4 +44,5 @@ public class KeywordController {
                 .map(tuple -> new KeywordResDto(tuple.getValue(), tuple.getScore()))
                 .collect(Collectors.toList());
     }
+
 }

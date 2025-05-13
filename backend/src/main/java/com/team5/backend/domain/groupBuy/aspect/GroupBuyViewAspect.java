@@ -4,15 +4,18 @@ import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
-import com.team5.backend.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -38,26 +41,27 @@ public class GroupBuyViewAspect {
      * 공동구매 조회 후 반환 시 상품의 카테고리 키워드를 기준으로 Redis의 Sorted Set에 점수 1점 추가.
      * ex) ZINCRBY keyword_rank 1 "강아지간식"
      */
-    @After("onGroupBuyView()")
+    @AfterReturning(pointcut = "onGroupBuyView()")
     public void afterGroupBuyViewed(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
         if (args.length == 0 || !(args[0] instanceof Long)) return;
 
         Long groupBuyId = (Long) args[0];
-        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
-                .orElse(null);
-        if (groupBuy == null || groupBuy.getProduct() == null) {
-            log.warn("GroupBuy or Product not found for ID: {}", groupBuyId);
-            return;
-        }
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId).orElse(null);
+        if (groupBuy == null || groupBuy.getProduct() == null) return;
 
-        Product product = groupBuy.getProduct();
-        Category category = product.getCategory();
+        Category category = groupBuy.getProduct().getCategory();
         KeywordType keyword = category.getKeyword();
-        if (keyword != null) {
-            redisTemplate.opsForZSet().incrementScore("keyword_rank", keyword.name(), 1.0);
-        }
+        if (keyword == null) return;
 
+        // 현재 시각 기준 시간별 키 생성
+        String hourKey = "keyword_rank:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
+
+        redisTemplate.opsForZSet().incrementScore(hourKey, keyword.name(), 1.0);
+
+        // Redis에서 2시간 뒤 자동 삭제 설정
+        redisTemplate.expire(hourKey, Duration.ofHours(2));
     }
+
 
 }
