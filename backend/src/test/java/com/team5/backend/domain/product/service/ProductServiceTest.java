@@ -34,10 +34,6 @@ class ProductServiceTest {
     private CategoryRepository categoryRepository;
     @Mock
     private ProductSearchService productSearchService;
-
-    @Mock
-    private ProductSearchService productSearchService;
-
     @InjectMocks
     private ProductService productService;
 
