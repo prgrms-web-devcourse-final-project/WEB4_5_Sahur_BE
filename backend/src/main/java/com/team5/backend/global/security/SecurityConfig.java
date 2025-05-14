@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .addFilterBefore(deletedMemberAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .rememberMe(rememberMe -> rememberMe
-                        .rememberMeParameter("remember")    // 클라이언트에서 사용할 파라미터 이름
+                        .rememberMeParameter("rememberMe")    // 클라이언트에서 사용할 파라미터 이름
                         .alwaysRemember(false)             // 체크박스 선택시에만 사용
                         .tokenValiditySeconds((int) (jwtUtil.getRememberMeExpiration() / 1000))  // 토큰 유효 시간
                         .userDetailsService(userDetailsService));
