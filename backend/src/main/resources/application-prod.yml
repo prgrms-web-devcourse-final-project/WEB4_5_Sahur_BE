@@ -12,12 +12,12 @@ spring:
       host: redis_1
       port: 6379
       password: ${custom.db.password}
-    elasticsearch:
-      uris: http://elasticsearch:9200
+#    elasticsearch:
+#      uris: http://${custom.db.host}:9200
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: false
@@ -32,7 +32,19 @@ logging:
     org.hibernate.orm.jdbc.extract: INFO
     org.springframework.transaction.interceptor: INFO
 
+# 프로메테우스 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      access: unrestricted
+
 custom:
+  elastic:
+    host: ${custom.db.host}
   site:
     domain: ${custom.prod.domain}
     backUrl: ${custom.prod.backUrl}

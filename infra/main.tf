@@ -308,6 +308,7 @@ backend http_back_1
 
 docker run \
   -d \
+  --restart unless-stopped \
   --network common \
   -p 8090:80 \
   -v /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy:/usr/local/etc/haproxy \
@@ -411,7 +412,7 @@ resource "aws_instance" "team05-db" {
   # 루트 볼륨 설정
   root_block_device {
     volume_type = "gp3"
-    volume_size = 12 # 볼륨 크기를 12GB로 설정
+    volume_size = 24 # 볼륨 크기를 12GB로 설정
   }
 
   user_data = <<-EOF

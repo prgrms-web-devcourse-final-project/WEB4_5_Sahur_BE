@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      # 도커 내부 데몬 IP로 통신, 동작 app & 서브 app 둘다 접근
+      - targets: ['172.17.0.1:8080', '172.17.0.1:8081']
+
+# CI/CD or spring 빌드 시 포함 X
+# 모니터링 추가 스크립트로 ec2에 수동 추가
