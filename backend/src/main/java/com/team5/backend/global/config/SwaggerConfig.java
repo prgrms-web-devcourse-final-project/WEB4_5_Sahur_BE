@@ -8,16 +8,15 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import io.swagger.v3.oas.models.servers.Server;
 
 
 @Configuration
 public class SwaggerConfig {
-    Server server = new Server();
-    {
-        server.setUrl("https://api.devapi.store");
-        server.setDescription("API Server");
-    }
+//    Server server = new Server();
+//    {
+//        server.setUrl("https://api.devapi.store");
+//        server.setDescription("API Server");
+//    }
 
     @Bean
     public OpenAPI openAPI() {
