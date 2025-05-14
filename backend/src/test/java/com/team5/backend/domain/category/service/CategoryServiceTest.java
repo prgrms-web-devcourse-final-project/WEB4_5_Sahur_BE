@@ -41,14 +41,14 @@ class CategoryServiceTest {
 
         sample1 = Category.builder()
                 .categoryId(1L)
-                .category(null)
+                .categoryType(null)
                 .keyword(null)
                 .uid(101)
                 .build();
 
         sample2 = Category.builder()
                 .categoryId(2L)
-                .category(null)
+                .categoryType(null)
                 .keyword(null)
                 .uid(102)
                 .build();
@@ -61,14 +61,14 @@ class CategoryServiceTest {
     @DisplayName("카테고리 생성 - 성공")
     void createCategory() {
         CategoryCreateReqDto req = CategoryCreateReqDto.builder()
-                .category(null)
+                .categoryType(null)
                 .keyword(null)
                 .uid(103)
                 .build();
 
         Category saved = Category.builder()
                 .categoryId(3L)
-                .category(null)
+                .categoryType(null)
                 .keyword(null)
                 .uid(103)
                 .build();
@@ -112,7 +112,7 @@ class CategoryServiceTest {
     @DisplayName("카테고리 수정 - 성공")
     void updateCategory() {
         CategoryUpdateReqDto req = CategoryUpdateReqDto.builder()
-                .category(null)
+                .categoryType(null)
                 .keyword(null)
                 .uid(110)
                 .build();
@@ -157,7 +157,7 @@ class CategoryServiceTest {
                 CustomException.class,
                 () -> categoryService.updateCategory(50L,
                         CategoryUpdateReqDto.builder()
-                                .category(null)
+                                .categoryType(null)
                                 .keyword(null)
                                 .uid(0)
                                 .build()

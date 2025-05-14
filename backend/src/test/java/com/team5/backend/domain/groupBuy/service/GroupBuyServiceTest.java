@@ -70,7 +70,7 @@ class GroupBuyServiceTest {
 
         testCategory = Category.builder()
                 .categoryId(1L)
-                .category(null)
+                .categoryType(null)
                 .keyword(KeywordType.DEFAULT)
                 .uid(101)
                 .build();

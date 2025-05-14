@@ -48,7 +48,7 @@ class ProductServiceTest {
 
         testCategory = Category.builder()
                 .categoryId(1L)
-                .category(null)
+                .categoryType(null)
                 .keyword(null)
                 .uid(123)
                 .build();

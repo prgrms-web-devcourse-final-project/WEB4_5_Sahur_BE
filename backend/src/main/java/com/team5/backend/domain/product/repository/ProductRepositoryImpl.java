@@ -23,12 +23,12 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
 
     @Override
     public Page<Product> findAllByFilter(String categoryName, String keywordName, Pageable pageable) {
-        QCategory category = QCategory.category1;
+        QCategory category = QCategory.category;
         BooleanBuilder builder = new BooleanBuilder();
 
         // 필터 조건
         if (StringUtils.hasText(categoryName)) {
-            builder.and(product.category.category
+            builder.and(product.category.categoryType
                     .stringValue()
                     .equalsIgnoreCase(categoryName.trim()));
         }

@@ -28,7 +28,7 @@ public class CategoryService {
     public CategoryResDto createCategory(CategoryCreateReqDto request) {
 
         Category category = Category.builder()
-                .category(request.getCategory())
+                .categoryType(request.getCategoryType())
                 .keyword(request.getKeyword())
                 .uid(request.getUid())
                 .build();
@@ -65,7 +65,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
 
-        category.updateCategoryInfo(request.getCategory(), request.getKeyword(), request.getUid());
+        category.updateCategoryInfo(request.getCategoryType(), request.getKeyword(), request.getUid());
         return CategoryResDto.fromEntity(category);
     }
 
