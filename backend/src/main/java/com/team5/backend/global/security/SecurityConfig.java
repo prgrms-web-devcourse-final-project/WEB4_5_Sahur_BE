@@ -50,8 +50,8 @@ public class SecurityConfig {
                         // OAuth2 콜백 경로 설정
                         .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/*"))
                 )
+                .addFilterBefore(deletedMemberAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(deletedMemberAuthenticationFilter, JwtAuthenticationFilter.class)
                 .rememberMe(rememberMe -> rememberMe
                         .rememberMeParameter("remember")    // 클라이언트에서 사용할 파라미터 이름
                         .alwaysRemember(false)             // 체크박스 선택시에만 사용

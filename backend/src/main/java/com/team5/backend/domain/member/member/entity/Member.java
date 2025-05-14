@@ -4,10 +4,7 @@ import com.team5.backend.domain.member.member.dto.PatchMemberReqDto;
 import com.team5.backend.global.entity.Address;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -19,7 +16,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE Member SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE member_id = ?")
-@SQLRestriction(value = "deleted = false")
+@FilterDef(name = "deletedMemberFilter", parameters = @ParamDef(name = "isDeleted", type = Boolean.class))
+@Filter(name = "deletedMemberFilter", condition = "deleted = :isDeleted")
 public class Member {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

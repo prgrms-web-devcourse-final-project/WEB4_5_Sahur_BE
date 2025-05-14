@@ -67,7 +67,7 @@ public class AuthService {
     private LoginResDto deleteMemberLogin(Member member, HttpServletResponse response) {
 
         // 짧은 유효기간의 임시 액세스 토큰 생성 (리프레시 토큰 없음)
-        String tempAccessToken = jwtUtil.generateTemporaryAccessToken(
+        String tempAccessToken = jwtUtil.generateDeletedMemberToken(
                 member.getMemberId(),
                 member.getEmail(),
                 member.getRole().name()

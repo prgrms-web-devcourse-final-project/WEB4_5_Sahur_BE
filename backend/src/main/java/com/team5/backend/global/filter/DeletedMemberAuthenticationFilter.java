@@ -43,14 +43,18 @@ public class DeletedMemberAuthenticationFilter extends OncePerRequestFilter {
         // 탈퇴 회원 복구 엔드포인트에 대해서만 동작
         String requestPath = request.getServletPath();
         if (!requestPath.equals("/api/v1/members/restore")) {
+
             filterChain.doFilter(request, response);
             return ;
         }
+
+        log.info("DeletedMemberAuthenticationFilter 처리 중: {}", requestPath);
 
         // 임시 토큰 추출 (탈퇴 회원용 토큰)
         String tempToken = authTokenManager.extractAccessToken(request);
 
         if (tempToken == null) {
+
             sendErrorResponse(response, AuthErrorCode.INVALID_TOKEN);
             return ;
         }
@@ -58,6 +62,14 @@ public class DeletedMemberAuthenticationFilter extends OncePerRequestFilter {
         try {
             // 임시 토큰 검증
             if (jwtUtil.isTokenExpired(tempToken)) {
+
+                sendErrorResponse(response, AuthErrorCode.INVALID_TOKEN);
+                return ;
+            }
+
+            // 삭제된 회원용 토큰인지 확인
+            if (!jwtUtil.isDeletedMemberToken(tempToken)) {
+
                 sendErrorResponse(response, AuthErrorCode.INVALID_TOKEN);
                 return ;
             }
@@ -66,7 +78,7 @@ public class DeletedMemberAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtUtil.extractEmail(tempToken);
 
             try {
-                // UserDetailsService를 통해 삭제된 회원 정보도 로드
+                // UserDetailsService를 통해 삭제된 회원 정보 로드
                 UserDetails userDetails = customUserDetailsService.loadDeletedUserByUsername(email);
 
                 // 인증 객체 생성 및 Security Context에 설정
@@ -80,11 +92,9 @@ public class DeletedMemberAuthenticationFilter extends OncePerRequestFilter {
                 // 필터 체인 계속 진행
                 filterChain.doFilter(request, response);
             } catch (Exception e) {
-                log.error("탈퇴 회원 인증 처리 중 오류 발생", e);
                 sendErrorResponse(response, MemberErrorCode.MEMBER_NOT_FOUND);
             }
         } catch (Exception e) {
-            log.error("임시 토큰 처리 중 예외 발생", e);
             sendErrorResponse(response, AuthErrorCode.INVALID_TOKEN);
         }
     }

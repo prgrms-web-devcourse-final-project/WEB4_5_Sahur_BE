@@ -289,20 +289,46 @@ public class JwtUtil {
         return REMEMBER_ME_EXPIRATION;
     }
 
-    // 임시 액세스 토큰 생성
-    public String generateTemporaryAccessToken(Long memberId, String email, String role) {
+    // 탈퇴 회원용 임시 토큰 생성
+    public String generateDeletedMemberToken(Long memberId, String email, String role) {
 
-        String token = generateToken(memberId, email, role, temporaryTokenExpiration);
+        // 토큰에 삭제된 회원임을 표시
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("memberId", memberId);
+        claims.put("role", role);
+        claims.put("isDeleted", true);  // 삭제된 회원 표시
 
-        // Redis에 액세스 토큰 저장
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + temporaryTokenExpiration);
+
+        String token = Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .addClaims(claims)
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .compact();
+
+        // Redis에 임시 토큰 저장 (다른 접두사 사용)
         redisTemplate.opsForValue().set(
-                REDIS_ACCESS_TOKEN_PREFIX + email,
+                "deleted_member:" + email,
                 token,
                 temporaryTokenExpiration,
                 TimeUnit.MILLISECONDS
         );
 
         return token;
+    }
+
+    // 토큰이 삭제된 회원용인지 확인
+    public boolean isDeletedMemberToken(String token) {
+        try {
+            Claims claims = getClaims(token);
+            return claims.get("isDeleted", Boolean.class) != null &&
+                    claims.get("isDeleted", Boolean.class);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public long getTemporaryTokenExpiration() {

@@ -44,6 +44,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // 회원 복구일 경우 JwtAuthenticationFilter에서는 처리하지 않고 필터 체인을 계속 진행
+        String requestPath = request.getServletPath();
+        if (requestPath.equals("/api/v1/members/restore")) {
+
+            filterChain.doFilter(request, response);
+            return ;
+        }
+
         String accessToken = authTokenManager.extractAccessToken(request);
         String refreshToken = authTokenManager.extractRefreshToken(request);
         String rememberMeToken = authTokenManager.extractRememberMeToken(request); // Remember Me 토큰 추출
@@ -89,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 토큰이 없으면 필터 체인을 계속 진행
             filterChain.doFilter(request, response);
-            return;
+            return ;
         }
 
         try {

@@ -5,6 +5,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,6 +13,9 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -51,16 +55,19 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new PrincipalDetails(member, oAuth2User.getAttributes());
     }
 
+    // 삭제된 회원 복구를 위한 메서드
     public UserDetails loadDeletedUserByUsername(String email) throws UsernameNotFoundException {
 
-        Member member = memberRepository.findByEmailAllMembers(email)
-                .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Member deletedMember = memberRepository.findByEmailAllMembers(email)
+                .orElseThrow(() -> {
+                    return new CustomException(MemberErrorCode.MEMBER_NOT_FOUND);
+                });
 
-        // 삭제된 회원만 처리 (일반 회원은 임시 토큰으로 접근 불가)
-        if (!member.getDeleted()) {
+        // 삭제되지 않은 회원이라면 이 메서드를 사용하면 안됨
+        if (deletedMember.getDeletedAt() == null) {
             throw new CustomException(MemberErrorCode.MEMBER_NOT_DELETED);
         }
 
-        return new PrincipalDetails(member, null);
+        return new PrincipalDetails(deletedMember, Collections.emptyMap());
     }
 }
