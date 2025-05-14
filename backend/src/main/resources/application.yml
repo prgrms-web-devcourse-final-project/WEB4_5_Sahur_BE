@@ -26,6 +26,11 @@ spring:
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
 
+management:
+  health:
+    elasticsearch:
+      enabled: false
+
 custom:
   site:
     backUrl: "${custom.dev.backUrl}"
