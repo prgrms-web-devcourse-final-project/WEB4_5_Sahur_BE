@@ -46,7 +46,7 @@ public class PaymentControllerTest {
 		verify(tossService).confirmPayment(dto);
 		verify(paymentService).savePayment(1L, "key-123");
 
-		assertEquals("200-0", result.getCode());
+		assertEquals("200-0", result.getMsg());
 		assertEquals("결제 승인 성공", result.getMsg());
 	}
 
@@ -69,7 +69,7 @@ public class PaymentControllerTest {
 
 		RsData<PaymentResDto> result = paymentController.getPaymentInfo(1L);
 
-		assertEquals("200-0", result.getCode());
+		assertEquals("200-0", result.getMsg());
 		assertEquals("결제 내역 조회 성공", result.getMsg());
 		assertEquals(dto, result.getData());
 	}
@@ -84,7 +84,7 @@ public class PaymentControllerTest {
 
 		RsData<String> result = paymentController.cancelPayment(1L, req);
 
-		assertEquals("200-0", result.getCode());
+		assertEquals("200-0", result.getMsg());
 		assertEquals("결제 취소 성공", result.getMsg());
 		assertEquals("테스트 사유", result.getData());
 	}
@@ -111,7 +111,7 @@ public class PaymentControllerTest {
 
 		RsData<Page<PaymentResDto>> result = paymentController.getPaymentsByMember("token", null);
 
-		assertEquals("200-0", result.getCode());
+		assertEquals("200-0", result.getMsg());
 		assertEquals("전체 결제 내역 비동기 조회 성공", result.getMsg());
 		assertNotNull(result.getData());
 	}
@@ -136,7 +136,7 @@ public class PaymentControllerTest {
 
 		RsData<PaymentResDto> result = paymentController.getPaymentByOrder(888L);
 
-		assertEquals("200-0", result.getCode());
+		assertEquals("200-0", result.getMsg());
 		assertEquals("주문별 결제 내역 조회 성공", result.getMsg());
 		assertEquals(dto, result.getData());
 	}
