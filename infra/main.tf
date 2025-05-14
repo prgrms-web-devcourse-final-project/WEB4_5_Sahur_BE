@@ -416,11 +416,11 @@ resource "aws_instance" "team05-db" {
   # EC2 인스턴스 유형
   instance_type = "t3.small"
   # 사용할 서브넷 ID
-  subnet_id = aws_subnet.team05-subnet_app.id
+  subnet_id = aws_subnet.team05-subnet_db.id
   # 적용할 보안 그룹 ID
   vpc_security_group_ids = [aws_security_group.team05-sg.id]
   # 퍼블릭 IP 연결 설정
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
   # 인스턴스에 IAM 역할 연결
   iam_instance_profile = aws_iam_instance_profile.team05-instance-profile.name
