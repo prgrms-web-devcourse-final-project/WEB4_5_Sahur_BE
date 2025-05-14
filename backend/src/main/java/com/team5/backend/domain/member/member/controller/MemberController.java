@@ -158,6 +158,16 @@ public class MemberController {
         return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
     }
 
+    @Operation(summary = "비밀번호 재설정", description = "인증 완료 후 새 비밀번호를 설정합니다.")
+    @PatchMapping("/members/password/reset")
+    public RsData<PasswordResetResDto> resetPassword(
+            @Parameter(description = "비밀번호 재설정 정보") @Valid @RequestBody PasswordResetReqDto passwordResetReqDto) {
+
+        PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
+
+        return RsDataUtil.success("비밀번호가 성공적으로 재설정되었습니다.", response);
+    }
+
     // 닉네임 중복 확인
     @Operation(summary = "닉네임 중복 확인", description = "사용하려는 닉네임의 중복 여부를 확인합니다.")
     @PostMapping("/members/nickname/check")

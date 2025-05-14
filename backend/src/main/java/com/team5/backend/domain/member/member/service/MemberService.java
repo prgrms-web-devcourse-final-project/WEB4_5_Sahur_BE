@@ -87,6 +87,7 @@ public class MemberService {
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(encodedPassword)
+                .deleted(false)
                 .address(address)
                 .imageUrl(imageUrl)
                 .role(Role.USER)
