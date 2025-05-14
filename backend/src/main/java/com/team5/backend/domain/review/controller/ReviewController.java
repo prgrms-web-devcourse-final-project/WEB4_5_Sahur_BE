@@ -6,6 +6,7 @@ import com.team5.backend.domain.review.service.ReviewService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "리뷰 API", description = "리뷰 관련 CRUD 및 조회 기능을 제공합니다.")
@@ -27,10 +29,10 @@ public class ReviewController {
     @Operation(summary = "리뷰 생성", description = "회원이 특정 상품에 대해 리뷰를 작성합니다.")
     @PostMapping
     public RsData<ReviewResDto> createReview(
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @RequestBody @Valid ReviewCreateReqDto request
     ) {
-        ReviewResDto response = reviewService.createReview(request, token);
+        ReviewResDto response = reviewService.createReview(request, userDetails);
         return RsDataUtil.success("리뷰 생성 성공", response);
     }
 
@@ -88,14 +90,13 @@ public class ReviewController {
         return RsDataUtil.success("상품 리뷰 조회 성공", response);
     }
 
-
     @Operation(summary = "내 리뷰 조회", description = "현재 로그인한 회원이 작성한 리뷰를 최신순으로 조회합니다.")
     @GetMapping("/member/list")
     public RsData<Page<ReviewResDto>> getMyReviews(
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @PageableDefault(size = 5) Pageable pageable
     ) {
-        Page<ReviewResDto> response = reviewService.getReviewsByToken(token, pageable);
+        Page<ReviewResDto> response = reviewService.getReviewsByMember(userDetails, pageable);
         return RsDataUtil.success("내 리뷰 조회 성공", response);
     }
 }

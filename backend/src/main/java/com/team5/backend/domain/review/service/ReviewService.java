@@ -14,11 +14,8 @@ import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.entity.ReviewSortField;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.exception.CustomException;
-import com.team5.backend.global.exception.code.ReviewErrorCode;
-import com.team5.backend.global.exception.code.HistoryErrorCode;
-import com.team5.backend.global.exception.code.ProductErrorCode;
-import com.team5.backend.global.exception.code.MemberErrorCode;
-import com.team5.backend.global.util.JwtUtil;
+import com.team5.backend.global.exception.code.*;
+import com.team5.backend.global.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -34,24 +31,13 @@ public class ReviewService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
     private final HistoryRepository historyRepository;
-    private final JwtUtil jwtUtil;
 
     /**
      * 리뷰 생성
      */
     @Transactional
-    public ReviewResDto createReview(ReviewCreateReqDto request, String token) {
-        String rawToken = token.replace("Bearer ", "");
-
-        if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new CustomException(ReviewErrorCode.TOKEN_BLACKLISTED);
-        }
-
-        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new CustomException(ReviewErrorCode.TOKEN_INVALID);
-        }
-
-        Long memberId = jwtUtil.extractMemberId(rawToken);
+    public ReviewResDto createReview(ReviewCreateReqDto request, PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
@@ -159,23 +145,12 @@ public class ReviewService {
                 .map(ReviewResDto::fromEntity);
     }
 
-
     /**
-     * 특정 회원의 리뷰 목록 조회 (토큰 기반)
+     * 특정 회원의 리뷰 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<ReviewResDto> getReviewsByToken(String token, Pageable pageable) {
-        String rawToken = token.replace("Bearer ", "");
-
-        if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new CustomException(ReviewErrorCode.TOKEN_BLACKLISTED);
-        }
-
-        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new CustomException(ReviewErrorCode.TOKEN_INVALID);
-        }
-
-        Long memberId = jwtUtil.extractMemberId(rawToken);
+    public Page<ReviewResDto> getReviewsByMember(PrincipalDetails userDetails, Pageable pageable) {
+        Long memberId = userDetails.getMember().getMemberId();
 
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);

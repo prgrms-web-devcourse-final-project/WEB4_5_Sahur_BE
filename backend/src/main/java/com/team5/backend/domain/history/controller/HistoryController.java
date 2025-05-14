@@ -7,6 +7,7 @@ import com.team5.backend.domain.history.service.HistoryService;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -31,11 +32,10 @@ public class HistoryController {
     @Operation(summary = "구매 이력 생성", description = "구매 이력을 생성합니다.")
     @PostMapping
     public RsData<HistoryResDto> createHistory(
-            @Parameter(description = "Access Token (Bearer 포함)", required = true)
-            @RequestHeader(value = "Authorization") String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @RequestBody HistoryCreateReqDto request) {
 
-        HistoryResDto response = historyService.createHistory(request, token);
+        HistoryResDto response = historyService.createHistory(request, userDetails);
         return RsDataUtil.success("구매 이력이 생성되었습니다.", response);
     }
 
@@ -79,14 +79,11 @@ public class HistoryController {
     @Operation(summary = "리뷰 작성 가능 여부 조회", description = "특정 상품에 대해 리뷰 작성 가능 여부를 조회합니다.")
     @GetMapping("/products/{productId}/writable")
     public RsData<Map<String, Boolean>> isReviewWritable(
-            @Parameter(description = "Access Token (Bearer 포함)", required = true)
-            @RequestHeader(value = "Authorization") String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @PathVariable Long productId) {
 
-        boolean writable = historyService.checkReviewWritable(productId, token);
+        boolean writable = historyService.checkReviewWritable(productId, userDetails);
         Map<String, Boolean> result = Collections.singletonMap("writable", writable);
         return RsDataUtil.success("리뷰 작성 가능 여부 조회 성공", result);
     }
-
-
 }
