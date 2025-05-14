@@ -1,0 +1,60 @@
+.emailAuthFinish {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  height: 42px;
+  padding: 0 16px;
+  color: black;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 21px;
+  border-radius: 4px;
+  white-space: noWrap;
+}
+
+.timerText {
+  margin-left: 12px;
+  color: #c084fc;
+  font-weight: 500;
+}
+
+.inputWithTimer {
+  position: relative;
+}
+
+.timerOverlay {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #C084FC;
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none; /* 입력에 방해되지 않도록 */
+}
+
+.inputWithPasswordView {
+  position: relative;
+}
+
+.passwordView {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: url(../../assets/images/icon/ico_password_active.svg) no-repeat 50% 50%;
+  font-size: 0;
+  cursor: pointer;
+}
+
+.active {
+  background: url(../../assets/images/icon/ico_password.svg) no-repeat 50% 50%;
+
+}

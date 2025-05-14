@@ -35,15 +35,20 @@ public class AuthService {
             throw new CustomException(AuthErrorCode.INVALID_LOGIN_INFO);
         }
 
-        // 액세스 토큰 생성 - Redis에 저장되고 클라이언트에 반환됨
-        String accessToken = jwtUtil.generateAccessToken(
-                member.getMemberId(), member.getEmail(), member.getRole().name());
+        // 액세스 토큰 및 리프레시 토큰 생성
+        String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getEmail(), member.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getEmail(), member.getRole().name());
 
-        // 리프레시 토큰 생성 - Redis에 저장되고 클라이언트에 반환됨
-        String refreshToken = jwtUtil.generateRefreshToken(
-                member.getMemberId(), member.getEmail(), member.getRole().name());
+        // Remember Me 쿠키 설정 (사용자가 Remember Me를 선택했을 경우)
+        if (loginReqDto.isRememberMe()) {
 
-        // 쿠키에 토큰 저장
+            String rememberMeToken = jwtUtil.generateRememberMeToken(member.getMemberId(), member.getEmail(), member.getRole().name());
+
+            int rememberMeMaxAge = (int) (jwtUtil.getRememberMeExpiration() / 1000);
+            authTokenManager.addCookie(response, "remember-me", rememberMeToken, rememberMeMaxAge);
+        }
+
+        // 기존 쿠키 설정 로직
         int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
         int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
 
@@ -65,8 +70,8 @@ public class AuthService {
             accessToken = accessToken.substring(7);
         }
 
-        // TokenCookieUtil을 사용하여 토큰 무효화 및 쿠키 삭제
-        authTokenManager.invalidateTokens(accessToken, response);
+        // TokenCookieUtil을 사용하여 모든 토큰 무효화 및 쿠키 삭제
+        authTokenManager.invalidateTokensWithRememberMe(accessToken, response);
     }
 
     // 토큰 갱신 메서드

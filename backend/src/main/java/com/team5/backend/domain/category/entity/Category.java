@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Table(name = "categories")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -18,7 +17,7 @@ public class Category {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CategoryType category;
+    private CategoryType categoryType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -28,7 +27,7 @@ public class Category {
     private Integer uid;
 
     public void updateCategoryInfo(CategoryType category, KeywordType keyword, Integer uid) {
-        this.category = category;
+        this.categoryType = category;
         this.keyword = keyword;
         this.uid = uid;
     }

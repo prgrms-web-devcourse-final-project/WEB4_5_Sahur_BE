@@ -1,5 +1,6 @@
 package com.team5.backend.domain.order.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.entity.Delivery;
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
+import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -20,6 +25,7 @@ import com.team5.backend.domain.order.dto.OrderDetailResDto;
 import com.team5.backend.domain.order.dto.OrderListResDto;
 import com.team5.backend.domain.order.dto.OrderPaymentInfoResDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.entity.FilterStatus;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
@@ -52,6 +58,9 @@ class OrderServiceTest {
 
     @Autowired
     private GroupBuyRepository groupBuyRepository;
+
+    @Autowired
+    private DeliveryRepository deliveryRepository;
 
     private Member member;
     private Product product;
@@ -147,7 +156,7 @@ class OrderServiceTest {
 
         assertThat(result.getContent())
                 .isNotEmpty()
-                .allMatch(o -> o.getStatus() == OrderStatus.BEFOREPAID);
+                .allMatch(o -> o.getStatus() == OrderStatus.BEFOREPAID.name());
     }
 
     @Test
@@ -157,23 +166,53 @@ class OrderServiceTest {
 
         assertThat(result.getContent())
                 .isNotEmpty()
-                .allMatch(o -> o.getMemberId().equals(member.getMemberId()));
+                .allSatisfy(order -> {
+                    assertThat(order.getMemberId()).isEqualTo(member.getMemberId());
+                });
     }
 
     @Test
-    @DisplayName("회원 주문 조회 성공 - inProgress 상태 필터링")
+    @DisplayName("회원 주문 조회 성공 - FilterStatus = IN_PROGRESS")
     void getOrdersByMember_inProgress_success() {
-        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "inProgress", pageable);
+        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), FilterStatus.IN_PROGRESS, pageable);
 
         assertThat(result.getContent())
                 .isNotEmpty()
-                .allMatch(o -> List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID).contains(o.getStatus()));
+                .allSatisfy(order -> {
+                    assertThat(List.of(OrderStatus.BEFOREPAID.name(), OrderStatus.PAID.name())).contains(order.getStatus());
+                });
     }
 
     @Test
-    @DisplayName("회원 주문 조회 성공 - canceled 상태 필터링")
+    @DisplayName("회원 주문 조회 성공 - FilterStatus = DONE")
+    void getOrdersByMember_status_done_success() {
+        Order order = orderService.createOrder(new OrderCreateReqDto(member.getMemberId(), groupBuy.getGroupBuyId(), product.getProductId(), 3));
+        order.markAsPaid();
+        orderRepository.save(order);
+
+        Delivery delivery = Delivery.create(order, new DeliveryReqDto(
+                "12345",
+                "서울시 광진구",
+                "상세 주소 123",
+                12345,
+                "01012345678",
+                "TRK12345678")
+        );
+        delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
+        deliveryRepository.save(delivery);
+
+        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), FilterStatus.DONE, pageable);
+
+        assertThat(result.getContent())
+                .isNotEmpty()
+                .allSatisfy(dto -> {
+                    assertThat(dto.getStatus()).isEqualTo(DeliveryStatus.COMPLETED.name());
+                });
+    }
+
+    @Test
+    @DisplayName("회원 주문 조회 성공 - FilterStatus = CANCELED")
     void getOrdersByMember_canceled_success() {
-        // 미리 취소된 주문 생성
         orderRepository.save(Order.builder()
                 .orderId(1L)
                 .member(member)
@@ -182,13 +221,23 @@ class OrderServiceTest {
                 .quantity(1)
                 .totalPrice(product.getPrice())
                 .status(OrderStatus.CANCELED)
+                .createdAt(LocalDateTime.now())
                 .build());
 
-        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), "canceled", pageable);
+        Page<OrderListResDto> result = orderService.getOrdersByMember(member.getMemberId(), FilterStatus.CANCELED, pageable);
 
         assertThat(result.getContent())
-                .extracting(OrderListResDto::getStatus)
-                .contains(OrderStatus.CANCELED);
+                .isNotEmpty()
+                .allSatisfy(order -> {
+                    assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED.name());
+                });
+    }
+
+    @Test
+    @DisplayName("이번 달 총 매출 조회 성공")
+    void getMonthlyCompletedSales_success() {
+        Long sum = orderService.getMonthlyCompletedSales();
+        assertThat(sum).isGreaterThanOrEqualTo(0L);
     }
 
     @Test

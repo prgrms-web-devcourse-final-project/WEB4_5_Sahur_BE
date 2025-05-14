@@ -1,24 +1,39 @@
 package com.team5.backend.global.init;
 
-import com.team5.backend.domain.category.entity.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.entity.CategoryType;
+import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
-import com.team5.backend.domain.delivery.entity.*;
+import com.team5.backend.domain.delivery.entity.Delivery;
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
-import com.team5.backend.domain.groupBuy.entity.*;
+import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.entity.Role;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
-import com.team5.backend.domain.notification.entity.*;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Role;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.notification.entity.Notification;
+import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
-import com.team5.backend.domain.order.entity.*;
+import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.order.service.OrderIdGenerator;
 import com.team5.backend.domain.payment.entity.Payment;
@@ -28,14 +43,8 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.entity.Address;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -110,7 +119,7 @@ public class BaseInitData implements CommandLineRunner {
             for (CategoryType type : CategoryType.values()) {
                 if (type != CategoryType.ALL) {
                     categories.add(categoryRepository.save(Category.builder()
-                            .category(type)
+                            .categoryType(type)
                             .keyword(KeywordType.BED)
                             .uid(uid++)
                             .build()));
@@ -128,6 +137,16 @@ public class BaseInitData implements CommandLineRunner {
                     createMember("오준호", "junho@example.com", "준호킹", new Address("42071", "대구 수성구 동대구로 400", "302호"), "user_junho.jpg"),
                     createMember("백민정", "minjung@example.com", "민정이", new Address("16677", "수원 영통구 광교중앙로 170", "B동 1203호"), "user_minjung.jpg"),
                     createMember("한서준", "seojoon@example.com", "서준이", new Address("28502", "청주 상당구 상당로 69", "3층 301호"), "user_seojoon.jpg")
+            );
+
+            List<Member> additionalMembers = List.of(
+                    createMember("강동원", "dongwon@example.com", "동원브로", new Address("06035", "서울 강남구 테헤란로 521", "2001호"), "user_dongwon.jpg"),
+                    createMember("이지은", "jieun@example.com", "지은누나", new Address("13496", "경기 성남시 분당구 정자일로 45", "107동 1505호"), "user_jieun.jpg"),
+                    createMember("박재범", "jay@example.com", "제이팍", new Address("07222", "서울 영등포구 여의대로 128", "1812호"), "user_jay.jpg"),
+                    createMember("정소민", "somin@example.com", "소민이", new Address("14547", "경기 부천시 부일로 223", "상동프라자 501호"), "user_somin.jpg"),
+                    createMember("김나연", "nayeon@example.com", "나연공주", new Address("46241", "부산 금정구 부산대학로 63", "장전동 빌라 203호"), "user_nayeon.jpg"),
+                    createMember("임시완", "siwan@example.com", "시완이", new Address("24465", "강원 춘천시 서부대성로 154", "101동 805호"), "user_siwan.jpg"),
+                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg")
             );
 
             for (int i = 0; i < 20; i++) {
@@ -151,8 +170,8 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl( List.of("https://img.example.com/prod_" + i + ".jpg"))
-                        .price((int)(100000 + (i * 7000L)))
+                        .imageUrl(List.of("https://img.example.com/prod_" + i + ".jpg"))
+                        .price((int) (100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
                         .build());
@@ -173,7 +192,7 @@ public class BaseInitData implements CommandLineRunner {
 
                 DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
                 deliveryRepository.save(Delivery.builder()
-                        .order(order).address(buyer.getAddress().getStreetAdr()).pccc(null)
+                        .order(order).address(buyer.getAddress()).pccc(null)
                         .contact("010-0000-00" + String.format("%02d", i))
                         .status(deliveryStatus)
                         .shipping("TRK" + String.format("%07d", i * 37))

@@ -1,12 +1,12 @@
 package com.team5.backend.domain.notification.service;
 
 import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.dto.*;
 import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
-import com.team5.backend.global.util.JwtUtil;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.global.security.PrincipalDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,15 +23,13 @@ class NotificationServiceTest {
 
     @Mock private NotificationRepository notificationRepository;
     @Mock private MemberRepository memberRepository;
-    @Mock private JwtUtil jwtUtil;
 
     @InjectMocks
     private NotificationService notificationService;
 
     private Member member;
     private Notification notification;
-    private final String token = "Bearer valid.token.here";
-    private final String rawToken = "valid.token.here";
+    private PrincipalDetails userDetails;
 
     @BeforeEach
     void setUp() {
@@ -43,6 +41,8 @@ class NotificationServiceTest {
                 .nickname("테스터")
                 .build();
 
+        userDetails = new PrincipalDetails(member, Map.of());
+
         notification = Notification.builder()
                 .notificationId(1L)
                 .member(member)
@@ -50,15 +50,9 @@ class NotificationServiceTest {
                 .title("알림 제목")
                 .message("알림 내용")
                 .url("/test")
-                .read(false)
+                .isRead(false)
                 .createdAt(LocalDateTime.now())
                 .build();
-
-        // 공통 mock 설정
-        when(jwtUtil.isTokenBlacklisted(rawToken)).thenReturn(false);
-        when(jwtUtil.validateAccessTokenInRedis(eq("test@team5.com"), eq(rawToken))).thenReturn(true);
-        when(jwtUtil.extractEmail(rawToken)).thenReturn("test@team5.com");
-        when(jwtUtil.extractMemberId(rawToken)).thenReturn(1L);
     }
 
     @Test
@@ -74,7 +68,7 @@ class NotificationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(notificationRepository.save(any())).thenReturn(notification);
 
-        NotificationResDto result = notificationService.createNotification(dto, token);
+        NotificationResDto result = notificationService.createNotification(dto, userDetails);
 
         assertEquals("알림 제목", result.getTitle());
         verify(notificationRepository).save(any());
@@ -106,7 +100,7 @@ class NotificationServiceTest {
     @DisplayName("알림 전체 업데이트")
     void updateNotification() {
         NotificationUpdateReqDto dto = NotificationUpdateReqDto.builder()
-                .read(true)
+                .isRead(true)
                 .title("변경된 제목")
                 .message("변경된 내용")
                 .url("/changed")
@@ -117,7 +111,7 @@ class NotificationServiceTest {
 
         NotificationResDto result = notificationService.updateNotification(1L, dto);
 
-        assertTrue(result.getRead());
+        assertTrue(result.getIsRead());
         assertEquals("변경된 제목", result.getTitle());
     }
 
@@ -139,25 +133,21 @@ class NotificationServiceTest {
 
         NotificationResDto result = notificationService.patchNotification(1L);
 
-        assertTrue(result.getRead());
+        assertTrue(result.getIsRead());
     }
 
     @Test
-    @DisplayName("토큰 기반 회원 알림 조회")
-    void getNotificationsByMemberToken() {
-        // 정렬 조건을 포함한 pageable: createdAt 내림차순
+    @DisplayName("회원 기반 알림 조회")
+    void getNotificationsByMember() {
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         when(memberRepository.existsById(1L)).thenReturn(true);
         when(notificationRepository.findByMemberMemberId(eq(1L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(notification)));
 
-        Page<NotificationResDto> result = notificationService.getNotificationsByMemberToken(token, pageable);
+        Page<NotificationResDto> result = notificationService.getNotificationsByMember(userDetails, pageable);
 
         assertEquals(1, result.getTotalElements());
-
-        // 정렬 포함된 pageable 객체가 일치하지 않을 수 있으므로 any(Pageable.class)로 검증
         verify(notificationRepository).findByMemberMemberId(eq(1L), any(Pageable.class));
     }
-
 }

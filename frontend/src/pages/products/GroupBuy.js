@@ -1,15 +1,6 @@
-import {
-    Badge,
-    Button,
-    Card,
-    Col,
-    Image,
-    ProgressBar,
-    Row,
-    Stack
-} from "react-bootstrap";
-import styles from "./ProductDetail.module.scss"
-import ProductCard from "../main/ProductCard";
+import {Button, Col, Row, Stack} from "react-bootstrap";
+import styles from "./GroupBuy.module.scss"
+import GroupBuyCard from "../main/GroupBuyCard";
 import {useState} from "react";
 import ProductDescription from "./ProductDescription";
 import ProductReviewList from "./ProductReviewList";
@@ -18,7 +9,7 @@ import ProductWrapper from "./ProductWrapper";
 import ProductImageSection from "./ProductImageSection";
 import ProductBuySection from "./ProductBuySection";
 
-const ProductDetail = () => {
+const GroupBuy = () => {
     const [currentView, setCurrentView] = useState('description'); //description, review 둘 중 하나
     return (
         <ProductWrapper>
@@ -34,13 +25,13 @@ const ProductDetail = () => {
                 <h4>진행중인 다른 공동구매</h4>
                 <Row>
                     <Col md={4}>
-                        <ProductCard />
+                        <GroupBuyCard />
                     </Col>
                     <Col md={4}>
-                        <ProductCard />
+                        <GroupBuyCard />
                     </Col>
                     <Col md={4}>
-                        <ProductCard />
+                        <GroupBuyCard />
                     </Col>
                 </Row>{/* 진행중인 다른 공동구매 로우 끝 */}
                 <Row className={"mt-10"}>
@@ -57,4 +48,4 @@ const ProductDetail = () => {
     );
 }
 
-export default ProductDetail;
+export default GroupBuy;

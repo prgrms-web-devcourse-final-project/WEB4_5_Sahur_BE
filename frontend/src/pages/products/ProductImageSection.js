@@ -1,5 +1,5 @@
 import sampleImg from "../../assets/images/sample.png";
-import styles from "./ProductDetail.module.scss";
+import styles from "./GroupBuy.module.scss";
 import {Col, Image, Row} from "react-bootstrap";
 
 const ProductImageSection = () => {
