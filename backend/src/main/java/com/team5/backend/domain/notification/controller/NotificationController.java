@@ -7,7 +7,7 @@ import com.team5.backend.domain.notification.service.NotificationService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
-import com.team5.backend.global.util.JwtUtil;
+import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,12 +15,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Notification", description = "알림 API")
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
-@Tag(name = "Notification", description = "알림 API")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -28,10 +29,10 @@ public class NotificationController {
     @Operation(summary = "알림 생성", description = "새로운 알림을 생성합니다.")
     @PostMapping
     public RsData<NotificationResDto> createNotification(
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @RequestBody NotificationCreateReqDto request
     ) {
-        NotificationResDto response = notificationService.createNotification(request, token);
+        NotificationResDto response = notificationService.createNotification(request, userDetails);
         return RsDataUtil.success("알림 생성 성공", response);
     }
 
@@ -80,10 +81,10 @@ public class NotificationController {
     @Operation(summary = "내 알림 목록 조회", description = "접속 중인 회원의 알림 목록을 최신순으로 조회합니다.")
     @GetMapping("/member/list")
     public RsData<Page<NotificationResDto>> getMyNotifications(
-            @RequestHeader("Authorization") String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @PageableDefault(size = 5) Pageable pageable
     ) {
-        Page<NotificationResDto> response = notificationService.getNotificationsByMemberToken(token, pageable);
+        Page<NotificationResDto> response = notificationService.getNotificationsByMember(userDetails, pageable);
         return RsDataUtil.success("회원 알림 목록 조회 성공", response);
     }
 }

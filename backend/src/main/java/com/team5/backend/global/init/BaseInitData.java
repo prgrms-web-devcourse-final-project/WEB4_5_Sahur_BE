@@ -1,24 +1,39 @@
 package com.team5.backend.global.init;
 
-import com.team5.backend.domain.category.entity.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.entity.CategoryType;
+import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
-import com.team5.backend.domain.delivery.entity.*;
+import com.team5.backend.domain.delivery.entity.Delivery;
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
-import com.team5.backend.domain.groupBuy.entity.*;
+import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.entity.Role;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.member.admin.entity.ProductRequest;
 import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
-import com.team5.backend.domain.notification.entity.*;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Role;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.notification.entity.Notification;
+import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
-import com.team5.backend.domain.order.entity.*;
+import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.order.service.OrderIdGenerator;
 import com.team5.backend.domain.payment.entity.Payment;
@@ -28,14 +43,8 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.entity.Address;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -110,7 +119,7 @@ public class BaseInitData implements CommandLineRunner {
             for (CategoryType type : CategoryType.values()) {
                 if (type != CategoryType.ALL) {
                     categories.add(categoryRepository.save(Category.builder()
-                            .category(type)
+                            .categoryType(type)
                             .keyword(KeywordType.DEFAULT)
                             .uid(uid++)
                             .build()));
@@ -161,8 +170,8 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl( List.of("https://img.example.com/prod_" + i + ".jpg"))
-                        .price((int)(100000 + (i * 7000L)))
+                        .imageUrl(List.of("https://img.example.com/prod_" + i + ".jpg"))
+                        .price((int) (100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
                         .build());
@@ -183,7 +192,7 @@ public class BaseInitData implements CommandLineRunner {
 
                 DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
                 deliveryRepository.save(Delivery.builder()
-                        .order(order).address(buyer.getAddress().getStreetAdr()).pccc(null)
+                        .order(order).address(buyer.getAddress()).pccc(null)
                         .contact("010-0000-00" + String.format("%02d", i))
                         .status(deliveryStatus)
                         .shipping("TRK" + String.format("%07d", i * 37))

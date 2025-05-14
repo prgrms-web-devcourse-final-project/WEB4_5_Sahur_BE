@@ -1,5 +1,8 @@
 package com.team5.backend.domain.order.service;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -7,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.team5.backend.domain.delivery.entity.DeliveryStatus;
+import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -16,6 +21,7 @@ import com.team5.backend.domain.order.dto.OrderDetailResDto;
 import com.team5.backend.domain.order.dto.OrderListResDto;
 import com.team5.backend.domain.order.dto.OrderPaymentInfoResDto;
 import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.entity.FilterStatus;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
@@ -26,7 +32,9 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -36,6 +44,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
+    private final DeliveryRepository deliveryRepository;
 
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
@@ -69,17 +78,31 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderListResDto> getOrdersByMember(Long memberId, String status, Pageable pageable) {
+    public Page<OrderListResDto> getOrdersByMember(Long memberId, FilterStatus status, Pageable pageable) {
         Page<Order> orders = null;
-        if ("inProgress".equalsIgnoreCase(status)) {
+        if (FilterStatus.IN_PROGRESS.equals(status)) {
             List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
-            orders = orderRepository.findByMember_MemberIdAndStatusIn(memberId, statusList, pageable);
-        } else if ("canceled".equalsIgnoreCase(status)) {
-            orders = orderRepository.findByMember_MemberIdAndStatusIn(memberId, List.of(OrderStatus.CANCELED), pageable);
+            orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, statusList, pageable);
+        } else if (FilterStatus.DONE.equals(status)) {
+            orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
+        } else if (FilterStatus.CANCELED.equals(status)) {
+            orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
         } else {
             orders = orderRepository.findByMember_MemberId(memberId, pageable);
         }
         return orders.map(OrderListResDto::from);
+    }
+
+    public Long getMonthlyCompletedSales() {
+        LocalDateTime start = YearMonth.now().atDay(1).atStartOfDay();
+        LocalDateTime end = YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX);
+
+        List<Order> paidOrders = orderRepository
+                .findAllByStatusAndCreatedAtBetween(OrderStatus.PAID, start, end);
+
+        return paidOrders.stream()
+                .mapToLong(Order::getTotalPrice)
+                .sum();
     }
 
     @Transactional(readOnly = true)
@@ -115,5 +138,23 @@ public class OrderService {
                 .amount(order.getTotalPrice())
                 .clientKey(tossPaymentConfig.getClientKey())
                 .build();
+    }
+
+    public void deleteExpiredOrders() {
+        LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
+        List<Order> expiredOrders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.BEFOREPAID, oneHourAgo);
+
+        for (Order order : expiredOrders) {
+            log.info("[Order Cleanup] 삭제할 주문: orderId={}, createdAt={}", order.getOrderId(), order.getCreatedAt());
+
+            if (order.getDelivery() != null) {
+                log.info("[Order Cleanup] 연결된 배송 정보도 삭제: deliveryId={}", order.getDelivery().getDeliveryId());
+                deliveryRepository.delete(order.getDelivery());
+            }
+            orderRepository.delete(order);
+            log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", order.getOrderId());
+        }
+
+        log.info("[Order Cleanup] 총 {}건의 주문이 삭제되었습니다.", expiredOrders.size());
     }
 }

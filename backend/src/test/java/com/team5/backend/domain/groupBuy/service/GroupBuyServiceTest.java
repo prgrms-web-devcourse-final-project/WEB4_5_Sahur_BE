@@ -14,6 +14,7 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.repository.ReviewRepository;
+import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,7 +72,7 @@ class GroupBuyServiceTest {
 
         testCategory = Category.builder()
                 .categoryId(1L)
-                .category(null)
+                .categoryType(null)
                 .keyword(KeywordType.DEFAULT)
                 .uid(101)
                 .build();
@@ -212,29 +214,23 @@ class GroupBuyServiceTest {
     }
 
     @Test
-    @DisplayName("토큰 기반 공동구매 조회 - 최신순 정렬 포함")
-    void getGroupBuysByToken_shouldReturnPagedResult() {
+    @DisplayName("PrincipalDetails 기반 공동구매 조회 - 최신순 정렬 포함")
+    void getGroupBuysByMember_shouldReturnPagedResult() {
         // given
-        String token = "Bearer fake.jwt.token";
-        String extractedToken = "fake.jwt.token";
-
+        PrincipalDetails principalDetails = new PrincipalDetails(testMember, Map.of());
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<GroupBuy> mockPage = new PageImpl<>(groupBuys);
 
-        // when
-        when(jwtUtil.isTokenBlacklisted(extractedToken)).thenReturn(false);
-        when(jwtUtil.extractEmail(extractedToken)).thenReturn("user@example.com");
-        when(jwtUtil.validateAccessTokenInRedis("user@example.com", extractedToken)).thenReturn(true);
-        when(jwtUtil.extractMemberId(extractedToken)).thenReturn(1L);
         when(historyRepository.findDistinctGroupBuysByMemberId(1L, pageable)).thenReturn(mockPage);
 
-        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByToken(token, pageable);
+        // when
+        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByMember(principalDetails, pageable);
 
         // then
         assertEquals(2, result.getTotalElements());
-        verify(jwtUtil).extractMemberId(extractedToken);
         verify(historyRepository).findDistinctGroupBuysByMemberId(1L, pageable);
     }
+
 
     @Test
     @DisplayName("공동구매 상태 일괄 업데이트 - 마감일 지난 경우 CLOSED 설정")
@@ -348,12 +344,15 @@ class GroupBuyServiceTest {
         base.getProduct().updateCategory(testCategory);
 
         List<GroupBuy> randoms = List.of(base, groupBuys.get(1));
+        Pageable pageable = PageRequest.of(0, 3);
+
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(base));
-        when(groupBuyRepository.findRandomTop3ByCategoryId(1L)).thenReturn(randoms);
+        when(groupBuyRepository.findRandomTop3ByCategoryIdExcludingSelf(1L, 1L, pageable)).thenReturn(randoms);
 
         List<GroupBuyResDto> result = groupBuyService.getRandomTop3GroupBuysBySameCategory(1L);
 
         assertEquals(2, result.size());
-        verify(groupBuyRepository).findRandomTop3ByCategoryId(1L);
+        verify(groupBuyRepository).findRandomTop3ByCategoryIdExcludingSelf(1L, 1L, pageable);
     }
+
 }

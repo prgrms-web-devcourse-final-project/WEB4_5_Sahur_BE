@@ -2,6 +2,7 @@ package com.team5.backend.domain.delivery.dto;
 
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,19 +10,19 @@ import lombok.Getter;
 @Builder
 public class DeliveryResDto {
 
-	private String address;
-	private Integer pccc;
-	private String contact;
-	private DeliveryStatus status;
-	private String shipping;
+    private String address;
+    private Integer pccc;
+    private String contact;
+    private DeliveryStatus status;
+    private String shipping;
 
-	public static DeliveryResDto fromEntity(Delivery delivery) {
-		return DeliveryResDto.builder()
-			.address(delivery.getAddress())
-			.pccc(delivery.getPccc() != null ? delivery.getPccc() : 0)
-			.contact(delivery.getContact())
-			.status(delivery.getStatus())
-			.shipping(delivery.getShipping())
-			.build();
-	}
+    public static DeliveryResDto fromEntity(Delivery delivery) {
+        return DeliveryResDto.builder()
+                .address(delivery.getAddress().toString())
+                .pccc(delivery.getPccc() != null ? delivery.getPccc() : 0)
+                .contact(delivery.getContact())
+                .status(delivery.getStatus())
+                .shipping(delivery.getShipping())
+                .build();
+    }
 }

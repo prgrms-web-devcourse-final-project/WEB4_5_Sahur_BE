@@ -22,14 +22,21 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     Page<GroupBuy> findByStatus(GroupBuyStatus status, Pageable pageable);
     @Query("SELECT g FROM GroupBuy g WHERE g.status = 'ONGOING' ORDER BY g.product.dibCount DESC")
     List<GroupBuy> findTop3ByDibsOrder(Pageable pageable);
-    @Query(value = """
-        SELECT * FROM group_buy g
-        JOIN product p ON g.product_id = p.product_id
-        WHERE p.category_id = :categoryId
-        AND g.status = 'ONGOING'
-        ORDER BY RAND()
-        LIMIT 3
-    """, nativeQuery = true)
-    List<GroupBuy> findRandomTop3ByCategoryId(@Param("categoryId") Long categoryId);
+    @Query("""
+    SELECT g FROM GroupBuy g
+    JOIN FETCH g.product p
+    JOIN FETCH p.category c
+    WHERE c.categoryId = :categoryId
+    AND g.status = 'ONGOING'
+    AND g.groupBuyId <> :excludedGroupBuyId
+    ORDER BY FUNCTION('RAND')
+""")
+    List<GroupBuy> findRandomTop3ByCategoryIdExcludingSelf(
+            @Param("categoryId") Long categoryId,
+            @Param("excludedGroupBuyId") Long excludedGroupBuyId,
+            Pageable pageable
+    );
+
+
 
 }

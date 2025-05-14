@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class CategoryCreateReqDto {
 
     @NotNull(message = "카테고리는 필수입니다.")
-    private CategoryType category;
+    private CategoryType categoryType;
 
     @NotNull(message = "키워드는 필수입니다.")
     private KeywordType keyword;
