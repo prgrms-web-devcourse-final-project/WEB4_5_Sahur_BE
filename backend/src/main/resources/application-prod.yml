@@ -43,6 +43,8 @@ management:
       access: unrestricted
 
 custom:
+  elastic:
+    host: ${custom.db.host}
   site:
     domain: ${custom.prod.domain}
     backUrl: ${custom.prod.backUrl}

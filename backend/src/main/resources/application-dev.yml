@@ -12,8 +12,8 @@ spring:
       host: localhost
       port: 6379
       password: ${custom.db.password}
-    elasticsearch:
-      uris: http://localhost:9200
+#    elasticsearch:
+#      uris: http://localhost:9200
 
   jpa:
     open-in-view: false
@@ -35,6 +35,8 @@ logging:
     org.springframework.transaction.interceptor: TRACE
 
 custom:
+  elastic:
+    host: localhost
   site:
     domain: ${custom.dev.domain}
     backUrl: ${custom.dev.backUrl}
