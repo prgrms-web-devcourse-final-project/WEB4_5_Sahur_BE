@@ -15,7 +15,9 @@ const Payment = () => {
                     <span className={"cursor-pointer"} onClick={() => navigate("/groupBuy/1")}>
                         <img src={arrowLeft} style={{ width: "20px" }}/>
                     </span>
-                    <h3 style={{ marginRight: '30px' }}>결제 정보</h3>
+                    <div className={"d-flex justify-content-center"}>
+                        <h4 style={{ marginRight: '30px', height: '40px' }}>결제 정보</h4>
+                    </div>
                     <span/>
                 </Card.Body>
             </Card>
@@ -30,12 +32,20 @@ const Payment = () => {
                             </desc>
                         </Col>
                     </Row>
-                    <Row className={"m-3"}>
+                    <Row className={"m-3 align-items-stretch"}>
                         <Col md={7}>
-                            <DeliverySection />
+                            <Card className="h-100">
+                                <Card.Body className={"p-3"}>
+                                    <DeliverySection />
+                                </Card.Body>
+                            </Card>
                         </Col>
                         <Col md={5}>
-                            <OrderSection />
+                            <Card className="h-100">
+                                <Card.Body className={"p-3"}>
+                                    <OrderSection />
+                                </Card.Body>
+                            </Card>
                         </Col>
                     </Row>
                 </div>

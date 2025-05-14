@@ -1,28 +1,36 @@
 import {Badge, Card, ProgressBar, Stack} from "react-bootstrap";
-import sampleImg from "../../assets/images/sample.png"
 import {useNavigate} from "react-router-dom";
 import { ReactComponent as ParticipationIcon } from "../../assets/images/icon/participation.svg"
 import { ReactComponent as ClockIcon } from "../../assets/images/icon/clock.svg"
 import styles from "./Main.module.scss"
+import DeadlineTimer from "./DeadlineTimer"
 
-const GroupBuyCard = () => {
+const GroupBuyCard = ({ product }) => {
     const navigate = useNavigate();
+    const current = product?.currentParticipantCount ?? 0;
+    const target = product?.targetParticipants ?? 0;
+    const percent = target > 0 ? Math.round((current / target) * 100) : 0;
     return (
-        <Card className={`p-2 m-1 cursor-pointer ${styles.groupBuyCardBorder}`} onClick={() => navigate("/groupBuy/1")}>
+        <Card className={`p-2 m-1 cursor-pointer ${styles.groupBuyCardBorder}`}
+              onClick={() => navigate(`/groupBuy/${product?.groupById}`)}>
             <div className={styles.imageWrapper}>
-                <img src={sampleImg} alt="썸네일" className={styles.img} />
-                <Badge className={styles.badgeTopRight}>마감임박</Badge>
+                <img src={product?.product.imageUrl[0]} alt="썸네일" className={styles.img} />
+                {product?.deadlineToday && <Badge className={styles.badgeTopRight}>마감임박</Badge>}
             </div>
             <Card.Body className={"p-2"}>
-                <Card.Title>프리미엄 블푸투스 이어폰</Card.Title>
+                <Card.Title>{product?.product.title}</Card.Title>
                 <Card.Text>
                     <small style={{ color: "#6B7280" }}>해외직구 | 무료배송</small>
-                    <div style={{ fontWeight: "700" }}>39,000</div>
+                    <div style={{ fontWeight: "700" }}>{product?.product.price.toLocaleString()}원</div>
                     <Stack direction={"horizontal"} className={"d-flex justify-content-between mb-1"} >
-                        <span style={{ color: "#9333EA" }}><ParticipationIcon /> 28/50명 참여</span>
-                        <span style={{ color: "#DC2626" }}><ClockIcon /> 2시간 남음</span>
+                        <span style={{ color: "#9333EA" }}><ParticipationIcon />
+                            {`${current} / ${target}명 참여`}
+                        </span>
+                        <span style={{ color: "#DC2626" }}>
+                            <ClockIcon /><DeadlineTimer deadline={product?.deadline} />
+                        </span>
                     </Stack>
-                    <ProgressBar className={styles.customProgress} now={60} />
+                    <ProgressBar className={styles.customProgress} now={percent} />
                 </Card.Text>
             </Card.Body>
         </Card>
