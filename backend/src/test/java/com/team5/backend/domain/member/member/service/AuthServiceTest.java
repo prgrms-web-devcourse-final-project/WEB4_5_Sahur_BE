@@ -78,7 +78,7 @@ class AuthServiceTest {
     void loginSuccess() {
         
         // Given
-        LoginReqDto loginReqDto = new LoginReqDto(email, password);
+        LoginReqDto loginReqDto = new LoginReqDto(email, password, false);
 
         when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(password, encPassword)).thenReturn(true);
@@ -107,7 +107,7 @@ class AuthServiceTest {
     void loginFailEmailNotFound() {
         
         // Given
-        LoginReqDto loginReqDto = new LoginReqDto(email, password);
+        LoginReqDto loginReqDto = new LoginReqDto(email, password, false);
 
         when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -124,7 +124,7 @@ class AuthServiceTest {
     void loginFailPasswordMismatch() {
 
         // Given
-        LoginReqDto loginReqDto = new LoginReqDto(email, password);
+        LoginReqDto loginReqDto = new LoginReqDto(email, password, false);
 
         when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(password, encPassword)).thenReturn(false);
