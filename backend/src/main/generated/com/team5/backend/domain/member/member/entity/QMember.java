@@ -26,6 +26,10 @@ public class QMember extends EntityPathBase<Member> {
 
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
+    public final BooleanPath deleted = createBoolean("deleted");
+
+    public final DateTimePath<java.time.LocalDateTime> deletedAt = createDateTime("deletedAt", java.time.LocalDateTime.class);
+
     public final StringPath email = createString("email");
 
     public final BooleanPath emailVerified = createBoolean("emailVerified");
@@ -66,4 +70,3 @@ public class QMember extends EntityPathBase<Member> {
     }
 
 }
-

@@ -7,8 +7,6 @@ import com.team5.backend.domain.member.member.service.MemberService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
-import com.team5.backend.global.exception.code.CommonErrorCode;
-import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,6 +77,17 @@ public class MemberController {
         return RsDataUtil.success("로그아웃 및 회원 탈퇴가 완료되었습니다.");
     }
 
+    // 회원 복구
+    @Operation(summary = "회원 복구", description = "탈퇴한 회원을 복구합니다. 탈퇴한 회원이 로그인하면 발급되는 임시 토큰을 통해서만 호출할 수 있습니다.")
+    @PostMapping("/members/restore")
+    public RsData<MemberRestoreResDto> restoreMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
+
+        Long memberId = userDetails.getMember().getMemberId();
+        MemberRestoreResDto memberRestoreResDto = memberService.restoreMember(memberId);
+
+        return RsDataUtil.success("회원 복구가 완료되었습니다.", memberRestoreResDto);
+    }
+
     // 로그인
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다.")
     @PostMapping("/auth/login")
@@ -147,6 +156,16 @@ public class MemberController {
 
         EmailResDto response = mailService.verifyPasswordResetAuthCode(emailVerificationReqDto);
         return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
+    }
+
+    @Operation(summary = "비밀번호 재설정", description = "인증 완료 후 새 비밀번호를 설정합니다.")
+    @PatchMapping("/members/password/reset")
+    public RsData<PasswordResetResDto> resetPassword(
+            @Parameter(description = "비밀번호 재설정 정보") @Valid @RequestBody PasswordResetReqDto passwordResetReqDto) {
+
+        PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
+
+        return RsDataUtil.success("비밀번호가 성공적으로 재설정되었습니다.", response);
     }
 
     // 닉네임 중복 확인

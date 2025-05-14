@@ -1,5 +1,6 @@
 package com.team5.backend.global.security;
 
+import com.team5.backend.global.filter.DeletedMemberAuthenticationFilter;
 import com.team5.backend.global.filter.JwtAuthenticationFilter;
 import com.team5.backend.global.handler.OAuth2AuthenticationSuccessHandler;
 import com.team5.backend.global.util.JwtUtil;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final DeletedMemberAuthenticationFilter deletedMemberAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,13 +43,17 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOauth2UserService))
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)
+                        // OAuth2 로그인 페이지 경로 설정
+                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/oauth2/authorization"))
+                        // OAuth2 콜백 경로 설정
+                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/*"))
                 )
+                .addFilterBefore(deletedMemberAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .rememberMe(rememberMe -> rememberMe
-                        .rememberMeParameter("remember")    // 클라이언트에서 사용할 파라미터 이름
+                        .rememberMeParameter("rememberMe")    // 클라이언트에서 사용할 파라미터 이름
                         .alwaysRemember(false)             // 체크박스 선택시에만 사용
                         .tokenValiditySeconds((int) (jwtUtil.getRememberMeExpiration() / 1000))  // 토큰 유효 시간
                         .userDetailsService(userDetailsService));

@@ -8,6 +8,7 @@ import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.ErrorCode;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.exception.code.AuthErrorCode;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.security.CustomUserDetailsService;
 import com.team5.backend.global.util.JwtUtil;
@@ -43,6 +44,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        // 회원 복구일 경우 JwtAuthenticationFilter에서는 처리하지 않고 필터 체인을 계속 진행
+        String requestPath = request.getServletPath();
+        if (requestPath.equals("/api/v1/members/restore")) {
+
+            filterChain.doFilter(request, response);
+            return ;
+        }
 
         String accessToken = authTokenManager.extractAccessToken(request);
         String refreshToken = authTokenManager.extractRefreshToken(request);
@@ -89,7 +98,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 토큰이 없으면 필터 체인을 계속 진행
             filterChain.doFilter(request, response);
-            return;
+            return ;
         }
 
         try {
@@ -101,6 +110,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 이메일 추출 및 토큰 유효성 검증
             String email = jwtUtil.extractEmail(accessToken);
+
+            // 삭제된 회원을 위한 로그아웃
+            if (jwtUtil.isDeletedMemberToken(accessToken)) {
+
+                log.info("삭제된 회원의 토큰 감지: {}", email);
+
+                if (requestPath.equals("/api/v1/auth/logout")) {
+                    // 로그아웃 요청은 진행시킴
+                    try {
+                        // 삭제된 회원 정보 로드
+                        UserDetails userDetails = customUserDetailsService.loadDeletedUserByUsername(email);
+
+                        // 인증 객체 생성 및 Security Context에 설정
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                        // 로그아웃 요청 계속 진행
+                        filterChain.doFilter(request, response);
+                        return;
+                    } catch (Exception e) {
+                        sendTokenErrorResponse(response, CommonErrorCode.INTERNAL_ERROR);
+                        return;
+                    }
+                } else {
+                    sendTokenErrorResponse(response, CommonErrorCode.INTERNAL_ERROR);
+                    return;
+                }
+            }
 
             // 액세스 토큰이 유효하고 Redis에 저장된 토큰과 일치하면 요청 진행
             if (!jwtUtil.isTokenExpired(accessToken) && jwtUtil.validateAccessTokenInRedis(email, accessToken)) {

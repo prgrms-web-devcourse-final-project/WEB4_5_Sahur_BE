@@ -290,37 +290,66 @@ public class AuthTokenManager {
     // 로그아웃시 Remember Me 토큰도 함께 무효화
     public void invalidateTokensWithRememberMe(String accessToken, HttpServletResponse response) {
 
-        // 기존 invalidateTokens 메서드와 동일한 로직 수행
         if (accessToken == null || accessToken.isEmpty()) {
             throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
         }
 
         // 토큰에서 이메일 추출
-        String email = jwtUtil.extractEmail(accessToken);
+        String email;
+        boolean isDeletedMemberToken;
 
-        // 토큰 유효성 검증
+        try {
+            email = jwtUtil.extractEmail(accessToken);
+            isDeletedMemberToken = jwtUtil.isDeletedMemberToken(accessToken);
+        } catch (Exception e) {
+            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
+        }
+
+        // 삭제된 회원의 토큰인 경우
+        if (isDeletedMemberToken) {
+
+            // 액세스 토큰 블랙리스트에 추가
+            jwtUtil.addToBlacklist(accessToken);
+
+            // 쿠키 삭제
+            deleteCookies(response);
+
+            return; // 삭제된 회원은 여기서 처리 종료
+        }
+
+        // 일반 회원에 대한 토큰 유효성 검증
         if (!jwtUtil.validateToken(accessToken, email)) {
             throw new CustomException(AuthErrorCode.INVALID_TOKEN);
         }
 
-        // 리프레시 토큰 조회 후 블랙리스트에 추가
+        // 일반 회원에 대한 리프레시 토큰 처리
         String refreshToken = jwtUtil.getStoredRefreshToken(email);
         if (refreshToken != null) {
+
             jwtUtil.addRefreshTokenToBlacklist(refreshToken);
+            jwtUtil.removeRefreshToken(email);
+        } else {
+            // 일반 회원이지만 리프레시 토큰이 없는 경우 - 비정상 케이스
+            log.warn("일반 회원의 리프레시 토큰이 존재하지 않습니다. 이메일: {}", email);
         }
 
-        // Remember Me 토큰 무효화 (추가된 부분)
-        jwtUtil.invalidateRememberMeToken(email);
+        try {
+            // Remember Me 토큰 처리
+            jwtUtil.invalidateRememberMeToken(email);
+        } catch (Exception e) {
+            log.warn("Remember Me 토큰 처리 중 예외 발생: {}", e.getMessage());
+        }
 
         // 액세스 토큰 블랙리스트에 추가
         jwtUtil.addToBlacklist(accessToken);
 
-        // Redis에서 리프레시 토큰 삭제
-        jwtUtil.removeRefreshToken(email);
-
         // 쿠키 삭제
+        deleteCookies(response);
+    }
+
+    private void deleteCookies(HttpServletResponse response) {
         addCookie(response, "accessToken", "", 0);
         addCookie(response, "refreshToken", "", 0);
-        addCookie(response, "remember-me", "", 0);  // Remember Me 쿠키도 삭제
+        addCookie(response, "remember-me", "", 0);
     }
 }
