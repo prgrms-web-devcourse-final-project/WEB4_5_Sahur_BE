@@ -271,7 +271,6 @@ class MemberServiceTest {
         given(memberRepository.existsByEmail(patchMemberReqDto.getEmail())).willReturn(false);
         given(memberRepository.existsByNickname(patchMemberReqDto.getNickname())).willReturn(false);
         given(passwordEncoder.encode(anyString())).willReturn("newEncodedPassword");
-        given(memberRepository.save(any(Member.class))).willReturn(member);
 
         // When
         PatchMemberResDto result = memberService.updateMember(memberId, patchMemberReqDto);
@@ -286,7 +285,6 @@ class MemberServiceTest {
         verify(memberRepository).existsByEmail(patchMemberReqDto.getEmail());
         verify(memberRepository).existsByNickname(patchMemberReqDto.getNickname());
         verify(passwordEncoder).encode(patchMemberReqDto.getPassword());
-        verify(memberRepository).save(any(Member.class));
     }
 
     @Test
@@ -382,7 +380,6 @@ class MemberServiceTest {
         verify(mailService).isPasswordResetVerified(passwordResetReqDto.getEmail());
         verify(memberRepository).findByEmail(passwordResetReqDto.getEmail());
         verify(passwordEncoder).encode(passwordResetReqDto.getPassword());
-        verify(memberRepository).save(member);
         verify(mailService).clearPasswordResetVerificationStatus(passwordResetReqDto.getEmail());
     }
 

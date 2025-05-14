@@ -71,11 +71,12 @@ class DibsControllerTest {
     void deleteDibs() throws Exception {
         // when & then
         mockMvc.perform(delete("/api/v1/dibs/products/100/dibs")
-                        .param("memberId", "1"))
-                .andExpect(status().isNoContent());
+                        .header("Authorization", TOKEN))
+                .andExpect(status().isOk());
 
         verify(dibsService).deleteByProductAndToken(100L, TOKEN);
     }
+
 
     @Test
     @DisplayName("회원 관심상품 전체 조회 API")
@@ -88,9 +89,13 @@ class DibsControllerTest {
         when(dibsService.getAllDibsByToken(eq(TOKEN))).thenReturn(list);
 
         // when & then
-        mockMvc.perform(get("/api/v1/dibs/members/1/dibs"))
+        mockMvc.perform(get("/api/v1/dibs")
+                        .header("Authorization", TOKEN))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].dibsId").value(1L))
+                .andExpect(jsonPath("$.data[0].memberId").value(1L))
+                .andExpect(jsonPath("$.data[0].productId").value(100L));
     }
 
     @Test

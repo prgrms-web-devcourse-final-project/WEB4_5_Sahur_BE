@@ -2,6 +2,7 @@ package com.team5.backend.global.security;
 
 import com.team5.backend.global.filter.JwtAuthenticationFilter;
 import com.team5.backend.global.handler.OAuth2AuthenticationSuccessHandler;
+import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,8 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtUtil jwtUtil;
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -42,7 +45,12 @@ public class SecurityConfig {
                                 .userService(customOauth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .rememberMe(rememberMe -> rememberMe
+                        .rememberMeParameter("remember")    // 클라이언트에서 사용할 파라미터 이름
+                        .alwaysRemember(false)             // 체크박스 선택시에만 사용
+                        .tokenValiditySeconds((int) (jwtUtil.getRememberMeExpiration() / 1000))  // 토큰 유효 시간
+                        .userDetailsService(userDetailsService));
 
         return http.build();
     }

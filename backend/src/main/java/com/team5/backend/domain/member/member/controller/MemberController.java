@@ -116,9 +116,7 @@ public class MemberController {
             @Parameter(description = "이메일 정보") @RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
 
         EmailResDto response = mailService.sendAuthCode(emailSendReqDto);
-
-        if (response.isSuccess()) return RsDataUtil.success("인증번호가 이메일로 전송되었습니다.", response);
-        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
+        return RsDataUtil.success("인증번호가 이메일로 전송되었습니다.", response);
     }
 
     // 이메일 인증번호 검증
@@ -128,9 +126,7 @@ public class MemberController {
             @Parameter(description = "인증번호 검증 정보") @RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
 
         EmailResDto response = mailService.validationAuthCode(emailVerificationReqDto);
-
-        if (response.isSuccess()) return RsDataUtil.success("인증이 완료되었습니다.", response);
-        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
+        return RsDataUtil.success("인증이 완료되었습니다.", response);
     }
 
     // 비밀번호 재설정 이메일 인증번호 전송
@@ -140,9 +136,7 @@ public class MemberController {
             @Parameter(description = "이메일 정보") @RequestBody @Valid EmailSendReqDto emailSendReqDto) throws MessagingException {
 
         EmailResDto response = mailService.sendPasswordResetAuthCode(emailSendReqDto);
-
-        if (response.isSuccess()) return RsDataUtil.success("비밀번호 재설정 인증번호가 이메일로 전송되었습니다.", response);
-        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
+        return RsDataUtil.success("비밀번호 재설정 인증번호가 이메일로 전송되었습니다.", response);
     }
 
     // 비밀번호 재설정 이메일 인증번호 검증
@@ -152,31 +146,16 @@ public class MemberController {
             @Parameter(description = "인증번호 검증 정보") @RequestBody @Valid EmailVerificationReqDto emailVerificationReqDto) {
 
         EmailResDto response = mailService.verifyPasswordResetAuthCode(emailVerificationReqDto);
-
-        if (response.isSuccess()) return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
-        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
+        return RsDataUtil.success("인증이 완료되었습니다. 새 비밀번호를 설정하세요.", response);
     }
 
-    // 비밀번호 재설정
-    @Operation(summary = "비밀번호 재설정", description = "인증 완료 후 새 비밀번호를 설정합니다.")
-    @PatchMapping("/members/password/reset")
-    public RsData<PasswordResetResDto> resetPassword(
-            @Parameter(description = "비밀번호 재설정 정보") @Valid @RequestBody PasswordResetReqDto passwordResetReqDto) {
-
-        PasswordResetResDto response = memberService.resetPassword(passwordResetReqDto);
-
-        if (response.isSuccess()) return RsDataUtil.success("비밀번호가 성공적으로 재설정되었습니다.", response);
-        else return RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, response);
-    }
-
+    // 닉네임 중복 확인
     @Operation(summary = "닉네임 중복 확인", description = "사용하려는 닉네임의 중복 여부를 확인합니다.")
     @PostMapping("/members/nickname/check")
     public RsData<NicknameCheckResDto> checkNicknameDuplicate(
             @Parameter(description = "닉네임 정보") @RequestBody NicknameCheckReqDto nicknameCheckReqDto) {
 
         NicknameCheckResDto response = memberService.checkNicknameDuplicate(nicknameCheckReqDto.getNickname());
-
-        if (response.isExists()) return RsDataUtil.fail(MemberErrorCode.NICKNAME_ALREADY_USED, response);
-        else return RsDataUtil.success("사용 가능한 닉네임입니다.", response);
+        return RsDataUtil.success("닉네임 중복 확인이 완료되었습니다.", response);
     }
 }

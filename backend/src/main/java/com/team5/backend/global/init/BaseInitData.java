@@ -130,6 +130,16 @@ public class BaseInitData implements CommandLineRunner {
                     createMember("한서준", "seojoon@example.com", "서준이", new Address("28502", "청주 상당구 상당로 69", "3층 301호"), "user_seojoon.jpg")
             );
 
+            List<Member> additionalMembers = List.of(
+                    createMember("강동원", "dongwon@example.com", "동원브로", new Address("06035", "서울 강남구 테헤란로 521", "2001호"), "user_dongwon.jpg"),
+                    createMember("이지은", "jieun@example.com", "지은누나", new Address("13496", "경기 성남시 분당구 정자일로 45", "107동 1505호"), "user_jieun.jpg"),
+                    createMember("박재범", "jay@example.com", "제이팍", new Address("07222", "서울 영등포구 여의대로 128", "1812호"), "user_jay.jpg"),
+                    createMember("정소민", "somin@example.com", "소민이", new Address("14547", "경기 부천시 부일로 223", "상동프라자 501호"), "user_somin.jpg"),
+                    createMember("김나연", "nayeon@example.com", "나연공주", new Address("46241", "부산 금정구 부산대학로 63", "장전동 빌라 203호"), "user_nayeon.jpg"),
+                    createMember("임시완", "siwan@example.com", "시완이", new Address("24465", "강원 춘천시 서부대성로 154", "101동 805호"), "user_siwan.jpg"),
+                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg")
+            );
+
             for (int i = 0; i < 20; i++) {
                 Member requester = members.get(i % members.size());
                 Category category = categories.get(i % categories.size());

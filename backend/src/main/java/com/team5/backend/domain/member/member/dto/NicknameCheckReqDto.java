@@ -3,8 +3,10 @@ package com.team5.backend.domain.member.member.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class NicknameCheckReqDto {
 
     @NotBlank(message = "닉네임은 필수 입력 항목입니다.")

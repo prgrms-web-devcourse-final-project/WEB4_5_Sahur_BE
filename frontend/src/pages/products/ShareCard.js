@@ -1,6 +1,6 @@
 import {Button, Card} from "react-bootstrap";
 
-const ShareCard = () => {
+const ShareCard = ({ onClose }) => {
     return (
         <Card>
             <Card.Header>
@@ -10,7 +10,7 @@ const ShareCard = () => {
 
             </Card.Body>
             <Card.Footer>
-                <Button>닫기</Button>
+                <Button onClick={onClose}>닫기</Button>
             </Card.Footer>
         </Card>
     );
