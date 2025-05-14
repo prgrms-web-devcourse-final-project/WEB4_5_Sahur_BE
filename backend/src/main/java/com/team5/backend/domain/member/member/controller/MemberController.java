@@ -1,6 +1,7 @@
 package com.team5.backend.domain.member.member.controller;
 
 import com.team5.backend.domain.member.member.dto.*;
+import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.member.member.service.MailService;
 import com.team5.backend.domain.member.member.service.MemberService;
@@ -16,11 +17,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Tag(name = "Member", description = "회원 관련 API")
 @RestController
@@ -166,5 +169,10 @@ public class MemberController {
 
         NicknameCheckResDto response = memberService.checkNicknameDuplicate(nicknameCheckReqDto.getNickname());
         return RsDataUtil.success("닉네임 중복 확인이 완료되었습니다.", response);
+    }
+
+    @GetMapping("/member")
+    public ResponseEntity<Optional<Member>> getMember(String email) {
+        return ResponseEntity.ok(memberService.getMember(email));
     }
 }

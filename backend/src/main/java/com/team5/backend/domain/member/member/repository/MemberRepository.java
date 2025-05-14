@@ -22,6 +22,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m FROM Member m WHERE m.memberId = :memberId")
     Optional<Member> findByIdAllMembers(@Param("memberId") Long memberId);
 
+    // 소프트 딜리트된 회원을 포함하여 회원 이메일로 회원 조회
+    @Query("SELECT m FROM Member m WHERE m.email = :email")
+    Optional<Member> findByEmailAllMembers(@Param("email") String email);
+
     // 30일 이상 지난 탈퇴 회원 하드 딜리트
     @Modifying
     @Transactional

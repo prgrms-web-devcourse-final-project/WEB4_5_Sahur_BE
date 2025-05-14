@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -259,5 +260,9 @@ public class MemberService {
         int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDays);
 
         log.info("삭제된 회원 수: {}", deletedCount);
+    }
+
+    public Optional<Member> getMember(String email) {
+        return memberRepository.findByEmailAllMembers(email);
     }
 }

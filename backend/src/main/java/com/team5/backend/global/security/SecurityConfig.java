@@ -1,5 +1,6 @@
 package com.team5.backend.global.security;
 
+import com.team5.backend.global.filter.DeletedMemberAuthenticationFilter;
 import com.team5.backend.global.filter.JwtAuthenticationFilter;
 import com.team5.backend.global.handler.OAuth2AuthenticationSuccessHandler;
 import com.team5.backend.global.util.JwtUtil;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final DeletedMemberAuthenticationFilter deletedMemberAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -49,6 +51,7 @@ public class SecurityConfig {
                         .redirectionEndpoint(endpoint -> endpoint.baseUri("/login/oauth2/code/*"))
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(deletedMemberAuthenticationFilter, JwtAuthenticationFilter.class)
                 .rememberMe(rememberMe -> rememberMe
                         .rememberMeParameter("remember")    // 클라이언트에서 사용할 파라미터 이름
                         .alwaysRemember(false)             // 체크박스 선택시에만 사용
