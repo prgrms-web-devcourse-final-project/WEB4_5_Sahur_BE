@@ -72,10 +72,9 @@ public class GroupBuyController {
     @GetMapping("/{groupBuyId}")
     public RsData<GroupBuyDetailResDto> getGroupBuyById(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId,
-            @Parameter(description = "Access Token (Bearer 포함)", required = false)
-            @RequestHeader(value = "Authorization", required = false) String token) {
-
-        GroupBuyDetailResDto data = groupBuyService.getGroupBuyById(groupBuyId, token);
+            @AuthenticationPrincipal PrincipalDetails userDetails
+    ) {
+        GroupBuyDetailResDto data = groupBuyService.getGroupBuyById(groupBuyId, userDetails);
         return RsDataUtil.success("공동구매 단건 조회 성공", data);
     }
 

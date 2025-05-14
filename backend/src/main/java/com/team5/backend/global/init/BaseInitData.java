@@ -146,7 +146,8 @@ public class BaseInitData implements CommandLineRunner {
                     createMember("정소민", "somin@example.com", "소민이", new Address("14547", "경기 부천시 부일로 223", "상동프라자 501호"), "user_somin.jpg"),
                     createMember("김나연", "nayeon@example.com", "나연공주", new Address("46241", "부산 금정구 부산대학로 63", "장전동 빌라 203호"), "user_nayeon.jpg"),
                     createMember("임시완", "siwan@example.com", "시완이", new Address("24465", "강원 춘천시 서부대성로 154", "101동 805호"), "user_siwan.jpg"),
-                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg")
+                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg"),
+                    createMember("테스트", "xmxmxm@example.com", "테스트", new Address("34129", "대궁 수성구 들안로 67", "수성타워 1202"), "user_test.jpg")
             );
 
             for (int i = 0; i < 20; i++) {

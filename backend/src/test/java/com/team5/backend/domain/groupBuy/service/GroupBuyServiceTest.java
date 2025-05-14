@@ -163,24 +163,20 @@ class GroupBuyServiceTest {
     @DisplayName("공동구매 단건 조회 - 로그인 상태에서 Dibs 한 경우")
     void getGroupBuyById_shouldReturnDetailDtoWithDibs() {
         // given
-        String token = "Bearer test.jwt.token";
-        String rawToken = "test.jwt.token";
-
         GroupBuy groupBuy = groupBuys.get(0);
         groupBuy.getProduct().updateCategory(testCategory);
 
-        // mocking
+        PrincipalDetails userDetails = new PrincipalDetails(testMember, Map.of());
+
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuy));
         when(reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId())).thenReturn(4.0);
-        when(jwtUtil.isTokenBlacklisted(rawToken)).thenReturn(false);
-        when(jwtUtil.extractEmail(rawToken)).thenReturn("user@example.com");
-        when(jwtUtil.validateAccessTokenInRedis("user@example.com", rawToken)).thenReturn(true);
-        when(jwtUtil.extractMemberId(rawToken)).thenReturn(testMember.getMemberId());
-        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), testMember.getMemberId()))
-                .thenReturn(Optional.ofNullable(mock(com.team5.backend.domain.dibs.entity.Dibs.class)));
+        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(
+                groupBuy.getProduct().getProductId(),
+                testMember.getMemberId())
+        ).thenReturn(Optional.of(mock(com.team5.backend.domain.dibs.entity.Dibs.class)));
 
         // when
-        GroupBuyDetailResDto result = groupBuyService.getGroupBuyById(groupBuy.getGroupBuyId(), token);
+        GroupBuyDetailResDto result = groupBuyService.getGroupBuyById(groupBuy.getGroupBuyId(), userDetails);
 
         // then
         assertNotNull(result);
