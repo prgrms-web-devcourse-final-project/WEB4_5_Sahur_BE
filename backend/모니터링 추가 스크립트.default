@@ -1,6 +1,6 @@
 #CI/CD과정에 도커 컴포즈를 사용하지 않아 수동으로 도커 빌드한 모니터링 스크립트입니다.
 
-# 사전에 actuator 및 프로메테우스 gradle 의존성 추가 필요
+# 사전에 스프링에 actuator 및 프로메테우스 gradle 의존성 추가 필요
 
 # 프로메테우스 yml 조회
 ls -l /home/ubuntu/prometheus/prometheus.yml

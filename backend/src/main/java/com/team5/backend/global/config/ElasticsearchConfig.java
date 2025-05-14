@@ -28,7 +28,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 @Configuration
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
-    @Value("${custom.db.host}")
+    @Value("${custom.elastic.host}")
     private String elasticsearchHost;
 
     @Override
