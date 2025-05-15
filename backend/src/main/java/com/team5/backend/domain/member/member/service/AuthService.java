@@ -6,8 +6,9 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
-import com.team5.backend.global.util.JwtUtil;
 import com.team5.backend.global.security.AuthTokenManager;
+import com.team5.backend.global.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -83,13 +84,22 @@ public class AuthService {
 
     // 로그아웃 메서드
     @Transactional
-    public void logout(String token, HttpServletResponse response) {
+    public void logout(String headerToken, HttpServletRequest request, HttpServletResponse response) {
 
-        String accessToken = token;
+        // 헤더 또는 쿠키에서 액세스 토큰 추출
+        String accessToken = headerToken;
 
-        // Bearer 접두사가 있는 경우 제거
-        if (accessToken.startsWith("Bearer ")) {
+        // 헤더에 액세스 토큰이 없으면 쿠키에서 확인
+        if (accessToken == null || accessToken.isEmpty()) {
+            accessToken = authTokenManager.extractAccessToken(request);
+        } else if (accessToken.startsWith("Bearer ")) {
+            // Bearer 접두사가 있는 경우 제거
             accessToken = accessToken.substring(7);
+        }
+
+        // 액세스 토큰이 여전히 비어있으면 예외 처리
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
         }
 
         // TokenCookieUtil을 사용하여 모든 토큰 무효화 및 쿠키 삭제

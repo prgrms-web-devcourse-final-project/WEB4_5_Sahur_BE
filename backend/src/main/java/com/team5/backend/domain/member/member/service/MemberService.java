@@ -13,6 +13,7 @@ import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.util.ImageUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -156,19 +159,21 @@ public class MemberService {
 
             // 토큰 정보 추출
             String token = authTokenManager.extractToken(authentication);
-
             if (token == null) {
                 throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
             }
 
-            authService.logout(token, response);
+            // Bearer 접두사 추가 (로그아웃 메서드에서 처리하므로)
+            String headerToken = "Bearer " + token;
+
+            // 수정된 로그아웃 메서드 호출 (HttpServletRequest도 필요)
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            authService.logout(headerToken, request, response);
 
         } catch (CustomException e) {
-
             log.info("회원 탈퇴 중 인증 관련 오류 발생: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-
             log.info("회원 탈퇴 중 예상치 못한 오류 발생", e);
             throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }

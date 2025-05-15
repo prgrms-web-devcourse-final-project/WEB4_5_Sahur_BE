@@ -27,9 +27,20 @@ public class AuthTokenManager {
     // 요청에서 액세스 토큰을 추출
     public String extractAccessToken(HttpServletRequest request) {
 
+        // 먼저 Authorization 헤더에서 확인
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+
+        // 헤더에 없으면 쿠키에서 확인
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
 
         return null;

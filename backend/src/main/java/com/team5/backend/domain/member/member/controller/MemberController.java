@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -102,9 +103,10 @@ public class MemberController {
     @Operation(summary = "로그아웃", description = "현재 로그인된 계정을 로그아웃합니다.")
     @PostMapping("/auth/logout")
     public RsData<LogoutResDto> logout(
-            @Parameter(description = "Access Token (Bearer 포함)") @RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
+            @Parameter(description = "Access Token (Bearer 포함, 선택적)")
+            @RequestHeader(value = "Authorization", required = false) String headerToken, HttpServletRequest request, HttpServletResponse response) {
 
-        authService.logout(token, response);
+        authService.logout(headerToken, request, response);
         return RsDataUtil.success("로그아웃에 성공했습니다.", new LogoutResDto());
     }
 
