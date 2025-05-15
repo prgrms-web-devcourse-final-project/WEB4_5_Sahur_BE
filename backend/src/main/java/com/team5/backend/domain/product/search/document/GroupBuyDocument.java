@@ -1,11 +1,13 @@
 package com.team5.backend.domain.product.search.document;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.util.List;
 
-@Document(indexName = "groupbuys")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@org.springframework.data.elasticsearch.annotations.Document(indexName = "groupbuy")
 @Getter
 @Setter
 @NoArgsConstructor
