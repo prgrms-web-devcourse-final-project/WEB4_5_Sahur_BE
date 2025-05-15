@@ -170,13 +170,13 @@ public class BaseInitData implements CommandLineRunner {
                 Category category = categories.get(i % categories.size());
                 String title = productTitles.get(i % productTitles.size());
                 String description = productDescriptions.get(i % productDescriptions.size());
-                String etc = "옵션: 다양함 / 이미지: https://img.example.com/prod_" + i + ".jpg";
+                String etc = "옵션: 다양함 / 이미지: https://i.pravatar.cc/150?img=" + i + ".jpg";
 
                 productRequestRepository.save(ProductRequest.builder()
                         .member(requester)
                         .category(category)
                         .title(title + " 요청")
-                        .productUrl("https://example.com/item" + i)
+                        .productUrl("https://i.pravatar.cc/150?img=" + i)
                         .etc(etc)
                         .status(ProductRequestStatus.APPROVED)
                         .createdAt(LocalDateTime.now().minusDays(i % 7))
@@ -186,7 +186,7 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl(List.of("https://img.example.com/prod_" + i + ".jpg"))
+                        .imageUrl(List.of("https://i.pravatar.cc/150?img=" + i + ".jpg"))
                         .price((int) (100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
