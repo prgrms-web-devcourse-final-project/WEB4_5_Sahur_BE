@@ -114,7 +114,7 @@ class MemberControllerTest {
     @Test
     @DisplayName("회원 가입")
     void signup() throws Exception {
-        
+
         // Given
         SignupReqDto signupReqDto = SignupReqDto.builder()
                 .email(TEST_EMAIL)
@@ -154,7 +154,8 @@ class MemberControllerTest {
                         .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("회원가입에 성공했습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.memberId").value(1L))
                 .andExpect(jsonPath("$.data.message").value("회원가입이 성공적으로 완료되었습니다."));
     }
@@ -164,7 +165,7 @@ class MemberControllerTest {
     void login() throws Exception {
 
         // Given
-        LoginReqDto loginReqDto = new LoginReqDto(TEST_EMAIL, TEST_PASSWORD);
+        LoginReqDto loginReqDto = new LoginReqDto(TEST_EMAIL, TEST_PASSWORD, false);
         LoginResDto loginResDto = new LoginResDto(accessToken, "refresh-token", 1L);
 
         when(authService.login(any(LoginReqDto.class), any())).thenReturn(loginResDto);
@@ -175,7 +176,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(loginReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("로그인에 성공했습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.accessToken").value(accessToken))
                 .andExpect(jsonPath("$.data.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.data.memberId").value(1L));
@@ -193,7 +195,8 @@ class MemberControllerTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("로그아웃에 성공했습니다."));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"));
     }
 
     @Test
@@ -209,7 +212,8 @@ class MemberControllerTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("회원 정보를 성공적으로 조회했습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.memberId").value(member.getMemberId()))
                 .andExpect(jsonPath("$.data.email").value(member.getEmail()))
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()));
@@ -241,7 +245,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(patchMemberReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("회원 정보가 수정되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.memberId").value(member.getMemberId()));
     }
 
@@ -257,9 +262,26 @@ class MemberControllerTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200-0"))
-                .andExpect(jsonPath("$.msg").value("로그아웃 및 회원 탈퇴가 완료되었습니다."))
-                .andExpect(jsonPath("$.data").exists());
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"));
+    }
+
+    @Test
+    @DisplayName("회원 복구")
+    void restoreMember() throws Exception {
+
+        // Given
+        MemberRestoreResDto restoreResDto = new MemberRestoreResDto(1L, "회원이 성공적으로 복구되었습니다.");
+        when(memberService.restoreMember(anyLong())).thenReturn(restoreResDto);
+
+        // When, Then
+        mockMvc.perform(post("/api/v1/members/restore")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
+                .andExpect(jsonPath("$.data.memberId").value(1L));
     }
 
     @Test
@@ -279,7 +301,8 @@ class MemberControllerTest {
                         .cookie(cookie))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("토큰이 재발급되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.accessToken").value("new-access-token"))
                 .andExpect(jsonPath("$.data.refreshToken").value("new-refresh-token"));
     }
@@ -303,7 +326,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(emailSendReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("인증번호가 이메일로 전송되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.success").value(true));
     }
 
@@ -326,7 +350,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(verificationReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("인증이 완료되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.success").value(true));
     }
 
@@ -349,7 +374,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(emailSendReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("비밀번호 재설정 인증번호가 이메일로 전송되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.success").value(true));
     }
 
@@ -372,7 +398,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(verificationReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("인증이 완료되었습니다. 새 비밀번호를 설정하세요."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.success").value(true));
     }
 
@@ -395,7 +422,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(resetReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("비밀번호가 성공적으로 재설정되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.success").value(true));
     }
 
@@ -417,7 +445,8 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(checkReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("사용 가능한 닉네임입니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.exists").value(false));
     }
 
@@ -439,6 +468,7 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(checkReqDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("이미 사용 중인 닉네임입니다."));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.msg").value("SUCCESS"));
     }
 }
