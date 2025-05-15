@@ -13,7 +13,7 @@ public class GroupBuyReindexService {
     private final GroupBuyRepository groupBuyRepository;
     private final GroupBuySearchService groupBuySearchService;
 
-    @PostConstruct
+    
     @Transactional(readOnly = true)
     public void reindexAll() {
         groupBuyRepository.findAll()
