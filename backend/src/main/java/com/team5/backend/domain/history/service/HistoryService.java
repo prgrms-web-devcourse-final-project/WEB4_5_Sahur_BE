@@ -14,6 +14,7 @@ import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.HistoryErrorCode;
+import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -38,19 +39,8 @@ public class HistoryService {
      * memberId는 토큰에서 추출
      */
     @Transactional
-    public HistoryResDto createHistory(HistoryCreateReqDto request, String token) {
-        String rawToken = token.replace("Bearer ", "");
-
-        if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new CustomException(HistoryErrorCode.TOKEN_BLACKLISTED);
-        }
-
-        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new CustomException(HistoryErrorCode.TOKEN_INVALID);
-        }
-
-        Long memberId = jwtUtil.extractMemberId(rawToken);
-
+    public HistoryResDto createHistory(HistoryCreateReqDto request, PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(HistoryErrorCode.MEMBER_NOT_FOUND));
 
@@ -67,9 +57,9 @@ public class HistoryService {
                 .writable(request.getWritable())
                 .build();
 
-        History saved = historyRepository.save(history);
-        return HistoryResDto.fromEntity(saved);
+        return HistoryResDto.fromEntity(historyRepository.save(history));
     }
+
 
     /**
      * 전체 구매 이력 조회 (최신순)
@@ -119,19 +109,11 @@ public class HistoryService {
     }
 
     @Transactional(readOnly = true)
-    public boolean checkReviewWritable(Long ProductId, String token) {
-        String rawToken = token.replace("Bearer ", "");
+    public boolean checkReviewWritable(Long productId, PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
 
-        if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new CustomException(HistoryErrorCode.TOKEN_BLACKLISTED);
-        }
-
-        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new CustomException(HistoryErrorCode.TOKEN_INVALID);
-        }
-
-        Long memberId = jwtUtil.extractMemberId(rawToken);
-        return historyRepository.findByMember_MemberIdAndProduct_ProductId(memberId, ProductId).getWritable();
-
+        return historyRepository.findByMember_MemberIdAndProduct_ProductId(memberId, productId)
+                .getWritable();
     }
+
 }

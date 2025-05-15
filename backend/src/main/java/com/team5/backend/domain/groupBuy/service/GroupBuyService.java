@@ -12,6 +12,7 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.GroupBuyErrorCode;
+import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -88,25 +89,18 @@ public class GroupBuyService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GroupBuyResDto> getGroupBuysByToken(String token, Pageable pageable) {
-        String rawToken = token.replace("Bearer ", "");
+    public Page<GroupBuyResDto> getGroupBuysByMember(PrincipalDetails userDetails, Pageable pageable) {
+        Long memberId = userDetails.getMember().getMemberId();
 
-        if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new CustomException(GroupBuyErrorCode.TOKEN_BLACKLISTED);
-        }
-
-        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new CustomException(GroupBuyErrorCode.TOKEN_INVALID);
-        }
-
-        Long memberId = jwtUtil.extractMemberId(rawToken);
-
-        return historyRepository.findDistinctGroupBuysByMemberId(memberId, PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt")))
-                .map(this::toDto);
+        return historyRepository.findDistinctGroupBuysByMemberId(
+                memberId,
+                PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"))
+        ).map(this::toDto);
     }
 
+
     @Transactional(readOnly = true)
-    public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, String token) {
+    public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, PrincipalDetails userDetails) {
         GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
 
@@ -118,19 +112,11 @@ public class GroupBuyService {
 
         boolean isDibs = false;
 
-        if (token != null && token.startsWith("Bearer ")) {
-            String rawToken = token.replace("Bearer ", "");
-
-            if (jwtUtil.isTokenBlacklisted(rawToken)) {
-                throw new CustomException(GroupBuyErrorCode.TOKEN_BLACKLISTED);
-            }
-
-            if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-                throw new CustomException(GroupBuyErrorCode.TOKEN_INVALID);
-            }
-
-            Long memberId = jwtUtil.extractMemberId(rawToken);
-            isDibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), memberId).isPresent();
+        if (userDetails != null) {
+            Long memberId = userDetails.getMember().getMemberId();
+            isDibs = dibsRepository
+                    .findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), memberId)
+                    .isPresent();
         }
 
         return GroupBuyDetailResDto.fromEntity(groupBuy, isTodayDeadline, isDibs, averageRate);

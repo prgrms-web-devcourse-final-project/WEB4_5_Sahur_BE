@@ -8,7 +8,6 @@ import lombok.*;
 @Entity
 @Table(name = "dibs")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

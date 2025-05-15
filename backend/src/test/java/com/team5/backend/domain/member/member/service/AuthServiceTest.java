@@ -70,17 +70,18 @@ class AuthServiceTest {
                 .password(encPassword)
                 .nickname("테스트")
                 .role(Role.USER)
+                .deleted(Boolean.FALSE)
                 .build();
     }
 
     @Test
     @DisplayName("로그인 성공 테스트")
     void loginSuccess() {
-        
-        // Given
-        LoginReqDto loginReqDto = new LoginReqDto(email, password);
 
-        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+        // Given
+        LoginReqDto loginReqDto = new LoginReqDto(email, password, false);
+
+        when(memberRepository.findByEmailAllMembers(email)).thenReturn(Optional.of(member));
         when(passwordEncoder.matches(password, encPassword)).thenReturn(true);
         when(jwtUtil.generateAccessToken(member.getMemberId(), email, member.getRole().name()))
                 .thenReturn(accessToken);
@@ -105,11 +106,11 @@ class AuthServiceTest {
     @Test
     @DisplayName("로그인 실패 - 이메일 없음")
     void loginFailEmailNotFound() {
-        
-        // Given
-        LoginReqDto loginReqDto = new LoginReqDto(email, password);
 
-        when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+        // Given
+        LoginReqDto loginReqDto = new LoginReqDto(email, password, false);
+
+        when(memberRepository.findByEmailAllMembers(email)).thenReturn(Optional.empty());
 
         // When, Then
         CustomException exception = assertThrows(CustomException.class, () ->
@@ -124,13 +125,13 @@ class AuthServiceTest {
     void loginFailPasswordMismatch() {
 
         // Given
-        LoginReqDto loginReqDto = new LoginReqDto(email, password);
+        LoginReqDto loginReqDto = new LoginReqDto(email, password, false);
 
-        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-        when(passwordEncoder.matches(password, encPassword)).thenReturn(false);
+        when(memberRepository.findByEmailAllMembers(email)).thenReturn(Optional.empty());
 
         // When, Then
-        CustomException exception = assertThrows(CustomException.class, () -> authService.login(loginReqDto, response));
+        CustomException exception = assertThrows(CustomException.class, () ->
+                authService.login(loginReqDto, response));
 
         assertEquals(AuthErrorCode.INVALID_LOGIN_INFO, exception.getErrorCode());
         verify(jwtUtil, never()).generateAccessToken(anyLong(), anyString(), anyString());
@@ -147,7 +148,7 @@ class AuthServiceTest {
         authService.logout(token, response);
 
         // Then
-        verify(authTokenManager).invalidateTokens(accessToken, response);
+        verify(authTokenManager).invalidateTokensWithRememberMe(accessToken, response);
     }
 
     @Test

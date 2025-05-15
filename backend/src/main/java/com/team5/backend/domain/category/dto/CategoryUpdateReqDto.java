@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CategoryUpdateReqDto {
-    private CategoryType category;
+    private CategoryType categoryType;
     private KeywordType keyword;
     private Integer uid;
 }

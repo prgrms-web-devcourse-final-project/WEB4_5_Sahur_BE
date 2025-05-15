@@ -1,12 +1,5 @@
 package com.team5.backend.domain.product.service;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.product.dto.ProductCreateReqDto;
@@ -23,8 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -64,13 +55,7 @@ public class ProductService {
      */
     @Transactional(readOnly = true)
     public Page<Product> getAllProducts(String category, String keyword, Pageable pageable) {
-        if (category != null) {
-            return productRepository.findByCategory_Category(category, pageable);
-        } else if (keyword != null) {
-            return productRepository.findByCategory_Keyword(keyword, pageable);
-        } else {
-            return productRepository.findAll(pageable);
-        }
+        return productRepository.findAllByFilter(category, keyword, pageable);
     }
 
     /**
@@ -103,12 +88,11 @@ public class ProductService {
                 request.getPrice()
         );
 
-        Product updatedProduct = productRepository.save(product);
         if (isUpdatedForSearch) {
-            productSearchService.index(updatedProduct);
+            productSearchService.index(product);
         }
 
-        return ProductResDto.fromEntity(updatedProduct);
+        return ProductResDto.fromEntity(product);
     }
 
     /**

@@ -7,6 +7,8 @@ import Layout from "../layout/Layout";
 import PasswordReset from "../pages/login/PasswordReset";
 import GroupBuy from "../pages/products/GroupBuy";
 import Payment from "../pages/payment/Payment";
+import PaymentSuccess from "../pages/payment/PaymentSuccess";
+import PaymentFail from "../pages/payment/PaymentFail";
 
 const BaseRoutes = () => {
     return (
@@ -19,6 +21,8 @@ const BaseRoutes = () => {
                 <Route path="main" element={<Main />} />
                 <Route path="groupBuy/:groupBuyId" element={<GroupBuy />} />
                 <Route path="groupBuy/:groupBuyId/payment" element={<Payment />} />
+                <Route path="payment/success" element={<PaymentSuccess />} />
+                <Route path="payment/fail" element={<PaymentFail />} />
             </Route>
             {/* 에러페이지 */}
             <Route path={"*"} element={<Error404 />} />

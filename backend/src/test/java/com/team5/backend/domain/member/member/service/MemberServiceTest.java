@@ -9,6 +9,7 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.util.ImageUtil;
@@ -330,7 +331,9 @@ class MemberServiceTest {
         verify(memberRepository).findById(memberId);
         verify(authTokenManager).extractToken(authentication);
         verify(authService).logout(anyString(), any(HttpServletResponse.class));
-        verify(memberRepository).delete(member);
+
+        // delete() 대신 save() 메서드 호출
+        verify(memberRepository).save(member);
     }
 
     @Test
@@ -391,18 +394,16 @@ class MemberServiceTest {
         PasswordResetReqDto passwordResetReqDto = new PasswordResetReqDto("test@example.com", "newPassword123");
         given(mailService.isPasswordResetVerified(passwordResetReqDto.getEmail())).willReturn(false);
 
-        // When
-        PasswordResetResDto result = memberService.resetPassword(passwordResetReqDto);
+        // When, Then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            memberService.resetPassword(passwordResetReqDto);
+        });
 
-        // Then
-        assertNotNull(result);
-        assertFalse(result.isSuccess());
-        assertEquals("이메일 인증이 완료되지 않았거나 인증 시간이 만료되었습니다.", result.getMessage());
+        assertEquals(CommonErrorCode.VALIDATION_ERROR, exception.getErrorCode());
 
         // Verify
         verify(mailService).isPasswordResetVerified(passwordResetReqDto.getEmail());
         verify(memberRepository, never()).findByEmail(anyString());
-        verify(memberRepository, never()).save(any(Member.class));
     }
 
     @Test
@@ -413,12 +414,13 @@ class MemberServiceTest {
         String nickname = "existingNickname";
         given(memberRepository.existsByNickname(nickname)).willReturn(true);
 
-        // When
-        NicknameCheckResDto result = memberService.checkNicknameDuplicate(nickname);
+        // When, Then
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            memberService.checkNicknameDuplicate(nickname);
+        });
 
-        // Then
-        assertNotNull(result);
-        assertTrue(result.isExists());
+        // 예외 코드 확인
+        assertEquals(MemberErrorCode.NICKNAME_ALREADY_USED, exception.getErrorCode());
 
         // Verify
         verify(memberRepository).existsByNickname(nickname);

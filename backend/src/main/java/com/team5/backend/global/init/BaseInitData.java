@@ -1,15 +1,5 @@
 package com.team5.backend.global.init;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
@@ -43,8 +33,16 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.entity.Address;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -117,14 +115,18 @@ public class BaseInitData implements CommandLineRunner {
             List<Category> categories = new ArrayList<>();
             int uid = 1;
             for (CategoryType type : CategoryType.values()) {
-                if (type != CategoryType.ALL) {
-                    categories.add(categoryRepository.save(Category.builder()
-                            .category(type)
-                            .keyword(KeywordType.DEFAULT)
-                            .uid(uid++)
-                            .build()));
+                if (type == CategoryType.ALL) continue;
+                for (KeywordType keyword : KeywordType.ofParent(type)) {
+                    categories.add(categoryRepository.save(
+                            Category.builder()
+                                    .categoryType(type)
+                                    .keyword(keyword)
+                                    .uid(uid++)
+                                    .build()
+                    ));
                 }
             }
+
 
             List<Member> members = List.of(
                     createMember("이수민", "alice@example.com", "수민짱", new Address("04524", "서울 마포구 월드컵북로 396", "102동 1101호"), "user_alice.jpg"),
@@ -146,8 +148,22 @@ public class BaseInitData implements CommandLineRunner {
                     createMember("정소민", "somin@example.com", "소민이", new Address("14547", "경기 부천시 부일로 223", "상동프라자 501호"), "user_somin.jpg"),
                     createMember("김나연", "nayeon@example.com", "나연공주", new Address("46241", "부산 금정구 부산대학로 63", "장전동 빌라 203호"), "user_nayeon.jpg"),
                     createMember("임시완", "siwan@example.com", "시완이", new Address("24465", "강원 춘천시 서부대성로 154", "101동 805호"), "user_siwan.jpg"),
-                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg")
+                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg"),
+                    createMember("테스트", "xmxmxm@example.com", "테스트", new Address("34129", "대궁 수성구 들안로 67", "수성타워 1202"), "user_test.jpg")
             );
+
+            Member admin = memberRepository.save(Member.builder()
+                    .name("관리자")
+                    .email("admin@example.com")
+                    .password(passwordEncoder.encode("admin123!")) // 원하는 강력한 비밀번호로 설정
+                    .nickname("관리자계정")
+                    .address(new Address("00000", "서울 종로구 청와대로 1", "청사 101호"))
+                    .role(Role.ADMIN) // ✅ 핵심: 관리자 권한 부여
+                    .deleted(false)
+                    .emailVerified(true)
+                    .imageUrl("http://example.com/admin.jpg")
+                    .build());
+
 
             for (int i = 0; i < 20; i++) {
                 Member requester = members.get(i % members.size());
@@ -239,6 +255,7 @@ public class BaseInitData implements CommandLineRunner {
                 .nickname(nickname)
                 .address(address)
                 .role(Role.USER)
+                .deleted(false)
                 .emailVerified(true)
                 .imageUrl("http://example.com/" + imageFile)
                 .build());

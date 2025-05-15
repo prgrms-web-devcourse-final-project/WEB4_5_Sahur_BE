@@ -46,13 +46,6 @@ const Header = () => {
             });
         }
     });
-
-    const menuItems = [
-        { menuId: 1, menuUrl: "/main", menuName: "홈"},
-        { menuId: 2, menuUrl: "/popular", menuName: "인기"},
-        { menuId: 3, menuUrl: "/latest", menuName: "신규"},
-        { menuId: 4, menuUrl: "/closing", menuName: "마감임박"},
-    ];
     
     const categoryIcon = [
         {name: "전체", icon: icoAll },
@@ -81,7 +74,7 @@ const Header = () => {
                 <HeaderSearchBox />
                 <ShoppingKeyword />
             </div>
-            <NavigationMenu menuItems={menuItems} />
+            <NavigationMenu />
             <Stack direction={"horizontal"} className={"mt-2 justify-content-center"}>
                 {categoryIcon.map((item) => {
                     return  <div key={item.name}

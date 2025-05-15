@@ -14,6 +14,7 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.repository.ReviewRepository;
+import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,8 +72,8 @@ class GroupBuyServiceTest {
 
         testCategory = Category.builder()
                 .categoryId(1L)
-                .category(null)
-                .keyword(KeywordType.DEFAULT)
+                .categoryType(null)
+                .keyword(KeywordType.MAKEUP)
                 .uid(101)
                 .build();
 
@@ -161,24 +163,20 @@ class GroupBuyServiceTest {
     @DisplayName("공동구매 단건 조회 - 로그인 상태에서 Dibs 한 경우")
     void getGroupBuyById_shouldReturnDetailDtoWithDibs() {
         // given
-        String token = "Bearer test.jwt.token";
-        String rawToken = "test.jwt.token";
-
         GroupBuy groupBuy = groupBuys.get(0);
         groupBuy.getProduct().updateCategory(testCategory);
 
-        // mocking
+        PrincipalDetails userDetails = new PrincipalDetails(testMember, Map.of());
+
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(groupBuy));
         when(reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId())).thenReturn(4.0);
-        when(jwtUtil.isTokenBlacklisted(rawToken)).thenReturn(false);
-        when(jwtUtil.extractEmail(rawToken)).thenReturn("user@example.com");
-        when(jwtUtil.validateAccessTokenInRedis("user@example.com", rawToken)).thenReturn(true);
-        when(jwtUtil.extractMemberId(rawToken)).thenReturn(testMember.getMemberId());
-        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), testMember.getMemberId()))
-                .thenReturn(Optional.ofNullable(mock(com.team5.backend.domain.dibs.entity.Dibs.class)));
+        when(dibsRepository.findByProduct_ProductIdAndMember_MemberId(
+                groupBuy.getProduct().getProductId(),
+                testMember.getMemberId())
+        ).thenReturn(Optional.of(mock(com.team5.backend.domain.dibs.entity.Dibs.class)));
 
         // when
-        GroupBuyDetailResDto result = groupBuyService.getGroupBuyById(groupBuy.getGroupBuyId(), token);
+        GroupBuyDetailResDto result = groupBuyService.getGroupBuyById(groupBuy.getGroupBuyId(), userDetails);
 
         // then
         assertNotNull(result);
@@ -212,29 +210,23 @@ class GroupBuyServiceTest {
     }
 
     @Test
-    @DisplayName("토큰 기반 공동구매 조회 - 최신순 정렬 포함")
-    void getGroupBuysByToken_shouldReturnPagedResult() {
+    @DisplayName("PrincipalDetails 기반 공동구매 조회 - 최신순 정렬 포함")
+    void getGroupBuysByMember_shouldReturnPagedResult() {
         // given
-        String token = "Bearer fake.jwt.token";
-        String extractedToken = "fake.jwt.token";
-
+        PrincipalDetails principalDetails = new PrincipalDetails(testMember, Map.of());
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<GroupBuy> mockPage = new PageImpl<>(groupBuys);
 
-        // when
-        when(jwtUtil.isTokenBlacklisted(extractedToken)).thenReturn(false);
-        when(jwtUtil.extractEmail(extractedToken)).thenReturn("user@example.com");
-        when(jwtUtil.validateAccessTokenInRedis("user@example.com", extractedToken)).thenReturn(true);
-        when(jwtUtil.extractMemberId(extractedToken)).thenReturn(1L);
         when(historyRepository.findDistinctGroupBuysByMemberId(1L, pageable)).thenReturn(mockPage);
 
-        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByToken(token, pageable);
+        // when
+        Page<GroupBuyResDto> result = groupBuyService.getGroupBuysByMember(principalDetails, pageable);
 
         // then
         assertEquals(2, result.getTotalElements());
-        verify(jwtUtil).extractMemberId(extractedToken);
         verify(historyRepository).findDistinctGroupBuysByMemberId(1L, pageable);
     }
+
 
     @Test
     @DisplayName("공동구매 상태 일괄 업데이트 - 마감일 지난 경우 CLOSED 설정")

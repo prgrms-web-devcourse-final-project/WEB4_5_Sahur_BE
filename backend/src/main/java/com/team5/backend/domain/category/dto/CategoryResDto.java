@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryResDto {
     private Long categoryId;
-    private CategoryType category;
+    private CategoryType categoryType;
     private KeywordType keyword;
     private Integer uid;
 
     public static CategoryResDto fromEntity(Category category) {
         return CategoryResDto.builder()
                 .categoryId(category.getCategoryId())
-                .category(category.getCategory())
+                .categoryType(category.getCategoryType())
                 .keyword(category.getKeyword())
                 .uid(category.getUid())
                 .build();
