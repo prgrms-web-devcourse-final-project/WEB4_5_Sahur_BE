@@ -195,6 +195,27 @@ systemctl start docker
 # 도커 네트워크 생성
 docker network create common
 
+# ElasticSearch 설치
+docker run -d \
+  --name elastic \
+  --restart unless-stopped \
+  --network common \
+  -p 9200:9200 \
+  -e discovery.type=single-node \
+  -e xpack.security.enabled=false \
+  -e xpack.monitoring.collection.enabled=true \
+  -v es-data:/usr/share/elasticsearch/data \
+  docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+
+# Kibana 설치
+docker run -d \
+  --name kibana \
+  --restart unless-stopped \
+  --network common \
+  -p 5601:5601 \
+  -e ELASTICSEARCH_HOSTS=http://elastic:9200 \
+  docker.elastic.co/kibana/kibana:8.12.0
+
 # mysql 설치
 docker run -d \
   --name mysql_1 \
@@ -393,7 +414,7 @@ resource "aws_instance" "team05-db" {
   # 사용할 AMI ID
   ami = data.aws_ami.latest_amazon_linux.id
   # EC2 인스턴스 유형
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
   # 사용할 서브넷 ID
   subnet_id = aws_subnet.team05-subnet_db.id
   # 적용할 보안 그룹 ID
@@ -412,7 +433,7 @@ resource "aws_instance" "team05-db" {
   # 루트 볼륨 설정
   root_block_device {
     volume_type = "gp3"
-    volume_size = 24 # 볼륨 크기를 12GB로 설정
+    volume_size = 30 # 볼륨 크기를 30GB로 설정
   }
 
   user_data = <<-EOF
