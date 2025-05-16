@@ -54,7 +54,7 @@ public class GroupBuySearchService {
     public List<GroupBuyResDto> search(String keyword) {
         try {
             SearchRequest request = SearchRequest.of(s -> s
-                    .index("groupbuys")
+                    .index("groupbuy")
                     .query(q -> q
                             .matchPhrasePrefix(m -> m
                                     .field("title")
