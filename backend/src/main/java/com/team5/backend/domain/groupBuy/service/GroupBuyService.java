@@ -201,6 +201,15 @@ public class GroupBuyService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Page<GroupBuyResDto> getOngoingGroupBuysByCategoryId(Long categoryId, Pageable pageable, GroupBuySortField sortField) {
+        Pageable sortedPageable = createSortedPageable(pageable, sortField);
+        Page<GroupBuy> groupBuys = groupBuyRepository.findOngoingByCategoryId(categoryId, sortedPageable);
+        return groupBuys.map(this::toDto);
+    }
+
+
+
 
     private GroupBuyResDto toDto(GroupBuy groupBuy) {
         boolean isDeadlineToday = groupBuy.getDeadline() != null &&
