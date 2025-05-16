@@ -1,6 +1,5 @@
 package com.team5.backend.domain.payment.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,13 +49,10 @@ public class PaymentService {
     }
 
     public Page<PaymentResDto> getPaymentsByKeysAsync(Page<String> paymentKeys) {
-        List<String> failedKeys = new ArrayList<>();
-
         List<CompletableFuture<PaymentResDto>> futures = paymentKeys.stream()
                 .map(key -> tossService.getPaymentInfoAsync(key)
                         .exceptionally(e -> {
                             log.error("[비동기 Toss 결제 조회 실패] paymentKey: {}", key, e);
-                            failedKeys.add(key);
                             return null;
                         }))
                 .toList();
