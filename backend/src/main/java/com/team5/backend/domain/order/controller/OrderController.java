@@ -27,7 +27,6 @@ import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.dto.OrderUpdateResDto;
 import com.team5.backend.domain.order.entity.FilterStatus;
 import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.service.OrderService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
@@ -64,7 +63,7 @@ public class OrderController {
     @GetMapping
     public RsData<Page<OrderListResDto>> getOrders(
             @RequestParam(required = false) Long orderId,
-            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(name = "status", required = false) String status,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<OrderListResDto> dtoPage = orderService.getOrders(orderId, status, pageable);
@@ -75,7 +74,7 @@ public class OrderController {
     @GetMapping("/me")
     public RsData<Page<OrderListResDto>> getMemberOrders(
             @AuthenticationPrincipal PrincipalDetails userDetails,
-            @RequestParam(required = false) FilterStatus status,
+            @RequestParam(name = "status", required = false) FilterStatus status,
             @PageableDefault(size = 5) Pageable pageable
     ) {
         Long memberId = userDetails.getMember().getMemberId();

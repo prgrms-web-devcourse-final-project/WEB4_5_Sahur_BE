@@ -67,15 +67,32 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderListResDto> getOrders(Long orderId, OrderStatus status, Pageable pageable) {
+    public Page<OrderListResDto> getOrders(Long orderId, String status, Pageable pageable) {
         Page<Order> orders = null;
+
+        // 주문 ID가 있는 경우 -> 단건 조회
         if (orderId != null) {
             orders = orderRepository.findByOrderId(orderId, pageable);
-        } else if (status != null) {
-            orders = orderRepository.findByStatus(status, pageable);
+            return orders.map(OrderListResDto::from);
+        }
+
+        // 주문 상태별 필터링
+        if (status != null) {
+            switch (status.toUpperCase()) {
+                case "BEFOREPAID" -> orders = orderRepository.findByStatus(OrderStatus.BEFOREPAID, pageable);
+                case "PAID" -> orders = orderRepository.findByStatusAndDelivery_Status(
+                        OrderStatus.PAID, DeliveryStatus.PREPARING, pageable
+                );
+                case "CANCELED" -> orders = orderRepository.findByStatus(OrderStatus.CANCELED, pageable);
+                case "INDELIVERY" ->
+                        orders = orderRepository.findByDelivery_Status(DeliveryStatus.INDELIVERY, pageable);
+                case "COMPLETED" -> orders = orderRepository.findByDelivery_Status(DeliveryStatus.COMPLETED, pageable);
+                default -> throw new IllegalArgumentException("지원하지 않는 상태입니다: " + status);
+            }
         } else {
             orders = orderRepository.findAll(pageable);
         }
+
         return orders.map(OrderListResDto::from);
     }
 
