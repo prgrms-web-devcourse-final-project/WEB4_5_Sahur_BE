@@ -81,10 +81,10 @@ public class MemberController {
     // 회원 복구
     @Operation(summary = "회원 복구", description = "탈퇴한 회원을 복구합니다. 탈퇴한 회원이 로그인하면 발급되는 임시 토큰을 통해서만 호출할 수 있습니다.")
     @PostMapping("/members/restore")
-    public RsData<MemberRestoreResDto> restoreMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
+    public RsData<MemberRestoreResDto> restoreMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
 
         Long memberId = userDetails.getMember().getMemberId();
-        MemberRestoreResDto memberRestoreResDto = memberService.restoreMember(memberId);
+        MemberRestoreResDto memberRestoreResDto = memberService.restoreMember(memberId, response);
 
         return RsDataUtil.success("회원 복구가 완료되었습니다.", memberRestoreResDto);
     }

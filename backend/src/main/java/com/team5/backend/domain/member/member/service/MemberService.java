@@ -13,6 +13,7 @@ import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.util.ImageUtil;
+import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class MemberService {
     private final AuthService authService;
     private final ImageUtil imageUtil;
     private final AuthTokenManager authTokenManager;
+    private final JwtUtil jwtUtil;
 
     private final HistoryRepository historyRepository;
 
@@ -233,7 +235,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberRestoreResDto restoreMember(Long memberId) {
+    public MemberRestoreResDto restoreMember(Long memberId, HttpServletResponse response) {
 
         // 삭제된 회원을 포함하여 조회
         Member member = memberRepository.findByIdAllMembers(memberId)
@@ -250,9 +252,19 @@ public class MemberService {
 
         log.info("회원 ID {} 복구 처리 완료", member.getMemberId());
 
+        // 새로운 액세스 토큰과 리프레시 토큰 발급
+        String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getEmail(), member.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getEmail(), member.getRole().name());
+
+        // 토큰을 쿠키에 저장
+        authTokenManager.addCookie(response, "accessToken", accessToken, (int) (jwtUtil.getAccessTokenExpiration() / 1000));
+        authTokenManager.addCookie(response, "refreshToken", refreshToken, (int) (jwtUtil.getRefreshTokenExpiration() / 1000));
+
         return MemberRestoreResDto.builder()
                 .memberId(member.getMemberId())
                 .message("회원 복구가 성공적으로 완료되었습니다.")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
