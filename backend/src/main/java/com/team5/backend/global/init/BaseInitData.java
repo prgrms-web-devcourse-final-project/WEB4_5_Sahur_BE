@@ -115,14 +115,18 @@ public class BaseInitData implements CommandLineRunner {
             List<Category> categories = new ArrayList<>();
             int uid = 1;
             for (CategoryType type : CategoryType.values()) {
-                if (type != CategoryType.ALL) {
-                    categories.add(categoryRepository.save(Category.builder()
-                            .categoryType(type)
-                            .keyword(KeywordType.DEFAULT)
-                            .uid(uid++)
-                            .build()));
+                if (type == CategoryType.ALL) continue;
+                for (KeywordType keyword : KeywordType.ofParent(type)) {
+                    categories.add(categoryRepository.save(
+                            Category.builder()
+                                    .categoryType(type)
+                                    .keyword(keyword)
+                                    .uid(uid++)
+                                    .build()
+                    ));
                 }
             }
+
 
             List<Member> members = List.of(
                     createMember("이수민", "alice@example.com", "수민짱", new Address("04524", "서울 마포구 월드컵북로 396", "102동 1101호"), "user_alice.jpg"),

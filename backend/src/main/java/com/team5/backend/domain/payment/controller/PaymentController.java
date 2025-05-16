@@ -1,5 +1,17 @@
 package com.team5.backend.domain.payment.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.payment.dto.CancelReqDto;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
@@ -9,16 +21,15 @@ import com.team5.backend.domain.payment.service.TossService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.security.PrincipalDetails;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
 
 @Tag(name = "Payment", description = "결제 관련 API")
 @RestController
@@ -28,7 +39,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final TossService tossService;
-	private final AuthService authService;
+    private final AuthService authService;
 
     @Operation(summary = "결제 승인", description = "해당 주문에 대한 결제 승인 및 paymentKey 저장")
     @PostMapping("/confirm")
@@ -62,10 +73,10 @@ public class PaymentController {
     @Operation(summary = "내 결제 조회", description = "로그인한 회원의 결제 내역 전체 조회")
     @GetMapping("/me")
     public RsData<Page<PaymentResDto>> getPaymentsByMember(
-			@RequestHeader(value = "Authorization", required = false) String token,
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @PageableDefault(size = 5, sort = "paymentId", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-		Long memberId = authService.getLoggedInMember(token).getMemberId();
+        Long memberId = userDetails.getMember().getMemberId();
 
         Page<String> paymentKeys = paymentService.getPaymentKeysByMember(memberId, pageable);
         Page<PaymentResDto> result = paymentService.getPaymentsByKeysAsync(paymentKeys);

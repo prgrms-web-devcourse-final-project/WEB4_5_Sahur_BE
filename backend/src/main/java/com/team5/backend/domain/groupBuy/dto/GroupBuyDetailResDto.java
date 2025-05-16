@@ -14,6 +14,7 @@ public class GroupBuyDetailResDto {
     private Long groupBuyId;
     private ProductDto product;
     private Double averageRate;
+    private Integer reviewCount; // ✅ 추가
     private Integer targetParticipants;
     private Integer currentParticipantCount;
     private Integer round;
@@ -22,11 +23,12 @@ public class GroupBuyDetailResDto {
     private boolean isDeadlineToday;
     private boolean isDibs;
 
-    public static GroupBuyDetailResDto fromEntity(GroupBuy groupBuy, boolean isTodayDeadline, boolean isDibs, Double averageRate) {
+    public static GroupBuyDetailResDto fromEntity(GroupBuy groupBuy, boolean isTodayDeadline, boolean isDibs, Double averageRate, Integer reviewCount) {
         return GroupBuyDetailResDto.builder()
                 .groupBuyId(groupBuy.getGroupBuyId())
                 .product(ProductDto.fromEntity(groupBuy.getProduct()))
                 .averageRate(averageRate)
+                .reviewCount(reviewCount) // ✅ 추가
                 .targetParticipants(groupBuy.getTargetParticipants())
                 .currentParticipantCount(groupBuy.getCurrentParticipantCount())
                 .round(groupBuy.getRound())
@@ -37,3 +39,4 @@ public class GroupBuyDetailResDto {
                 .build();
     }
 }
+
