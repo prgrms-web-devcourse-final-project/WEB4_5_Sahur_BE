@@ -1,5 +1,15 @@
 package com.team5.backend.global.init;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
@@ -33,16 +43,8 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.entity.Address;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -204,6 +206,7 @@ public class BaseInitData implements CommandLineRunner {
                 Member buyer = members.get((i + 1) % members.size());
                 Long orderId = orderIdGenerator.generateOrderId();
                 Order order = orderRepository.save(Order.create(orderId, buyer, groupBuy, product, 1));
+                order.markAsPaid();
                 paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
 
                 DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
