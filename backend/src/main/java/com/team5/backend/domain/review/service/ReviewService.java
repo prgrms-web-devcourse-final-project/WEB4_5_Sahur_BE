@@ -52,9 +52,10 @@ public class ReviewService {
                 .history(history)
                 .comment(request.getComment())
                 .rate(request.getRate())
-                .imageUrl(request.getImageUrl())
+                .imageUrl(request.getImageUrl()) // request.getImageUrl() → List<String>
                 .createdAt(LocalDateTime.now())
                 .build();
+
 
         history.setWritable(false);
         Review saved = reviewRepository.save(review);
