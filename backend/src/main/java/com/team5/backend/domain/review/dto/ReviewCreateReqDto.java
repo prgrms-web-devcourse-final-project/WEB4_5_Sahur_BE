@@ -8,9 +8,8 @@ import java.util.List;
 @Getter
 @Builder
 public class ReviewCreateReqDto {
-    private Long productId;
-    private Long historyId;
+    private Long historyId; // ✅ 구매 내역 선택
     private String comment;
     private Integer rate;
-    private List<String> imageUrl; // 🔄 String → List<String>
+    private List<String> imageUrl;
 }
