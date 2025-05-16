@@ -14,24 +14,32 @@ public class AppConfig {
     }
 
     @Getter
-    public static ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper;
 
     @Autowired
     public void setObjectMapper(ObjectMapper objectMapper) {
         AppConfig.objectMapper = objectMapper;
     }
 
+    private String frontendUrl;
+    private String backendUrl;
+
     @Value("${custom.site.frontUrl}")
-    private static String frontendUrl;
+    public void setFrontendUrl(String frontendUrl) {
+        this.frontendUrl = frontendUrl;
+    }
 
     @Value("${custom.site.backUrl}")
-    private static String backendUrl;
+    public void setBackendUrl(String backendUrl) {
+        this.backendUrl = backendUrl;
+    }
 
-    public static String getSiteFrontUrl() {
+    // Static methods to access the values
+    public String getSiteFrontUrl() {
         return frontendUrl;
     }
 
-    public static String getSiteBackUrl() {
+    public String getSiteBackUrl() {
         return backendUrl;
     }
 
