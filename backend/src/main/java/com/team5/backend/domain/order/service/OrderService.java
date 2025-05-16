@@ -87,7 +87,7 @@ public class OrderService {
                 case "INDELIVERY" ->
                         orders = orderRepository.findByDelivery_Status(DeliveryStatus.INDELIVERY, pageable);
                 case "COMPLETED" -> orders = orderRepository.findByDelivery_Status(DeliveryStatus.COMPLETED, pageable);
-                default -> throw new IllegalArgumentException("지원하지 않는 상태입니다: " + status);
+                default -> throw new CustomException(OrderErrorCode.INVALID_ORDER_STATUS);
             }
         } else {
             orders = orderRepository.findAll(pageable);
