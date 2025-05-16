@@ -40,9 +40,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -62,6 +60,7 @@ public class BaseInitData implements CommandLineRunner {
     private final DeliveryRepository deliveryRepository;
     private final DibsRepository dibsRepository;
     private final HistoryRepository historyRepository;
+    private final OrderIdGenerator orderIdGenerator;
 
     private final List<String> reviewComments = List.of(
             "배송도 빠르고 제품도 만족해요!",
@@ -77,19 +76,9 @@ public class BaseInitData implements CommandLineRunner {
     );
 
     private final List<String> productTitles = List.of(
-            "트렌디한 여름 반팔티",
-            "프리미엄 가죽 지갑",
-            "촉촉한 수분 크림",
-            "고출력 블루투스 스피커",
-            "모던 디자인 책상",
-            "다기능 전기밥솥",
-            "견고한 철제 선반",
-            "유기농 곡물 세트",
-            "무릎 보호 스포츠 레깅스",
-            "차량용 방향제",
-            "베스트셀러 에세이집",
-            "친환경 유아용 식기",
-            "고양이 자동 화장실"
+            "트렌디한 여름 반팔티", "프리미엄 가죽 지갑", "촉촉한 수분 크림", "고출력 블루투스 스피커",
+            "모던 디자인 책상", "다기능 전기밥솥", "견고한 철제 선반", "유기농 곡물 세트",
+            "무릎 보호 스포츠 레깅스", "차량용 방향제", "베스트셀러 에세이집", "친환경 유아용 식기", "고양이 자동 화장실"
     );
 
     private final List<String> productDescriptions = List.of(
@@ -107,7 +96,6 @@ public class BaseInitData implements CommandLineRunner {
             "아이 건강을 생각한 친환경 식기 세트.",
             "편리한 청소 기능이 탑재된 고양이 화장실."
     );
-    private final OrderIdGenerator orderIdGenerator;
 
     @Override
     public void run(String... args) {
@@ -127,57 +115,39 @@ public class BaseInitData implements CommandLineRunner {
                 }
             }
 
-
             List<Member> members = List.of(
                     createMember("이수민", "alice@example.com", "수민짱", new Address("04524", "서울 마포구 월드컵북로 396", "102동 1101호"), "user_alice.jpg"),
                     createMember("박지훈", "bob@example.com", "지훈이", new Address("34121", "대전 서구 둔산로 123", "301호"), "user_bob.jpg"),
                     createMember("최유리", "carol@example.com", "율무차", new Address("48058", "부산 해운대구 센텀서로 30", "1501호"), "user_carol.jpg"),
                     createMember("정예린", "yerin@example.com", "예린스타", new Address("21945", "인천 연수구 송도과학로 16", "A동 1804호"), "user_yerin.jpg"),
-                    createMember("김태호", "taeho@example.com", "호박고구마", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg"),
-                    createMember("홍길동", "hong@example.com", "길동쓰", new Address("44720", "울산 남구 돋질로 100", "505호"), "user_hong.jpg"),
-                    createMember("신유진", "yujin@example.com", "진진자라", new Address("54942", "전북 전주시 완산구 홍산로 275", "2003호"), "user_yujin.jpg"),
-                    createMember("오준호", "junho@example.com", "준호킹", new Address("42071", "대구 수성구 동대구로 400", "302호"), "user_junho.jpg"),
-                    createMember("백민정", "minjung@example.com", "민정이", new Address("16677", "수원 영통구 광교중앙로 170", "B동 1203호"), "user_minjung.jpg"),
-                    createMember("한서준", "seojoon@example.com", "서준이", new Address("28502", "청주 상당구 상당로 69", "3층 301호"), "user_seojoon.jpg")
-            );
-
-            List<Member> additionalMembers = List.of(
-                    createMember("강동원", "dongwon@example.com", "동원브로", new Address("06035", "서울 강남구 테헤란로 521", "2001호"), "user_dongwon.jpg"),
-                    createMember("이지은", "jieun@example.com", "지은누나", new Address("13496", "경기 성남시 분당구 정자일로 45", "107동 1505호"), "user_jieun.jpg"),
-                    createMember("박재범", "jay@example.com", "제이팍", new Address("07222", "서울 영등포구 여의대로 128", "1812호"), "user_jay.jpg"),
-                    createMember("정소민", "somin@example.com", "소민이", new Address("14547", "경기 부천시 부일로 223", "상동프라자 501호"), "user_somin.jpg"),
-                    createMember("김나연", "nayeon@example.com", "나연공주", new Address("46241", "부산 금정구 부산대학로 63", "장전동 빌라 203호"), "user_nayeon.jpg"),
-                    createMember("임시완", "siwan@example.com", "시완이", new Address("24465", "강원 춘천시 서부대성로 154", "101동 805호"), "user_siwan.jpg"),
-                    createMember("한지민", "jimin@example.com", "지민씨", new Address("34189", "대구 수성구 들안로 67", "수성타워 1201호"), "user_jimin.jpg"),
-                    createMember("테스트", "xmxmxm@example.com", "테스트", new Address("34129", "대궁 수성구 들안로 67", "수성타워 1202"), "user_test.jpg")
+                    createMember("김태호", "taeho@example.com", "호박고구마", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg")
             );
 
             Member admin = memberRepository.save(Member.builder()
                     .name("관리자")
                     .email("admin@example.com")
-                    .password(passwordEncoder.encode("admin123!")) // 원하는 강력한 비밀번호로 설정
+                    .password(passwordEncoder.encode("admin123!"))
                     .nickname("관리자계정")
                     .address(new Address("00000", "서울 종로구 청와대로 1", "청사 101호"))
-                    .role(Role.ADMIN) // ✅ 핵심: 관리자 권한 부여
+                    .role(Role.ADMIN)
                     .deleted(false)
                     .emailVerified(true)
                     .imageUrl("http://example.com/admin.jpg")
                     .build());
-
 
             for (int i = 0; i < 20; i++) {
                 Member requester = members.get(i % members.size());
                 Category category = categories.get(i % categories.size());
                 String title = productTitles.get(i % productTitles.size());
                 String description = productDescriptions.get(i % productDescriptions.size());
-                String etc = "옵션: 다양함 / 이미지: https://img.example.com/prod_" + i + ".jpg";
+                String imageUrl = "https://i.pravatar.cc/150?img=" + i + ".jpg";
 
                 productRequestRepository.save(ProductRequest.builder()
                         .member(requester)
                         .category(category)
                         .title(title + " 요청")
-                        .productUrl("https://example.com/item" + i)
-                        .etc(etc)
+                        .productUrl("https://i.pravatar.cc/150?img=" + i + ".jpg")
+                        .etc("옵션: 다양함 / 이미지: " + imageUrl)
                         .status(ProductRequestStatus.APPROVED)
                         .createdAt(LocalDateTime.now().minusDays(i % 7))
                         .build());
@@ -186,7 +156,7 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl(List.of("https://img.example.com/prod_" + i + ".jpg"))
+                        .imageUrl(List.of("https://i.pravatar.cc/150?img=" + i + ".jpg"))
                         .price((int) (100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
@@ -206,11 +176,11 @@ public class BaseInitData implements CommandLineRunner {
                 Order order = orderRepository.save(Order.create(orderId, buyer, groupBuy, product, 1));
                 paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
 
-                DeliveryStatus deliveryStatus = DeliveryStatus.values()[i % DeliveryStatus.values().length];
                 deliveryRepository.save(Delivery.builder()
-                        .order(order).address(buyer.getAddress()).pccc(null)
+                        .order(order)
+                        .address(buyer.getAddress())
                         .contact("010-0000-00" + String.format("%02d", i))
-                        .status(deliveryStatus)
+                        .status(DeliveryStatus.values()[i % DeliveryStatus.values().length])
                         .shipping("TRK" + String.format("%07d", i * 37))
                         .build());
 
@@ -218,30 +188,58 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(requester).product(product).build());
 
                 History history = historyRepository.save(History.builder()
-                        .member(buyer).product(product).groupBuy(groupBuy).order(order)
-                        .writable(i % 2 == 0).createdAt(LocalDateTime.now()).build());
+                        .member(buyer)
+                        .product(product)
+                        .groupBuy(groupBuy)
+                        .order(order)
+                        .writable(i % 2 == 0) // true면 리뷰 작성 가능
+                        .createdAt(LocalDateTime.now())
+                        .build());
 
-                reviewRepository.save(Review.builder()
-                        .member(buyer).product(product).history(history)
-                        .comment(reviewComments.get(i % reviewComments.size()))
-                        .rate(3 + (i % 3)).createdAt(LocalDateTime.now())
-                        .imageUrl("https://example.com/review/img" + i + ".jpg").build());
+                if (history.getWritable()) {
+                    history.setWritable(false); // 리뷰 작성 이후 writable false 처리
+
+                    reviewRepository.save(Review.builder()
+                            .member(buyer)
+                            .product(product)
+                            .history(history)
+                            .comment(reviewComments.get(i % reviewComments.size()))
+                            .rate(3 + (i % 3))
+                            .createdAt(LocalDateTime.now())
+                            .imageUrl(List.of("https://example.com/review/img" + i + ".jpg"))
+                            .build());
+                }
 
                 notificationRepository.save(Notification.builder()
-                        .member(buyer).type(NotificationType.ORDER)
-                        .title("주문 완료 알림").message(product.getTitle() + " 주문이 완료되었습니다.")
-                        .url("/orders/" + order.getOrderId()).isRead(false).createdAt(LocalDateTime.now()).build());
+                        .member(buyer)
+                        .type(NotificationType.ORDER)
+                        .title("주문 완료 알림")
+                        .message(product.getTitle() + " 주문이 완료되었습니다.")
+                        .url("/orders/" + order.getOrderId())
+                        .isRead(false)
+                        .createdAt(LocalDateTime.now())
+                        .build());
 
                 if (i % 4 == 0) {
                     notificationRepository.save(Notification.builder()
-                            .member(buyer).type(NotificationType.EVENT)
-                            .title("이벤트 소식 #" + i + "").message("신규 혜택 오픈!")
-                            .url("/events/" + i).isRead(false).createdAt(LocalDateTime.now()).build());
+                            .member(buyer)
+                            .type(NotificationType.EVENT)
+                            .title("이벤트 소식 #" + i)
+                            .message("신규 혜택 오픈!")
+                            .url("/events/" + i)
+                            .isRead(false)
+                            .createdAt(LocalDateTime.now())
+                            .build());
                 } else {
                     notificationRepository.save(Notification.builder()
-                            .member(requester).type(NotificationType.ETC)
-                            .title("시스템 공지").message("정기 점검 예정 안내")
-                            .url("/notice").isRead(false).createdAt(LocalDateTime.now()).build());
+                            .member(requester)
+                            .type(NotificationType.ETC)
+                            .title("시스템 공지")
+                            .message("정기 점검 예정 안내")
+                            .url("/notice")
+                            .isRead(false)
+                            .createdAt(LocalDateTime.now())
+                            .build());
                 }
             }
         }
@@ -261,4 +259,3 @@ public class BaseInitData implements CommandLineRunner {
                 .build());
     }
 }
-
