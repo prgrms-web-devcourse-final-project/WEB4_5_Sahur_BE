@@ -36,6 +36,15 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
             @Param("excludedGroupBuyId") Long excludedGroupBuyId,
             Pageable pageable
     );
+    @Query("""
+    SELECT g FROM GroupBuy g
+    JOIN g.product p
+    WHERE p.category.categoryId = :categoryId
+    AND g.status = 'ONGOING'
+""")
+    Page<GroupBuy> findOngoingByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
+
+
 
 
 
