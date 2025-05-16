@@ -2,7 +2,7 @@
 // docker-compose run k6 run /scripts/k6-test.js
 
 import http from 'k6/http';
-import { check, sleep } from 'k6';
+import { check } from 'k6';
 
 export const options = {
     scenarios: {
