@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -16,7 +17,7 @@ public class ReviewResDto {
     private String comment;
     private Integer rate;
     private LocalDateTime createdAt;
-    private String imageUrl;
+    private List<String> imageUrl; // 🔄 수정
 
     public static ReviewResDto fromEntity(Review review) {
         return ReviewResDto.builder()
@@ -27,7 +28,8 @@ public class ReviewResDto {
                 .comment(review.getComment())
                 .rate(review.getRate())
                 .createdAt(review.getCreatedAt())
-                .imageUrl(review.getImageUrl())
+                .imageUrl(review.getImageUrl()) // List<String> 그대로 사용
                 .build();
     }
 }
+
