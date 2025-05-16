@@ -14,6 +14,7 @@ import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
@@ -48,6 +49,7 @@ public class OrderService {
 
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
+    private final HistoryRepository historyRepository;
 
     public Order createOrder(OrderCreateReqDto request) {
         Member member = memberRepository.findById(request.getMemberId())
@@ -145,14 +147,19 @@ public class OrderService {
         List<Order> expiredOrders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.BEFOREPAID, oneHourAgo);
 
         for (Order order : expiredOrders) {
-            log.info("[Order Cleanup] 삭제할 주문: orderId={}, createdAt={}", order.getOrderId(), order.getCreatedAt());
+            Long orderId = order.getOrderId();
+            log.info("[Order Cleanup] 삭제할 주문: orderId={}, createdAt={}", orderId, order.getCreatedAt());
 
             if (order.getDelivery() != null) {
                 log.info("[Order Cleanup] 연결된 배송 정보도 삭제: deliveryId={}", order.getDelivery().getDeliveryId());
                 deliveryRepository.delete(order.getDelivery());
             }
+
+            log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
+            historyRepository.deleteByOrder_OrderId(orderId);
+
             orderRepository.delete(order);
-            log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", order.getOrderId());
+            log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", orderId);
         }
 
         log.info("[Order Cleanup] 총 {}건의 주문이 삭제되었습니다.", expiredOrders.size());
