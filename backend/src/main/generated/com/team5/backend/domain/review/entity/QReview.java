@@ -28,7 +28,7 @@ public class QReview extends EntityPathBase<Review> {
 
     public final com.team5.backend.domain.history.entity.QHistory history;
 
-    public final StringPath imageUrl = createString("imageUrl");
+    public final ListPath<String, StringPath> imageUrl = this.<String, StringPath>createList("imageUrl", String.class, StringPath.class, PathInits.DIRECT2);
 
     public final com.team5.backend.domain.member.member.entity.QMember member;
 
