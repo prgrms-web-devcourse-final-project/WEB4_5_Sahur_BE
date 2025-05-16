@@ -111,7 +111,6 @@ public class OrderController {
 
     @Operation(summary = "주문 취소", description = "주문을 취소합니다.")
     @DeleteMapping("/{orderId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public RsData<Empty> cancelOrder(
             @PathVariable Long orderId
     ) {
