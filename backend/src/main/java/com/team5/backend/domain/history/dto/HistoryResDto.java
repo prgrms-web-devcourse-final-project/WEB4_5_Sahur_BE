@@ -1,6 +1,7 @@
 package com.team5.backend.domain.history.dto;
 
 import com.team5.backend.domain.history.entity.History;
+import com.team5.backend.domain.order.dto.OrderHistoryInfoDto;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +13,7 @@ public class HistoryResDto {
     private Long memberId;
     private Long productId;
     private Long groupBuyId;
-    private Long orderId;
+    private OrderHistoryInfoDto order;  // ✅ 변경된 부분
     private Boolean writable;
 
     public static HistoryResDto fromEntity(History history) {
@@ -21,7 +22,7 @@ public class HistoryResDto {
                 .memberId(history.getMember().getMemberId())
                 .productId(history.getProduct().getProductId())
                 .groupBuyId(history.getGroupBuy().getGroupBuyId())
-                .orderId(history.getOrder().getOrderId())
+                .order(OrderHistoryInfoDto.fromEntity(history.getOrder())) // ✅ 변경된 부분
                 .writable(history.getWritable())
                 .build();
     }
