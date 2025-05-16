@@ -101,26 +101,31 @@ public class GroupBuyService {
 
     @Transactional(readOnly = true)
     public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, PrincipalDetails userDetails) {
-        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+        GroupBuy groupBuy = groupBuyRepository.findWithProductAndCategoryById(groupBuyId)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        // 명시적으로 Lazy 초기화 방지
+        groupBuy.getProduct().getCategory().getKeyword();
 
         boolean isTodayDeadline = groupBuy.getDeadline() != null &&
                 groupBuy.getDeadline().toLocalDate().isEqual(LocalDateTime.now().toLocalDate());
 
-        Double averageRate = reviewRepository.findAverageRatingByProductId(groupBuy.getProduct().getProductId());
+        Long productId = groupBuy.getProduct().getProductId();
+        Double averageRate = reviewRepository.findAverageRatingByProductId(productId);
         if (averageRate == null) averageRate = 0.0;
 
-        boolean isDibs = false;
+        Integer reviewCount = reviewRepository.countByProductId(productId);
 
+        boolean isDibs = false;
         if (userDetails != null) {
             Long memberId = userDetails.getMember().getMemberId();
-            isDibs = dibsRepository
-                    .findByProduct_ProductIdAndMember_MemberId(groupBuy.getProduct().getProductId(), memberId)
-                    .isPresent();
+            isDibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(productId, memberId).isPresent();
         }
 
-        return GroupBuyDetailResDto.fromEntity(groupBuy, isTodayDeadline, isDibs, averageRate);
+        return GroupBuyDetailResDto.fromEntity(groupBuy, isTodayDeadline, isDibs, averageRate, reviewCount);
     }
+
+
 
     @Transactional
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
