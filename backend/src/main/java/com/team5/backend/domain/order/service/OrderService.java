@@ -112,6 +112,7 @@ public class OrderService {
         return orders.map(OrderListResDto::from);
     }
 
+    @Transactional(readOnly = true)
     public Long getMonthlyCompletedSales() {
         LocalDateTime start = YearMonth.now().atDay(1).atStartOfDay();
         LocalDateTime end = YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX);
