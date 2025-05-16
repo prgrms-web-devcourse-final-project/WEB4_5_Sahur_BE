@@ -168,7 +168,7 @@ public class MemberService {
             // Bearer 접두사 추가 (로그아웃 메서드에서 처리하므로)
             String headerToken = "Bearer " + token;
 
-            // 수정된 로그아웃 메서드 호출 (HttpServletRequest도 필요)
+            // 로그아웃 메서드 호출
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
             authService.logout(headerToken, request, response);
 
@@ -252,20 +252,7 @@ public class MemberService {
 
         log.info("회원 ID {} 복구 처리 완료", member.getMemberId());
 
-        // 새로운 액세스 토큰과 리프레시 토큰 발급
-        String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getEmail(), member.getRole().name());
-        String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getEmail(), member.getRole().name());
-
-        // 토큰을 쿠키에 저장
-        authTokenManager.addCookie(response, "accessToken", accessToken, (int) (jwtUtil.getAccessTokenExpiration() / 1000));
-        authTokenManager.addCookie(response, "refreshToken", refreshToken, (int) (jwtUtil.getRefreshTokenExpiration() / 1000));
-
-        return MemberRestoreResDto.builder()
-                .memberId(member.getMemberId())
-                .message("회원 복구가 성공적으로 완료되었습니다.")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return authService.handleMemberRestoreAuth(member, response);
     }
 
     // 회원 탈퇴 30일 후 하드 딜리트 진행(매일 자정 수행)

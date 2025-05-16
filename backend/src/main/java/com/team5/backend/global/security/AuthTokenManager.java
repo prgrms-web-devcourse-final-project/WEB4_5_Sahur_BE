@@ -358,7 +358,8 @@ public class AuthTokenManager {
         deleteCookies(response);
     }
 
-    private void deleteCookies(HttpServletResponse response) {
+    public void deleteCookies(HttpServletResponse response) {
+
         addCookie(response, "accessToken", "", 0);
         addCookie(response, "refreshToken", "", 0);
         addCookie(response, "remember-me", "", 0);

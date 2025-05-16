@@ -11,10 +11,12 @@ import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -86,7 +88,100 @@ public class AuthService {
     @Transactional
     public void logout(String headerToken, HttpServletRequest request, HttpServletResponse response) {
 
-        // 헤더 또는 쿠키에서 액세스 토큰 추출
+        // 토큰 추출
+        String accessToken = extractToken(headerToken, request);
+
+        // 토큰 무효화 로직 수행
+        invalidateMember(accessToken, response);
+    }
+
+    private void invalidateMember(String accessToken, HttpServletResponse response) {
+
+        checkAccessToken(accessToken);
+
+        // 토큰에서 이메일 추출
+        String email;
+        boolean isDeletedMemberToken;
+
+        try {
+            email = jwtUtil.extractEmail(accessToken);
+            isDeletedMemberToken = jwtUtil.isDeletedMemberToken(accessToken);
+        } catch (Exception e) {
+            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
+        }
+
+        // 삭제된 회원의 토큰인 경우
+        if (isDeletedMemberToken) {
+
+            invalidateDeletedMemberToken(accessToken, response);
+            return ;
+        }
+
+        // 일반 회원에 대한 토큰 유효성 검증
+        if (!jwtUtil.validateToken(accessToken, email)) {
+            throw new CustomException(AuthErrorCode.INVALID_TOKEN);
+        }
+
+        // 일반 회원의 세션 무효화
+        invalidateActiveMember(email, accessToken, response);
+    }
+
+    private static void checkAccessToken(String accessToken) {
+
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
+        }
+    }
+
+    private void invalidateActiveMember(String email, String accessToken, HttpServletResponse response) {
+
+        // 리프레시 토큰 처리
+        invalidateRefreshToken(email);
+
+        // Remember Me 토큰 처리
+        invalidateRememberMeToken(email);
+
+        // 액세스 토큰 블랙리스트에 추가
+        jwtUtil.addToBlacklist(accessToken);
+
+        // 쿠키 삭제
+        authTokenManager.deleteCookies(response);
+    }
+
+    private void invalidateRememberMeToken(String email) {
+
+        try {
+            jwtUtil.invalidateRememberMeToken(email);
+        } catch (Exception e) {
+            log.warn("Remember Me 토큰 처리 중 예외 발생: {}", e.getMessage());
+        }
+
+    }
+
+    private void invalidateRefreshToken(String email) {
+
+        String refreshToken = jwtUtil.getStoredRefreshToken(email);
+
+        if (refreshToken != null) {
+            jwtUtil.addRefreshTokenToBlacklist(refreshToken);
+            jwtUtil.removeRefreshToken(email);
+        } else {
+            // 일반 회원이지만 리프레시 토큰이 없는 경우 - 비정상 케이스
+            log.warn("일반 회원의 리프레시 토큰이 존재하지 않습니다. 이메일: {}", email);
+        }
+    }
+
+    private void invalidateDeletedMemberToken(String accessToken, HttpServletResponse response) {
+
+        // 액세스 토큰 블랙리스트에 추가
+        jwtUtil.addToBlacklist(accessToken);
+
+        // 쿠키 삭제
+        authTokenManager.deleteCookies(response);
+    }
+
+    private String extractToken(String headerToken, HttpServletRequest request) {
+
         String accessToken = headerToken;
 
         // 헤더에 액세스 토큰이 없으면 쿠키에서 확인
@@ -98,12 +193,9 @@ public class AuthService {
         }
 
         // 액세스 토큰이 여전히 비어있으면 예외 처리
-        if (accessToken == null || accessToken.isEmpty()) {
-            throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
-        }
+        checkAccessToken(accessToken);
 
-        // TokenCookieUtil을 사용하여 모든 토큰 무효화 및 쿠키 삭제
-        authTokenManager.invalidateTokensWithRememberMe(accessToken, response);
+        return accessToken;
     }
 
     // 토큰 갱신 메서드
@@ -137,5 +229,27 @@ public class AuthService {
         String role = jwtUtil.extractRole(token);
 
         return new TokenInfoResDto(email, role);
+    }
+
+    @Transactional
+    public MemberRestoreResDto handleMemberRestoreAuth(Member restoredMember, HttpServletResponse response) {
+
+        // 회원 복구 후 인증 처리 (토큰 발급 및 쿠키 저장)
+        String accessToken = jwtUtil.generateAccessToken(restoredMember.getMemberId(), restoredMember.getEmail(), restoredMember.getRole().name());
+        String refreshToken = jwtUtil.generateRefreshToken(restoredMember.getMemberId(), restoredMember.getEmail(), restoredMember.getRole().name());
+
+        // 토큰을 쿠키에 저장
+        int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);
+        int refreshTokenMaxAge = (int) (jwtUtil.getRefreshTokenExpiration() / 1000);
+
+        authTokenManager.addCookie(response, "accessToken", accessToken, accessTokenMaxAge);
+        authTokenManager.addCookie(response, "refreshToken", refreshToken, refreshTokenMaxAge);
+
+        return MemberRestoreResDto.builder()
+                .memberId(restoredMember.getMemberId())
+                .message("회원 복구가 성공적으로 완료되었습니다.")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 }
