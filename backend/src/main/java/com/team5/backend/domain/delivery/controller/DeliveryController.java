@@ -104,7 +104,6 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 정보 삭제", description = "배송 정보를 삭제합니다.")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{deliveryId}")
     public RsData<Empty> deleteDelivery(
             @Parameter(description = "배송 ID") @PathVariable Long deliveryId

@@ -3,6 +3,7 @@ package com.team5.backend.domain.history.controller;
 import com.team5.backend.domain.history.dto.HistoryCreateReqDto;
 import com.team5.backend.domain.history.dto.HistoryResDto;
 import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
+import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.service.HistoryService;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.dto.Empty;
@@ -19,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "History", description = "구매 이력 관련 API")
@@ -76,14 +78,15 @@ public class HistoryController {
         return RsDataUtil.success("구매 이력 삭제 완료");
     }
 
-    @Operation(summary = "리뷰 작성 가능 여부 조회", description = "특정 상품에 대해 리뷰 작성 가능 여부를 조회합니다.")
-    @GetMapping("/products/{productId}/writable")
-    public RsData<Map<String, Boolean>> isReviewWritable(
+    @Operation(summary = "리뷰 작성 가능한 구매 내역 조회", description = "특정 상품에 대해 리뷰 작성 가능한 구매 이력 목록을 반환합니다.")
+    @GetMapping("/products/{productId}/writable-histories")
+    public RsData<List<HistoryResDto>> getWritableHistories(
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @PathVariable Long productId) {
 
-        boolean writable = historyService.checkReviewWritable(productId, userDetails);
-        Map<String, Boolean> result = Collections.singletonMap("writable", writable);
-        return RsDataUtil.success("리뷰 작성 가능 여부 조회 성공", result);
+        List<HistoryResDto> writableHistories = historyService.getWritableHistories(productId, userDetails);
+        return RsDataUtil.success("리뷰 작성 가능한 구매 이력 조회 성공", writableHistories);
     }
+
+
 }

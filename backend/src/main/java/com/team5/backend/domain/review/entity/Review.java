@@ -2,6 +2,7 @@ package com.team5.backend.domain.review.entity;
 
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.product.converter.StringListConverter;
 import com.team5.backend.domain.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,6 +45,8 @@ public class Review {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @Column(columnDefinition = "TEXT")
-    private String imageUrl = "";
+    @Column(name = "imageUrl", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> imageUrl;
+
 }

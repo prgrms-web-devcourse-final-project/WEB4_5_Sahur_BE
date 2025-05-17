@@ -20,4 +20,5 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
     History findByMember_MemberIdAndProduct_ProductId(Long memberId, Long productId);
 
     void deleteByOrder_OrderId(Long orderId);
+
 }

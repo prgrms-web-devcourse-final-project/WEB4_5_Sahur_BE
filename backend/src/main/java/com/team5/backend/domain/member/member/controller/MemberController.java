@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -80,10 +81,10 @@ public class MemberController {
     // 회원 복구
     @Operation(summary = "회원 복구", description = "탈퇴한 회원을 복구합니다. 탈퇴한 회원이 로그인하면 발급되는 임시 토큰을 통해서만 호출할 수 있습니다.")
     @PostMapping("/members/restore")
-    public RsData<MemberRestoreResDto> restoreMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
+    public RsData<MemberRestoreResDto> restoreMember(@AuthenticationPrincipal PrincipalDetails userDetails, HttpServletResponse response) {
 
         Long memberId = userDetails.getMember().getMemberId();
-        MemberRestoreResDto memberRestoreResDto = memberService.restoreMember(memberId);
+        MemberRestoreResDto memberRestoreResDto = memberService.restoreMember(memberId, response);
 
         return RsDataUtil.success("회원 복구가 완료되었습니다.", memberRestoreResDto);
     }
@@ -102,9 +103,10 @@ public class MemberController {
     @Operation(summary = "로그아웃", description = "현재 로그인된 계정을 로그아웃합니다.")
     @PostMapping("/auth/logout")
     public RsData<LogoutResDto> logout(
-            @Parameter(description = "Access Token (Bearer 포함)") @RequestHeader(value = "Authorization", required = false) String token, HttpServletResponse response) {
+            @Parameter(description = "Access Token (Bearer 포함, 선택적)")
+            @RequestHeader(value = "Authorization", required = false) String headerToken, HttpServletRequest request, HttpServletResponse response) {
 
-        authService.logout(token, response);
+        authService.logout(headerToken, request, response);
         return RsDataUtil.success("로그아웃에 성공했습니다.", new LogoutResDto());
     }
 

@@ -21,6 +21,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -109,11 +110,15 @@ public class HistoryService {
     }
 
     @Transactional(readOnly = true)
-    public boolean checkReviewWritable(Long productId, PrincipalDetails userDetails) {
+    public List<HistoryResDto> getWritableHistories(Long productId, PrincipalDetails userDetails) {
         Long memberId = userDetails.getMember().getMemberId();
 
-        return historyRepository.findByMember_MemberIdAndProduct_ProductId(memberId, productId)
-                .getWritable();
+        return historyRepository.findByMember_MemberIdAndProduct_ProductId(memberId, productId).stream()
+                .filter(history -> Boolean.TRUE.equals(history.getWritable()))
+                .map(HistoryResDto::fromEntity)
+                .toList();
     }
+
+
 
 }

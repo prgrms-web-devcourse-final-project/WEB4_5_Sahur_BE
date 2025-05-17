@@ -13,4 +13,6 @@ public class MemberRestoreResDto {
 
     private Long memberId;
     private String message;
+    private String accessToken;
+    private String refreshToken;
 }

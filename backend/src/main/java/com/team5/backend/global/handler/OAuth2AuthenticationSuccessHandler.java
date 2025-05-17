@@ -23,6 +23,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final JwtUtil jwtUtil;
     private final AuthTokenManager authTokenManager;
+    private final AppConfig appConfig;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -70,7 +71,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                         Authentication authentication) {
 
         // 세션에 저장된 원래 리디렉션 URI 가져오기, 없으면 기본값 사용
-        String defaultRedirectUri = AppConfig.getSiteFrontUrl() + "/login";
+        String defaultRedirectUri = appConfig.getSiteFrontUrl() + "/login";
 
         // 로그인 시도 시 파라미터로 전달된 redirect_uri가 있는지 확인
         String sessionRedirectUri = (String) request.getSession().getAttribute("redirect_uri");
@@ -80,7 +81,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 sessionRedirectUri != null ? sessionRedirectUri :
                         defaultRedirectUri;
 
-        log.info("결정된 리디렉션 URL: {}, AppConfig.getSiteFrontUrl(): {}", redirectUri, AppConfig.getSiteFrontUrl());
+        log.info("결정된 리디렉션 URL: {}, AppConfig.getSiteFrontUrl(): {}", redirectUri, appConfig.getSiteFrontUrl());
 
         return redirectUri;
     }

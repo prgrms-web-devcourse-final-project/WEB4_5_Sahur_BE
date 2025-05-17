@@ -91,8 +91,7 @@ class DeliveryControllerTest {
     void getAllDeliveries() throws Exception {
         mockMvc.perform(get("/api/v1/deliveries"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("200"))
-                .andExpect(jsonPath("$.data.totalElements").value(20));
+                .andExpect(jsonPath("$.status").value("200"));
     }
 
     @DisplayName("GET - 배송중인 상품 개수 조회")

@@ -1,143 +1,147 @@
 package com.team5.backend.domain.payment.controller;
 
-import com.team5.backend.domain.member.member.dto.GetMemberResDto;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.service.AuthService;
 import com.team5.backend.domain.payment.dto.CancelReqDto;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.service.PaymentService;
 import com.team5.backend.domain.payment.service.TossService;
-import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
-
-import java.util.List;
+import com.team5.backend.global.security.PrincipalDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class PaymentControllerTest {
 
-	private PaymentController paymentController;
-	private PaymentService paymentService;
-	private TossService tossService;
-	private AuthService authService;
+    private PaymentController paymentController;
+    private PaymentService paymentService;
+    private TossService tossService;
+    private AuthService authService;
 
-	@BeforeEach
-	void setup() {
-		paymentService = mock(PaymentService.class);
-		tossService = mock(TossService.class);
-		authService = mock(AuthService.class);
-		paymentController = new PaymentController(paymentService, tossService, authService);
-	}
+    @BeforeEach
+    void setup() {
+        paymentService = mock(PaymentService.class);
+        tossService = mock(TossService.class);
+        authService = mock(AuthService.class);
+        paymentController = new PaymentController(paymentService, tossService, authService);
+    }
 
-	@Test
-	@DisplayName("결제 승인 - 성공")
-	void confirmPayment_success() {
-		ConfirmReqDto dto = new ConfirmReqDto("key-123", 1L, 1000);
-		when(tossService.confirmPayment(dto)).thenReturn(true);
+    @Test
+    @DisplayName("결제 승인 성공")
+    void confirmPayment_success() {
+        ConfirmReqDto request = new ConfirmReqDto("payKey", 123456L, 10000);
 
-		RsData<Empty> result = paymentController.confirmPayment(dto);
+        RsData<?> result = paymentController.confirmPayment(request);
 
-		verify(tossService).confirmPayment(dto);
-		verify(paymentService).savePayment(1L, "key-123");
+        verify(tossService).confirmPayment(request);
+        verify(paymentService).savePayment(123456L, "payKey");
 
-		assertEquals("200-0", result.getMsg());
-		assertEquals("결제 승인 성공", result.getMsg());
-	}
+        assertEquals(200, result.getStatus());
+    }
 
-	@Test
-	@DisplayName("결제 내역 단건 조회 - 성공")
-	void getPaymentInfo_success() {
-		String paymentKey = "pay-001";
-		PaymentResDto dto = PaymentResDto.builder()
-			.paymentKey(paymentKey)
-			.orderId("ODR-2505081234")
-			.orderName("테스트")
-			.totalAmount(5000)
-			.method("카드")
-			.status("DONE")
-			.approvedAt("2025-05-08")
-			.build();
+    @Test
+    @DisplayName("결제 내역 단건 조회 - 성공")
+    void getPaymentInfo_success() {
+        String paymentKey = "pay-001";
+        PaymentResDto dto = PaymentResDto.builder()
+                .paymentKey(paymentKey)
+                .orderId("2505081234")
+                .orderName("테스트")
+                .totalAmount(5000)
+                .method("카드")
+                .status("DONE")
+                .approvedAt("2025-05-08")
+                .build();
 
-		when(paymentService.getPaymentKey(1L)).thenReturn(paymentKey);
-		when(tossService.getPaymentInfoByPaymentKey(paymentKey)).thenReturn(dto);
+        when(paymentService.getPaymentKey(1L)).thenReturn(paymentKey);
+        when(tossService.getPaymentInfoByPaymentKey(paymentKey)).thenReturn(dto);
 
-		RsData<PaymentResDto> result = paymentController.getPaymentInfo(1L);
+        RsData<PaymentResDto> result = paymentController.getPaymentInfo(1L);
 
-		assertEquals("200-0", result.getMsg());
-		assertEquals("결제 내역 조회 성공", result.getMsg());
-		assertEquals(dto, result.getData());
-	}
+        assertEquals(200, result.getStatus());
+        assertEquals(dto, result.getData());
+    }
 
-	@Test
-	@DisplayName("결제 취소 - 성공")
-	void cancelPayment_success() {
-		CancelReqDto req = new CancelReqDto("테스트 사유");
+    @Test
+    @DisplayName("결제 취소 성공")
+    void cancelPayment_success() {
+        CancelReqDto request = new CancelReqDto("테스트 취소");
+        when(paymentService.getPaymentKeyByOrder(123L)).thenReturn("payKey");
 
-		when(paymentService.getPaymentKeyByOrder(1L)).thenReturn("pay-123");
-		when(tossService.cancelPayment("pay-123", "테스트 사유")).thenReturn(true);
+        RsData<String> result = paymentController.cancelPayment(123L, request);
 
-		RsData<String> result = paymentController.cancelPayment(1L, req);
+        verify(tossService).cancelPayment("payKey", "테스트 취소");
+        assertEquals(200, result.getStatus());
+        assertEquals("테스트 취소", result.getData());
+    }
 
-		assertEquals("200-0", result.getMsg());
-		assertEquals("결제 취소 성공", result.getMsg());
-		assertEquals("테스트 사유", result.getData());
-	}
+    @Test
+    @DisplayName("내 결제 내역 조회 - 성공")
+    void getPaymentsByMember_success() {
+        PaymentResDto dto = PaymentResDto.builder()
+                .paymentKey("pay-key-001")
+                .orderId("ORD-2505085678")
+                .orderName("테스트 상품")
+                .totalAmount(1000)
+                .method("카드")
+                .status("DONE")
+                .approvedAt("2025-05-01")
+                .build();
 
-	@Test
-	@DisplayName("내 결제 내역 조회 - 성공")
-	void getPaymentsByMember_success() {
-		PaymentResDto dto = PaymentResDto.builder()
-			.paymentKey("pay-key-001")
-			.orderId("ORD-2505085678")
-			.orderName("테스트 상품")
-			.totalAmount(1000)
-			.method("카드")
-			.status("DONE")
-			.approvedAt("2025-05-01")
-			.build();
+        Member member = mock(Member.class);
+        when(member.getMemberId()).thenReturn(1L);
 
-		when(authService.getLoggedInMember(anyString()))
-				.thenReturn(mock(GetMemberResDto.class));
-		when(paymentService.getPaymentKeysByMember(eq(1L), any()))
-			.thenReturn(mock(org.springframework.data.domain.Page.class));
-		when(paymentService.getPaymentsByKeysAsync(any()))
-			.thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(dto)));
+        PrincipalDetails user = mock(PrincipalDetails.class);
+        when(user.getMember()).thenReturn(member);
 
-		RsData<Page<PaymentResDto>> result = paymentController.getPaymentsByMember("token", null);
+        Page<String> mockKeys = new PageImpl<>(List.of("key1", "key2"));
+        Page<PaymentResDto> mockDtos = new PageImpl<>(List.of(dto, dto));
 
-		assertEquals("200-0", result.getMsg());
-		assertEquals("전체 결제 내역 비동기 조회 성공", result.getMsg());
-		assertNotNull(result.getData());
-	}
+        when(paymentService.getPaymentKeysByMember(eq(1L), any())).thenReturn(mockKeys);
+        when(paymentService.getPaymentsByKeysAsync(mockKeys)).thenReturn(mockDtos);
 
-	@Test
-	@DisplayName("주문별 결제 조회 - 성공")
-	void getPaymentByOrder_success() {
-		String paymentKey = "pay-order-001";
+        RsData<Page<PaymentResDto>> result = paymentController.getPaymentsByMember(user, PageRequest.of(0, 5));
 
-		PaymentResDto dto = PaymentResDto.builder()
-				.paymentKey(paymentKey)
-				.orderId("ORD-2505081357")
-				.orderName("주문결제테스트")
-				.totalAmount(3000)
-				.method("카드")
-				.status("DONE")
-				.approvedAt("2025-05-02")
-				.build();
+        assertEquals(200, result.getStatus());
+        assertEquals(2, result.getData().getContent().size());
+    }
 
-		when(paymentService.getPaymentKeyByOrder(888L)).thenReturn(paymentKey);
-		when(tossService.getPaymentInfoByPaymentKey(paymentKey)).thenReturn(dto);
+    @Test
+    @DisplayName("주문별 결제 조회 - 성공")
+    void getPaymentByOrder_success() {
+        String paymentKey = "pay-order-001";
 
-		RsData<PaymentResDto> result = paymentController.getPaymentByOrder(888L);
+        PaymentResDto dto = PaymentResDto.builder()
+                .paymentKey(paymentKey)
+                .orderId("ORD-2505081357")
+                .orderName("주문결제테스트")
+                .totalAmount(3000)
+                .method("카드")
+                .status("DONE")
+                .approvedAt("2025-05-02")
+                .build();
 
-		assertEquals("200-0", result.getMsg());
-		assertEquals("주문별 결제 내역 조회 성공", result.getMsg());
-		assertEquals(dto, result.getData());
-	}
+        when(paymentService.getPaymentKeyByOrder(888L)).thenReturn(paymentKey);
+        when(tossService.getPaymentInfoByPaymentKey(paymentKey)).thenReturn(dto);
+
+        RsData<PaymentResDto> result = paymentController.getPaymentByOrder(888L);
+
+        assertEquals(200, result.getStatus());
+        assertEquals(dto, result.getData());
+    }
 }

@@ -41,10 +41,16 @@ public class ReviewService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
         History history = historyRepository.findById(request.getHistoryId())
                 .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
+
+        // 보안 체크: 요청한 유저가 해당 이력을 가진 사람인지 검증
+        if (!history.getMember().getMemberId().equals(memberId)) {
+            throw new CustomException(ReviewErrorCode.REVIEW_FORBIDDEN);
+        }
+
+        Product product = history.getProduct();
 
         Review review = Review.builder()
                 .member(member)
@@ -56,10 +62,12 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        history.setWritable(false);
+        history.setWritable(false); // 한 번 리뷰 작성하면 더는 못 쓰게
         Review saved = reviewRepository.save(review);
+
         return ReviewResDto.fromEntity(saved);
     }
+
 
     /**
      * 전체 리뷰 목록 조회 (최신순 정렬)
