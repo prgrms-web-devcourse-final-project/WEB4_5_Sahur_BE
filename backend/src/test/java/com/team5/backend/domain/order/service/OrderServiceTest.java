@@ -152,7 +152,7 @@ class OrderServiceTest {
     @Test
     @DisplayName("주문 목록 조회 - 상태로 필터링 성공")
     void getOrders_byStatus_success() {
-        Page<OrderListResDto> result = orderService.getOrders(null, OrderStatus.BEFOREPAID, pageable);
+        Page<OrderListResDto> result = orderService.getOrders(null, OrderStatus.BEFOREPAID.toString(), pageable);
 
         assertThat(result.getContent())
                 .isNotEmpty()
