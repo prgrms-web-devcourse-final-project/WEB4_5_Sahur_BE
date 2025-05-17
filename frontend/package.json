@@ -33,6 +33,7 @@
     "react-apexcharts": "^1.7.0",
     "react-arborist": "^3.4.2",
     "react-bootstrap": "^2.10.7",
+    "react-bootstrap-counter": "^1.0.1",
     "react-daum-postcode": "^3.2.0",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",

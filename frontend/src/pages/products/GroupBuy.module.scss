@@ -56,3 +56,12 @@
 .customProgress :global(.progress-bar) {
   background-color: #0F172A !important;
 }
+.countButton:hover,
+.countButton:focus,
+.countButton:active {
+  background-color: transparent !important;
+  border-color: black !important; /* 필요에 따라 유지 */
+  color: black !important;
+  box-shadow: none !important;
+  min-width: 40px;
+}

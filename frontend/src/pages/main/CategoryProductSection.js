@@ -18,7 +18,6 @@ const sortOptions = [
 
 const fetchGroupBuyListOngoing = async (params) => {
     const response = await axios.get(`/api/v1/groupBuy/list/onGoing${buildQuery(params)}`);
-    console.log(response.data)
     return response.data.data;
 }
 
