@@ -201,3 +201,13 @@ export const groupQuillLists = (htmlContent) => {
 export const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export const normalizeNumber = (input) => {
+  const num = Number(input);
+
+  if (isNaN(num) || !Number.isFinite(num)) {
+    return 1;
+  }
+
+  return Math.floor(num);
+}

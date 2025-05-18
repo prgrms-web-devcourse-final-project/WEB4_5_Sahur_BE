@@ -7,7 +7,6 @@ import useConfirm from "../../hooks/useConfirm";
 
 const fetchGroupBuyPopular = async () => {
     const response = await axios.get(`/api/v1/groupBuy/popular`);
-    console.log(response.data)
     return response.data.data;
 }
 

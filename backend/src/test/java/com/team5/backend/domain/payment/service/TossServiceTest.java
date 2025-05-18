@@ -1,148 +1,149 @@
 package com.team5.backend.domain.payment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.global.config.toss.TossPaymentConfig;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.PaymentErrorCode;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+@SpringBootTest
+@AutoConfigureMockRestServiceServer
 class TossServiceTest {
 
-	@InjectMocks
-	private TossService tossService;
+    @Autowired
+    private RestClient.Builder restClientBuilder;
 
-	@Mock
-	private RestTemplate restTemplate;
+    @MockBean
+    private TossPaymentConfig tossPaymentConfig;
 
-	@Mock
-	private TossPaymentConfig tossPaymentConfig;
+    private TossService tossService;
+    private MockRestServiceServer mockServer;
 
-	@BeforeEach
-	void init() {
-		MockitoAnnotations.openMocks(this);
-		when(tossPaymentConfig.getSecretKey()).thenReturn("test-secret");
-	}
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Test
-	@DisplayName("결제 승인 성공")
-	void confirmPayment_success() {
-		ConfirmReqDto request = new ConfirmReqDto("payKey", 123456L, 1000);
+    private ConfirmReqDto confirmReq;
 
-		when(restTemplate.postForEntity(
-			anyString(), any(HttpEntity.class), eq(String.class)))
-			.thenReturn(new ResponseEntity<>("OK", HttpStatus.OK));
+    @BeforeEach
+    void setUp() {
+        when(tossPaymentConfig.getSecretKey()).thenReturn("testSecretKey");
 
-		boolean result = tossService.confirmPayment(request);
+        mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
+        RestClient restClient = restClientBuilder.build();
 
-		assertTrue(result);
-	}
+        this.tossService = new TossService(tossPaymentConfig, restClient);
 
-	@Test
-	@DisplayName("결제 승인 실패 - 예외 발생")
-	void confirmPayment_fail() {
-		ConfirmReqDto request = new ConfirmReqDto("payKey", 123456L, 1000);
+        confirmReq = new ConfirmReqDto("testKey", 123456789L, 10000);
+    }
 
-		when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(String.class)))
-			.thenThrow(new RestClientException("Toss Error"));
+    @Test
+    @DisplayName("결제 승인 성공")
+    void confirmPayment_success() throws Exception {
+        mockServer.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andRespond(withSuccess());
 
-		CustomException e = assertThrows(CustomException.class,
-			() -> tossService.confirmPayment(request));
+        tossService.confirmPayment(confirmReq);
+    }
 
-		assertEquals(PaymentErrorCode.TOSS_CONFIRM_FAILED, e.getErrorCode());
-	}
+    @Test
+    @DisplayName("결제 승인 실패")
+    void confirmPayment_failure() throws Exception {
+        mockServer.expect(requestTo("https://api.tosspayments.com/v1/payments/confirm"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andRespond(withServerError());
 
-	@Test
-	@DisplayName("결제 정보 조회 성공")
-	void getPaymentInfo_success() {
-		String paymentKey = "pay-123";
+        assertThatThrownBy(() -> tossService.confirmPayment(confirmReq))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining(PaymentErrorCode.TOSS_CONFIRM_FAILED.getMessage());
+    }
 
-		Map<String, Object> card = Map.of(
-			"issuerCode", "KB", "acquirerCode", "SH", "number", "1234-5678-****-****"
-		);
-		Map<String, Object> body = new HashMap<>();
-		body.put("paymentKey", paymentKey);
-		body.put("orderId", "order-1");
-		body.put("orderName", "Test Order");
-		body.put("totalAmount", 15000);
-		body.put("method", "CARD");
-		body.put("status", "DONE");
-		body.put("approvedAt", "2025-05-01T12:00:00Z");
-		body.put("card", card);
+    @Test
+    @DisplayName("결제 단건 조회 성공")
+    void getPaymentInfoByPaymentKey_success() throws Exception {
+        String paymentKey = "testKey";
+        Map<String, Object> responseBody = Map.of(
+                "orderId", "123456789",
+                "orderName", "Test Order",
+                "totalAmount", 10000,
+                "method", "카드",
+                "status", "DONE",
+                "approvedAt", "2024-01-01T00:00:00Z",
+                "card", Map.of(
+                        "issuerCode", "BC",
+                        "acquirerCode", "신한",
+                        "number", "1111-****-****-1111"
+                )
+        );
 
-		ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(body, HttpStatus.OK);
-		ParameterizedTypeReference<Map<String, Object>> typeRef = new ParameterizedTypeReference<>() {};
+        mockServer.expect(requestTo("https://api.tosspayments.com/v1/payments/" + paymentKey))
+                .andRespond(withSuccess(objectMapper.writeValueAsString(responseBody), MediaType.APPLICATION_JSON));
 
-		when(restTemplate.exchange(
-			anyString(),
-			eq(HttpMethod.GET),
-			any(HttpEntity.class),
-			eq(typeRef))
-		).thenReturn(response);
+        PaymentResDto result = tossService.getPaymentInfoByPaymentKey(paymentKey);
+        assertThat(result).isNotNull();
+        assertThat(result.getOrderId()).isEqualTo("123456789");
+        assertThat(result.getMethod()).isEqualTo("카드");
+    }
 
-		PaymentResDto result = tossService.getPaymentInfoByPaymentKey(paymentKey);
+    @Test
+    @DisplayName("결제 단건 조회 실패")
+    void getPaymentInfoByPaymentKey_failure() throws Exception {
+        String paymentKey = "invalidKey";
 
-		assertEquals("pay-123", result.getPaymentKey());
-		assertEquals("Test Order", result.getOrderName());
-		assertEquals("KB", result.getIssuerCode());
-	}
+        mockServer.expect(requestTo("https://api.tosspayments.com/v1/payments/" + paymentKey))
+                .andRespond(withServerError());
 
-	@Test
-	@DisplayName("결제 정보 조회 실패 - 예외 발생")
-	void getPaymentInfo_fail() {
-		when(restTemplate.exchange(
-			anyString(),
-			eq(HttpMethod.GET),
-			any(HttpEntity.class),
-			any(ParameterizedTypeReference.class))
-		).thenThrow(new RestClientException("Toss Error"));
+        assertThatThrownBy(() -> tossService.getPaymentInfoByPaymentKey(paymentKey))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining(PaymentErrorCode.TOSS_FETCH_FAILED.getMessage());
+    }
 
-		CustomException e = assertThrows(CustomException.class,
-			() -> tossService.getPaymentInfoByPaymentKey("invalid-key"));
+    @Test
+    @DisplayName("결제 취소 성공")
+    void cancelPayment_success() {
+        String paymentKey = "testKey";
+        String cancelReason = "테스트 취소";
 
-		assertEquals(PaymentErrorCode.TOSS_FETCH_FAILED, e.getErrorCode());
-	}
+        mockServer.expect(requestTo("https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel"))
+                .andExpect(method(org.springframework.http.HttpMethod.POST))
+                .andRespond(withSuccess());
 
-	@Test
-	@DisplayName("결제 취소 성공")
-	void cancelPayment_success() {
-		when(restTemplate.postForEntity(
-			anyString(), any(HttpEntity.class), eq(String.class)))
-			.thenReturn(new ResponseEntity<>("OK", HttpStatus.OK));
+        tossService.cancelPayment(paymentKey, cancelReason);
+    }
 
-		boolean result = tossService.cancelPayment("payKey", "사용자 요청");
+    @Test
+    @DisplayName("결제 취소 실패")
+    void cancelPayment_failure() {
+        String paymentKey = "invalidKey";
+        String cancelReason = "잘못된 요청";
 
-		assertTrue(result);
-	}
+        mockServer.expect(requestTo("https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel"))
+                .andRespond(withServerError());
 
-	@Test
-	@DisplayName("결제 취소 실패 - 예외 발생")
-	void cancelPayment_fail() {
-		when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(String.class)))
-			.thenThrow(new RestClientException("Toss Error"));
-
-		CustomException e = assertThrows(CustomException.class,
-			() -> tossService.cancelPayment("payKey", "사유"));
-
-		assertEquals(PaymentErrorCode.TOSS_CANCEL_FAILED, e.getErrorCode());
-	}
+        assertThatThrownBy(() -> tossService.cancelPayment(paymentKey, cancelReason))
+                .isInstanceOf(CustomException.class)
+                .hasMessageContaining(PaymentErrorCode.TOSS_CANCEL_FAILED.getMessage());
+    }
 }

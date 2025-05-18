@@ -15,7 +15,7 @@ const NicknameForm = ({nickname, setNickname, error, setError, setInputStatus}) 
             setChecked(true);
             setInputStatus(prev => ({ ...prev, nickname: true }));
             openConfirm({
-                title: response.data.msg
+                title: response.data.message
                 , showCancelButton: false
             });
         }
@@ -23,7 +23,7 @@ const NicknameForm = ({nickname, setNickname, error, setError, setInputStatus}) 
             console.log(error)
             openConfirm({
                 title: '처리 중 오류가 발생했습니다.',
-                html: error.response?.data?.msg || "에러: 관리자에게 문의바랍니다."
+                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
             });
         }
     });

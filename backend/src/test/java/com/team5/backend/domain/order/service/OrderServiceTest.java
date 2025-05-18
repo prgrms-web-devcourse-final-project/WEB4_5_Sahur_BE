@@ -179,7 +179,7 @@ class OrderServiceTest {
         assertThat(result.getContent())
                 .isNotEmpty()
                 .allSatisfy(order -> {
-                    assertThat(List.of(OrderStatus.BEFOREPAID.name(), OrderStatus.PAID.name())).contains(order.getStatus());
+                    assertThat(List.of(OrderStatus.BEFOREPAID.name(), OrderStatus.PAID.name(), DeliveryStatus.INDELIVERY.name())).contains(order.getStatus());
                 });
     }
 

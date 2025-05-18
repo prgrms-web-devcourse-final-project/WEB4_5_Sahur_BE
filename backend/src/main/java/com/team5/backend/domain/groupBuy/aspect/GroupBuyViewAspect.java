@@ -2,8 +2,10 @@ package com.team5.backend.domain.groupBuy.aspect;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.KeywordType;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyDetailResDto;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.global.dto.RsData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -43,25 +45,20 @@ public class GroupBuyViewAspect {
      */
     @AfterReturning(pointcut = "onGroupBuyView()", returning = "result")
     public void afterGroupBuyViewed(JoinPoint joinPoint, Object result) {
-        Object[] args = joinPoint.getArgs();
-        if (args.length == 0 || !(args[0] instanceof Long)) return;
+        if (!(result instanceof RsData<?> rsData)) return;
+        Object data = rsData.getData();
 
-        Long groupBuyId = (Long) args[0];
-        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId).orElse(null);
-        if (groupBuy == null || groupBuy.getProduct() == null) return;
+        if (!(data instanceof GroupBuyDetailResDto dto)) return;
 
-        Category category = groupBuy.getProduct().getCategory();
-        KeywordType keyword = category.getKeyword();
+        // Redis 기록: dto 안에 있는 product.category.keyword 를 사용
+        String keyword = dto.getProduct().getCategory().getKeyword().name();
         if (keyword == null) return;
 
-        // 현재 시각 기준 시간별 키 생성
         String hourKey = "keyword_rank:" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"));
-
-        redisTemplate.opsForZSet().incrementScore(hourKey, keyword.name(), 1.0);
-
-        // Redis에서 2시간 뒤 자동 삭제 설정
+        redisTemplate.opsForZSet().incrementScore(hourKey, keyword, 1.0);
         redisTemplate.expire(hourKey, Duration.ofHours(2));
     }
+
 
 
 }

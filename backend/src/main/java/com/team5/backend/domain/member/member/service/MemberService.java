@@ -13,6 +13,8 @@ import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.util.ImageUtil;
+import com.team5.backend.global.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -42,6 +46,7 @@ public class MemberService {
     private final AuthService authService;
     private final ImageUtil imageUtil;
     private final AuthTokenManager authTokenManager;
+    private final JwtUtil jwtUtil;
 
     private final HistoryRepository historyRepository;
 
@@ -156,19 +161,21 @@ public class MemberService {
 
             // 토큰 정보 추출
             String token = authTokenManager.extractToken(authentication);
-
             if (token == null) {
                 throw new CustomException(AuthErrorCode.ACCESS_TOKEN_NOT_FOUND);
             }
 
-            authService.logout(token, response);
+            // Bearer 접두사 추가 (로그아웃 메서드에서 처리하므로)
+            String headerToken = "Bearer " + token;
+
+            // 로그아웃 메서드 호출
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            authService.logout(headerToken, request, response);
 
         } catch (CustomException e) {
-
             log.info("회원 탈퇴 중 인증 관련 오류 발생: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-
             log.info("회원 탈퇴 중 예상치 못한 오류 발생", e);
             throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
         }
@@ -228,7 +235,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberRestoreResDto restoreMember(Long memberId) {
+    public MemberRestoreResDto restoreMember(Long memberId, HttpServletResponse response) {
 
         // 삭제된 회원을 포함하여 조회
         Member member = memberRepository.findByIdAllMembers(memberId)
@@ -245,10 +252,7 @@ public class MemberService {
 
         log.info("회원 ID {} 복구 처리 완료", member.getMemberId());
 
-        return MemberRestoreResDto.builder()
-                .memberId(member.getMemberId())
-                .message("회원 복구가 성공적으로 완료되었습니다.")
-                .build();
+        return authService.handleMemberRestoreAuth(member, response);
     }
 
     // 회원 탈퇴 30일 후 하드 딜리트 진행(매일 자정 수행)
