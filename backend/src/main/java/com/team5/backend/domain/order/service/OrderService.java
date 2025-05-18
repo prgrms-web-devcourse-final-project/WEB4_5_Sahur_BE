@@ -99,16 +99,19 @@ public class OrderService {
     @Transactional(readOnly = true)
     public Page<OrderListResDto> getOrdersByMember(Long memberId, FilterStatus status, Pageable pageable) {
         Page<Order> orders = null;
-        if (FilterStatus.IN_PROGRESS.equals(status)) {
-            List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
-            orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, statusList, pageable);
-        } else if (FilterStatus.DONE.equals(status)) {
-            orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
-        } else if (FilterStatus.CANCELED.equals(status)) {
-            orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
-        } else {
-            orders = orderRepository.findByMember_MemberId(memberId, pageable);
+
+        switch (status) {
+            case IN_PROGRESS -> {
+                List<OrderStatus> progressStatuses = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
+                orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, progressStatuses, pageable);
+            }
+            case DONE ->
+                    orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
+            case CANCELED ->
+                    orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
+            default -> orders = orderRepository.findByMember_MemberId(memberId, pageable);
         }
+        
         return orders.map(OrderListResDto::from);
     }
 
