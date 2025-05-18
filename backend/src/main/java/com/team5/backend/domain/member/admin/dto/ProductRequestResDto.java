@@ -5,6 +5,8 @@ import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class ProductRequestResDto {
@@ -15,6 +17,8 @@ public class ProductRequestResDto {
     private String title;
     private String productUrl;
     private String etc;
+    private List<String> imageUrls;
+    private String description;
     private ProductRequestStatus status;
 
     public static ProductRequestResDto fromEntity(ProductRequest productRequest) {
@@ -24,7 +28,9 @@ public class ProductRequestResDto {
                 .categoryId(productRequest.getCategory().getCategoryId())
                 .title(productRequest.getTitle())
                 .productUrl(productRequest.getProductUrl())
-                .etc(productRequest.getEtc())
+//                .etc(productRequest.getEtc())
+                .imageUrls(productRequest.getImageUrls())
+                .description(productRequest.getDescription())
                 .status(productRequest.getStatus())
                 .build();
     }

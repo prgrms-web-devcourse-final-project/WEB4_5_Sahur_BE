@@ -42,7 +42,7 @@ public class ProductRequest {
     @Column(nullable = false)
     private String productUrl;
 
-    private String etc;
+//    private String etc;
 
     @CreatedDate
     private LocalDateTime createdAt;
