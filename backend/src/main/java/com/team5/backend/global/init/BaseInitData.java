@@ -135,7 +135,7 @@ public class BaseInitData implements CommandLineRunner {
                     .imageUrl("http://example.com/admin.jpg")
                     .build());
 
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 62; i++) {
                 Member requester = members.get(i % members.size());
                 Category category = categories.get(i % categories.size());
                 String title = productTitles.get(i % productTitles.size());
