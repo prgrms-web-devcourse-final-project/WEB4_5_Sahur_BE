@@ -1,7 +1,6 @@
-package com.team5.backend.domain.product.search.service;
+package com.team5.backend.domain.groupBuy.search.service;
 
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -53,7 +53,4 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
 
 
 
-
-
-
 }

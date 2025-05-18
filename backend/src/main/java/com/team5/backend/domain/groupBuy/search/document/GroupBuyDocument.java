@@ -1,4 +1,4 @@
-package com.team5.backend.domain.product.search.document;
+package com.team5.backend.domain.groupBuy.search.document;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@org.springframework.data.elasticsearch.annotations.Document(indexName = "groupbuy")
+@Document(indexName = "groupbuy")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,6 +24,14 @@ public class GroupBuyDocument {
     private int currentParticipantCount;
     private int round;
     private String deadline;
-    private String status; // GroupBuyStatus.toString()
+    private String status;
     private String createdAt;
+
+    private Long productId;
+    private Long dibCount;
+
+    private Long categoryId;
+    private String categoryType;
+    private String keyword;
+    private Integer uid;
 }
