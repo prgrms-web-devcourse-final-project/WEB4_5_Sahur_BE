@@ -168,7 +168,7 @@ public class BaseInitData implements CommandLineRunner {
                         .currentParticipantCount((i % 6) + 1)
                         .round(1 + (i % 3))
                         .deadline(LocalDateTime.now().plusDays(5 - (i % 3)))
-                        .status(i % 2 == 0 ? GroupBuyStatus.ONGOING : GroupBuyStatus.CLOSED)
+                        .status(GroupBuyStatus.ONGOING)
                         .build());
 
                 Member buyer = members.get((i + 1) % members.size());
