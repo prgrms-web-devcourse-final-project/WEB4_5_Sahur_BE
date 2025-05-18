@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -193,18 +194,34 @@ public class GroupBuyService {
 
     @Transactional(readOnly = true)
     public List<GroupBuyResDto> getRandomTop3GroupBuysBySameCategory(Long groupBuyId) {
-        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+        GroupBuy baseGroupBuy = groupBuyRepository.findById(groupBuyId)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
 
-        Long categoryId = groupBuy.getProduct().getCategory().getCategoryId();
+        CategoryType categoryType = baseGroupBuy.getProduct().getCategory().getCategoryType();
 
-        // Pageable 객체로 limit 3 적용
-        Pageable limit3 = PageRequest.of(0, 3);
+        List<GroupBuy> all = groupBuyRepository.findAllByCategoryType(categoryType);
 
-        return groupBuyRepository.findRandomTop3ByCategoryIdExcludingSelf(categoryId, groupBuyId ,limit3).stream()
+        // 자기 자신 제외
+        List<GroupBuy> candidates = new ArrayList<>(all);
+        candidates.removeIf(g -> g.getGroupBuyId().equals(groupBuyId));
+
+        // 무작위 정렬
+        candidates.sort(Comparator.comparing(g -> UUID.randomUUID()));
+
+        return candidates.stream()
+                .limit(3)
                 .map(this::toDto)
                 .toList();
     }
+
+
+
+
+
+
+
+
+
 
     @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getOngoingGroupBuysByCategoryId(Long categoryId, Pageable pageable, GroupBuySortField sortField) {
