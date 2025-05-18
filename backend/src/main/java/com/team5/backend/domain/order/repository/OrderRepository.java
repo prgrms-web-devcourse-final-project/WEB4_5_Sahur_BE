@@ -18,6 +18,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
 
+    Page<Order> findByStatusAndDelivery_Status(OrderStatus status, DeliveryStatus deliveryStatus, Pageable pageable);
+
+    Page<Order> findByDelivery_Status(DeliveryStatus status, Pageable pageable);
+
     Page<Order> findByMember_MemberId(Long memberId, Pageable pageable);
 
     Page<Order> findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(Long memberId, List<OrderStatus> status, Pageable pageable);

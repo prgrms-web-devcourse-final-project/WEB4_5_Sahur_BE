@@ -174,6 +174,7 @@ public class BaseInitData implements CommandLineRunner {
                 Member buyer = members.get((i + 1) % members.size());
                 Long orderId = orderIdGenerator.generateOrderId();
                 Order order = orderRepository.save(Order.create(orderId, buyer, groupBuy, product, 1));
+                order.markAsPaid();
                 paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
 
                 deliveryRepository.save(Delivery.builder()
