@@ -12,6 +12,7 @@ import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.exception.code.ProductErrorCode;
+import com.team5.backend.global.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,8 @@ public class ProductRequestService {
 
 
     @Transactional
-    public ProductRequestResDto createRequest(Long memberId, ProductRequestCreateReqDto requestDto) {
+    public ProductRequestResDto createRequest(ProductRequestCreateReqDto requestDto, PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
 
