@@ -2,6 +2,7 @@ package com.team5.backend.domain.member.admin.entity;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.product.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "ProductRequest")
@@ -34,21 +36,27 @@ public class ProductRequest {
     @JoinColumn(name = "categoryId", nullable = false)
     private Category category;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String productUrl;
 
-    @Column(nullable = true)
     private String etc;
 
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private List<String> imageUrls;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductRequestStatus status;
+    private ProductRequestStatus status = ProductRequestStatus.WAITING;;
 
     public void changeStatus(ProductRequestStatus newStatus) {
         this.status = newStatus;
