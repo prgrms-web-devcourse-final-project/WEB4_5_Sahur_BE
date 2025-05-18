@@ -49,7 +49,6 @@ public class OrderService {
 
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
-    private final HistoryRepository historyRepository;
 
     public Order createOrder(OrderCreateReqDto request) {
         Member member = memberRepository.findById(request.getMemberId())
@@ -176,8 +175,8 @@ public class OrderService {
                 deliveryRepository.delete(order.getDelivery());
             }
 
-            log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
-            historyRepository.deleteByOrder_OrderId(orderId);
+            // log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
+            // historyRepository.deleteByOrder_OrderId(orderId);
 
             orderRepository.delete(order);
             log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", orderId);
