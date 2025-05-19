@@ -244,10 +244,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // 쿠키 값을 담은 Map 생성 (쿠키 이름은 실제 코드에 맞게 수정 필요)
+            // 쿠키 값을 담은 Map 생성
             Map<String, String> newCookies = new HashMap<>();
-            newCookies.put("access-token", newAccessToken);
-            newCookies.put("refresh-token", newRefreshToken);
+            newCookies.put("accessToken", newAccessToken);
+            newCookies.put("refreshToken", newRefreshToken);
 
             // 새 쿠키 값을 포함한 요청 래퍼 생성
             HttpServletRequest wrappedRequest = new CookieRequestWrapper(request, newCookies);
