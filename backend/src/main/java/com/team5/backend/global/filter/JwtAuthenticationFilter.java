@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 회원 복구일 경우 JwtAuthenticationFilter에서는 처리하지 않고 필터 체인을 계속 진행
         String requestPath = request.getServletPath();
-        if (requestPath.startsWith("/h2-console") || requestPath.equals("/api/v1/members/restore") || requestPath.equals("/api/v1/members/me")) {
+        if (requestPath.startsWith("/h2-console") || requestPath.equals("/api/v1/members/restore")) {
 
             filterChain.doFilter(request, response);
             return ;
