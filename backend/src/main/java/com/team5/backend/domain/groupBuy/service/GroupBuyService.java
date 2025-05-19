@@ -7,6 +7,7 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.groupBuy.search.service.GroupBuySearchService;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
@@ -16,7 +17,10 @@ import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +39,7 @@ public class GroupBuyService {
     private final DibsRepository dibsRepository;
     private final ReviewRepository reviewRepository;
     private final JwtUtil jwtUtil;
+    private final GroupBuySearchService groupBuySearchService;
 
     @Transactional
     @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
@@ -65,7 +70,11 @@ public class GroupBuyService {
                 .status(GroupBuyStatus.ONGOING)
                 .build();
 
-        return toDto(groupBuyRepository.save(groupBuy));
+        GroupBuy savedGroupBuy = groupBuyRepository.save(groupBuy);
+
+        groupBuySearchService.index(savedGroupBuy);
+
+        return toDto(savedGroupBuy);
     }
 
     @Transactional(readOnly = true)
