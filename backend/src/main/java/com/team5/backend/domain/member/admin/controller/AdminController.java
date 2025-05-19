@@ -1,8 +1,8 @@
 package com.team5.backend.domain.member.admin.controller;
 
-import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.admin.dto.ProductRequestUpdateReqDto;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.service.AdminService;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;

@@ -1,12 +1,12 @@
-package com.team5.backend.domain.member.admin.service;
+package com.team5.backend.domain.member.productrequest.service;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
-import com.team5.backend.domain.member.admin.dto.ProductRequestCreateReqDto;
-import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
-import com.team5.backend.domain.member.admin.entity.ProductRequest;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.exception.CustomException;

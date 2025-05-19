@@ -1,8 +1,8 @@
-package com.team5.backend.domain.member.admin.controller;
+package com.team5.backend.domain.member.productrequest.controller;
 
-import com.team5.backend.domain.member.admin.dto.ProductRequestCreateReqDto;
-import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
-import com.team5.backend.domain.member.admin.service.ProductRequestService;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.service.ProductRequestService;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.security.PrincipalDetails;

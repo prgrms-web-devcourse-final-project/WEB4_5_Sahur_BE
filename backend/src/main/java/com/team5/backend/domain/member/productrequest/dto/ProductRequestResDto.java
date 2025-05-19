@@ -1,7 +1,7 @@
-package com.team5.backend.domain.member.admin.dto;
+package com.team5.backend.domain.member.productrequest.dto;
 
-import com.team5.backend.domain.member.admin.entity.ProductRequest;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import lombok.Builder;
 import lombok.Getter;
 

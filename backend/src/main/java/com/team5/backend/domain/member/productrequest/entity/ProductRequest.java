@@ -1,4 +1,4 @@
-package com.team5.backend.domain.member.admin.entity;
+package com.team5.backend.domain.member.productrequest.entity;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.member.member.entity.Member;
