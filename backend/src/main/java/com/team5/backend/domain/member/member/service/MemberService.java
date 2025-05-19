@@ -12,6 +12,7 @@ import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
+import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.ImageUtil;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -177,7 +178,7 @@ public class MemberService {
             throw e;
         } catch (Exception e) {
             log.info("회원 탈퇴 중 예상치 못한 오류 발생", e);
-            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
         }
 
         // 소프트 딜리트 적용
@@ -264,5 +265,19 @@ public class MemberService {
         int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDays);
 
         log.info("삭제된 회원 수: {}", deletedCount);
+    }
+
+    public GetMemberResDto getCurrentMemberInfo(PrincipalDetails userDetails) {
+
+        // 로그인 되지 않은 경우
+        if (userDetails == null) {
+            return GetMemberResDto.builder()
+                    .isLogged(false)
+                    .build();
+        }
+
+        // 로그인된 경우
+        Long memberId = userDetails.getMember().getMemberId();
+        return getMemberById(memberId);
     }
 }

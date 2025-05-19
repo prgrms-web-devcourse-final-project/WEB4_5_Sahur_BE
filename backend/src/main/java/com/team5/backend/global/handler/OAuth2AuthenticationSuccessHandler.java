@@ -5,6 +5,7 @@ import com.team5.backend.global.app.AppConfig;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URL;
 
 @Slf4j
 @Component
@@ -25,6 +27,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final AuthTokenManager authTokenManager;
     private final AppConfig appConfig;
 
+    // 배포 환경 확인 메서드
+    private boolean isProductionEnvironment() {
+
+        String backUrl = appConfig.getSiteBackUrl();
+        String frontUrl = appConfig.getSiteFrontUrl();
+
+        // 배포 환경 여부 확인 로직 (URL로 판단하거나 프로필로 판단)
+        return (backUrl != null && frontUrl != null &&
+                !backUrl.contains("localhost") && !frontUrl.contains("localhost"));
+    }
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
@@ -32,7 +45,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         Member member = principalDetails.getMember();
 
-        // JWT 토큰 생성 (JwtUtil 사용)
+        log.info("OAuth2 인증 성공! 사용자: {}", member.getEmail());
+
+        // JWT 토큰 생성
         String accessToken = jwtUtil.generateAccessToken(
                 member.getMemberId(),
                 member.getEmail(),
@@ -46,24 +61,75 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 member.getRole().name()
         );
 
-        // AuthTokenManager를 사용하여 쿠키 설정
+        // 토큰 만료 시간 계산
         int accessTokenMaxAge = (int)(jwtUtil.getAccessTokenExpiration() / 1000);
         int refreshTokenMaxAge = (int)(jwtUtil.getRefreshTokenExpiration() / 1000);
 
-        authTokenManager.addCookie(response, "accessToken", accessToken, accessTokenMaxAge);
-        authTokenManager.addCookie(response, "refreshToken", refreshToken, refreshTokenMaxAge);
+        // 배포 환경과 개발 환경 분리 처리
+        if (isProductionEnvironment()) {
+            log.info("배포 환경에서 쿠키 설정 - 프론트엔드 URL: {}", appConfig.getSiteFrontUrl());
 
-        // 리디렉션 URI 가져오기 (클라이언트에서 전달한 redirect_uri 파라미터 값)
+            // 프론트엔드 도메인 추출 (https://domain.com -> domain.com)
+            String domain = null;
+            try {
+                URL url = new URL(appConfig.getSiteFrontUrl());
+                domain = url.getHost();
+
+                // 최상위 도메인만 추출 (예: www.example.com -> .example.com)
+                if (domain.startsWith("www.")) {
+                    domain = domain.substring(4);
+                }
+
+                // 서브도메인 지원을 위해 점(.) 추가
+                if (!domain.startsWith(".")) {
+                    domain = "." + domain;
+                }
+
+                log.info("추출된 쿠키 도메인: {}", domain);
+            } catch (Exception e) {
+                log.error("도메인 추출 중 오류: {}", e.getMessage());
+            }
+
+            // 배포 환경에서는 헤더를 직접 설정
+            setCookieHeader(response, "accessToken", accessToken, accessTokenMaxAge, domain);
+            setCookieHeader(response, "refreshToken", refreshToken, refreshTokenMaxAge, domain);
+        } else {
+            // 개발 환경에서는 기존 방식 사용
+            log.info("개발 환경에서 쿠키 설정");
+            authTokenManager.addCookie(response, "accessToken", accessToken, accessTokenMaxAge);
+            authTokenManager.addCookie(response, "refreshToken", refreshToken, refreshTokenMaxAge);
+        }
+
+        // 리디렉션 URI 가져오기
         String targetUrl = determineTargetUrl(request, response, authentication);
 
-        // 리디렉션 URI에 토큰 추가
+        // 리디렉션 URI에 토큰 추가 - 쿠키가 작동하지 않을 경우를 대비해 URL 파라미터로도 전달
         targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
                 .build().toUriString();
 
+        log.info("최종 리다이렉트 URL: {}", targetUrl);
+
         // 리디렉션 수행
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    // 배포 환경에서 쿠키 헤더 직접 설정 메서드
+    private void setCookieHeader(HttpServletResponse response, String name, String value,
+                                 int maxAge, String domain) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAge);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
+
+        if (domain != null && !domain.isEmpty()) {
+            cookie.setDomain(domain);
+        }
+
+        response.addCookie(cookie);
     }
 
     @Override

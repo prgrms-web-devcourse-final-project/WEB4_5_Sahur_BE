@@ -49,8 +49,11 @@ public class MemberController {
     @GetMapping("/members/me")
     public RsData<GetMemberResDto> getMember(@AuthenticationPrincipal PrincipalDetails userDetails) {
 
-        Long memberId = userDetails.getMember().getMemberId();
-        GetMemberResDto memberResDto = memberService.getMemberById(memberId);
+        GetMemberResDto memberResDto = memberService.getCurrentMemberInfo(userDetails);
+
+        if (memberResDto.getIsLogged() == null || !memberResDto.getIsLogged()) {
+            return RsDataUtil.success("로그인이 필요합니다.", memberResDto);
+        }
 
         return RsDataUtil.success("회원 정보를 성공적으로 조회했습니다.", memberResDto);
     }
