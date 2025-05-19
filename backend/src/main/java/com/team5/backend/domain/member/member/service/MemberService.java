@@ -178,7 +178,7 @@ public class MemberService {
             throw e;
         } catch (Exception e) {
             log.info("회원 탈퇴 중 예상치 못한 오류 발생", e);
-            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
         }
 
         // 소프트 딜리트 적용

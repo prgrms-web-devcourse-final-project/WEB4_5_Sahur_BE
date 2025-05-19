@@ -133,11 +133,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         filterChain.doFilter(request, response);
                         return;
                     } catch (Exception e) {
-                        sendTokenErrorResponse(response, CommonErrorCode.INTERNAL_ERROR);
+                        sendTokenErrorResponse(response, CommonErrorCode.VALIDATION_ERROR);
                         return;
                     }
                 } else {
-                    sendTokenErrorResponse(response, CommonErrorCode.INTERNAL_ERROR);
+                    sendTokenErrorResponse(response, CommonErrorCode.VALIDATION_ERROR);
                     return;
                 }
             }
