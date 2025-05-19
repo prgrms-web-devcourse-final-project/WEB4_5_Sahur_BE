@@ -8,9 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.payment.dto.CancelReqDto;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
@@ -20,8 +21,6 @@ import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.security.PrincipalDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,25 +30,42 @@ public class PaymentControllerTest {
     private PaymentController paymentController;
     private PaymentService paymentService;
     private TossService tossService;
-    private AuthService authService;
+
+    private Long orderId;
+    private String paymentKey;
+    private int amount;
+    private PaymentResDto dto;
 
     @BeforeEach
     void setup() {
         paymentService = mock(PaymentService.class);
         tossService = mock(TossService.class);
-        authService = mock(AuthService.class);
-        paymentController = new PaymentController(paymentService, tossService, authService);
+        paymentController = new PaymentController(paymentService, tossService);
+
+        orderId = 2505081357L;
+        paymentKey = "tviva20250519145043ABCDE";
+        amount = 100000;
+
+        dto = PaymentResDto.builder()
+                .paymentKey(paymentKey)
+                .orderId(orderId.toString())
+                .orderName("테스트")
+                .totalAmount(amount)
+                .method("카드")
+                .status("DONE")
+                .approvedAt("2025-05-19")
+                .build();
     }
 
     @Test
     @DisplayName("결제 승인 성공")
     void confirmPayment_success() {
-        ConfirmReqDto request = new ConfirmReqDto("payKey", 123456L, 10000);
+        ConfirmReqDto request = new ConfirmReqDto(paymentKey, orderId, amount);
 
         RsData<?> result = paymentController.confirmPayment(request);
 
         verify(tossService).confirmPayment(request);
-        verify(paymentService).savePayment(123456L, "payKey");
+        verify(paymentService).savePayment(orderId, paymentKey);
 
         assertEquals(200, result.getStatus());
     }
@@ -57,17 +73,6 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("결제 내역 단건 조회 - 성공")
     void getPaymentInfo_success() {
-        String paymentKey = "pay-001";
-        PaymentResDto dto = PaymentResDto.builder()
-                .paymentKey(paymentKey)
-                .orderId("2505081234")
-                .orderName("테스트")
-                .totalAmount(5000)
-                .method("카드")
-                .status("DONE")
-                .approvedAt("2025-05-08")
-                .build();
-
         when(paymentService.getPaymentKey(1L)).thenReturn(paymentKey);
         when(tossService.getPaymentInfoByPaymentKey(paymentKey)).thenReturn(dto);
 
@@ -80,28 +85,23 @@ public class PaymentControllerTest {
     @Test
     @DisplayName("결제 취소 성공")
     void cancelPayment_success() {
-        CancelReqDto request = new CancelReqDto("테스트 취소");
-        when(paymentService.getPaymentKeyByOrder(123L)).thenReturn("payKey");
+        String cancelReason = "테스트 취소";
 
-        RsData<String> result = paymentController.cancelPayment(123L, request);
+        CancelReqDto request = new CancelReqDto(cancelReason);
+        when(paymentService.getPaymentKeyByOrder(orderId)).thenReturn(paymentKey);
 
-        verify(tossService).cancelPayment("payKey", "테스트 취소");
+        RsData<String> result = paymentController.cancelPayment(orderId, request);
+
+        verify(tossService).cancelPayment(paymentKey, cancelReason);
         assertEquals(200, result.getStatus());
-        assertEquals("테스트 취소", result.getData());
+        assertEquals(cancelReason, result.getData());
     }
 
     @Test
     @DisplayName("내 결제 내역 조회 - 성공")
     void getPaymentsByMember_success() {
-        PaymentResDto dto = PaymentResDto.builder()
-                .paymentKey("pay-key-001")
-                .orderId("ORD-2505085678")
-                .orderName("테스트 상품")
-                .totalAmount(1000)
-                .method("카드")
-                .status("DONE")
-                .approvedAt("2025-05-01")
-                .build();
+        OrderStatus status = OrderStatus.PAID;
+        String search = "테스트";
 
         Member member = mock(Member.class);
         when(member.getMemberId()).thenReturn(1L);
@@ -109,37 +109,25 @@ public class PaymentControllerTest {
         PrincipalDetails user = mock(PrincipalDetails.class);
         when(user.getMember()).thenReturn(member);
 
-        Page<String> mockKeys = new PageImpl<>(List.of("key1", "key2"));
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<String> keys = new PageImpl<>(List.of("key1", "key2"));
+        when(paymentService.getPaymentKeysByMember(member.getMemberId(), status, search, pageable)).thenReturn(keys);
+
         Page<PaymentResDto> mockDtos = new PageImpl<>(List.of(dto, dto));
+        when(paymentService.getPaymentsByKeysAsync(keys)).thenReturn(mockDtos);
 
-        when(paymentService.getPaymentKeysByMember(eq(1L), any())).thenReturn(mockKeys);
-        when(paymentService.getPaymentsByKeysAsync(mockKeys)).thenReturn(mockDtos);
-
-        RsData<Page<PaymentResDto>> result = paymentController.getPaymentsByMember(user, PageRequest.of(0, 5));
-
+        RsData<Page<PaymentResDto>> result = paymentController.getPaymentsByMember(user, pageable, status, search);
         assertEquals(200, result.getStatus());
-        assertEquals(2, result.getData().getContent().size());
+        assertEquals(dto, result.getData().getContent().get(0));
     }
 
     @Test
     @DisplayName("주문별 결제 조회 - 성공")
     void getPaymentByOrder_success() {
-        String paymentKey = "pay-order-001";
-
-        PaymentResDto dto = PaymentResDto.builder()
-                .paymentKey(paymentKey)
-                .orderId("ORD-2505081357")
-                .orderName("주문결제테스트")
-                .totalAmount(3000)
-                .method("카드")
-                .status("DONE")
-                .approvedAt("2025-05-02")
-                .build();
-
-        when(paymentService.getPaymentKeyByOrder(888L)).thenReturn(paymentKey);
+        when(paymentService.getPaymentKeyByOrder(orderId)).thenReturn(paymentKey);
         when(tossService.getPaymentInfoByPaymentKey(paymentKey)).thenReturn(dto);
 
-        RsData<PaymentResDto> result = paymentController.getPaymentByOrder(888L);
+        RsData<PaymentResDto> result = paymentController.getPaymentByOrder(orderId);
 
         assertEquals(200, result.getStatus());
         assertEquals(dto, result.getData());
