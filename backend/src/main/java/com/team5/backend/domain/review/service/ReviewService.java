@@ -45,9 +45,12 @@ public class ReviewService {
         History history = historyRepository.findById(request.getHistoryId())
                 .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
 
-        // 보안 체크: 요청한 유저가 해당 이력을 가진 사람인지 검증
         if (!history.getMember().getMemberId().equals(memberId)) {
             throw new CustomException(ReviewErrorCode.REVIEW_FORBIDDEN);
+        }
+
+        if (!history.getWritable()) {
+            throw new CustomException(ReviewErrorCode.DUPLICATE_REVIEW); // 방어 코드도 추천
         }
 
         Product product = history.getProduct();
@@ -62,11 +65,14 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        history.setWritable(false); // 한 번 리뷰 작성하면 더는 못 쓰게
         Review saved = reviewRepository.save(review);
+
+        history.setWritable(false);
+        historyRepository.save(history); // 이거 꼭 필요함!!
 
         return ReviewResDto.fromEntity(saved);
     }
+
 
 
     /**
@@ -138,6 +144,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
         review.getHistory().setWritable(true);
+        historyRepository.save(review.getHistory());
         reviewRepository.deleteById(id);
     }
 

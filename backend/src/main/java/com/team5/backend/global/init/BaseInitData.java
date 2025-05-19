@@ -188,18 +188,18 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(buyer).product(product).build());
                 dibsRepository.save(Dibs.builder().member(requester).product(product).build());
 
+                boolean shouldWriteReview = i % 2 == 0;
+
                 History history = historyRepository.save(History.builder()
                         .member(buyer)
                         .product(product)
                         .groupBuy(groupBuy)
                         .order(order)
-                        .writable(i % 2 == 0) // true면 리뷰 작성 가능
+                        .writable(!shouldWriteReview)  // 리뷰를 쓸 거면 false로 저장, 아닐 땐 true 유지
                         .createdAt(LocalDateTime.now())
                         .build());
 
-                if (history.getWritable()) {
-                    history.setWritable(false); // 리뷰 작성 이후 writable false 처리
-
+                if (shouldWriteReview) {
                     reviewRepository.save(Review.builder()
                             .member(buyer)
                             .product(product)
@@ -245,6 +245,7 @@ public class BaseInitData implements CommandLineRunner {
             }
         }
     }
+
 
     private Member createMember(String name, String email, String nickname, Address address, String imageFile) {
         return memberRepository.save(Member.builder()
