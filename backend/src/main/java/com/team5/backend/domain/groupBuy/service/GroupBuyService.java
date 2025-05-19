@@ -224,14 +224,6 @@ public class GroupBuyService {
     }
 
 
-
-
-
-
-
-
-
-
     @Transactional(readOnly = true)
     public Page<GroupBuyResDto> getOngoingGroupBuysByCategoryId(Long categoryId, Pageable pageable, GroupBuySortField sortField) {
         Pageable sortedPageable = createSortedPageable(pageable, sortField);

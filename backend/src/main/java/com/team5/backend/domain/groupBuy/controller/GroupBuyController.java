@@ -156,6 +156,9 @@ public class GroupBuyController {
             @Parameter(description = "정렬 기준", example = "LATEST") @RequestParam(defaultValue = "LATEST") GroupBuySortField sortField
     ) {
         Page<GroupBuyResDto> responses = groupBuyService.getOngoingGroupBuysByCategoryId(categoryId, pageable, sortField);
+        if (responses.isEmpty()) {
+            return RsDataUtil.success("해당 카테고리에 진행 중인 공동구매가 없습니다.", responses);
+        }
         return RsDataUtil.success("카테고리별 진행 중 공동구매 조회 성공", responses);
     }
 
