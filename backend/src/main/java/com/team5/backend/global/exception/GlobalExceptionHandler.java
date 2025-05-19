@@ -9,8 +9,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -49,5 +49,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(CommonErrorCode.INTERNAL_ERROR.getStatus())
                 .body(RsDataUtil.fail(CommonErrorCode.INTERNAL_ERROR));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<RsData<Empty>> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        String msg = String.format("잘못된 값입니다: '%s' 는 허용되지 않는 값입니다.", ex.getValue());
+        return ResponseEntity
+                .status(CommonErrorCode.VALIDATION_ERROR.getStatus())
+                .body(RsDataUtil.fail(CommonErrorCode.VALIDATION_ERROR, msg));
     }
 }
