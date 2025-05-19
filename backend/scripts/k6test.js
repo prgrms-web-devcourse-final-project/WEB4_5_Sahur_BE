@@ -1,6 +1,5 @@
 // 도커 컴포즈를 이용한 부하테스트 실행
-// docker-compose run k6 run /scripts/k6-test.js
-
+// docker-compose run --rm k6
 import http from 'k6/http';
 import { check } from 'k6';
 
