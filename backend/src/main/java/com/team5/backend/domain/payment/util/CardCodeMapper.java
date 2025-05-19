@@ -2,7 +2,6 @@ package com.team5.backend.domain.payment.util;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -10,6 +9,9 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
+
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
 
 import jakarta.annotation.PostConstruct;
 
@@ -40,8 +42,8 @@ public class CardCodeMapper {
 
                 codeToName.put(code, name);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new CustomException(PaymentErrorCode.INVALID_CARD_CODE);
         }
     }
 
