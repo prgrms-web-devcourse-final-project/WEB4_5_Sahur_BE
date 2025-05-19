@@ -146,8 +146,57 @@ class DeliveryControllerTest {
         Long deliveryId = 1L;
 
         mockMvc.perform(delete("/api/v1/deliveries/{deliveryId}", deliveryId))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("200"));
+    }
+
+    @DisplayName("예외 테스트 - 존재하지 않는 주문 ID")
+    @Test
+    void createDeliveryWithInvalidOrderId() throws Exception {
+        DeliveryReqDto request = new DeliveryReqDto(
+                "12345", "서울시 강남구", "테스트 123", 12345, "01012345678", "12345");
+
+        mockMvc.perform(post("/api/v1/deliveries/order/{orderId}", 9999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("404"));
+    }
+
+    @DisplayName("예외 테스트 - 존재하지 않는 배송 ID 조회")
+    @Test
+    void getDeliveryWithInvalidId() throws Exception {
+        mockMvc.perform(get("/api/v1/deliveries/order/{orderId}", 9999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("404"));
+    }
+
+    @DisplayName("예외 테스트 - 존재하지 않는 배송 ID 수정")
+    @Test
+    void updateDeliveryWithInvalidId() throws Exception {
+        DeliveryReqDto request = new DeliveryReqDto(
+                "12345", "서울시 강남구", "테스트 123", 12345, "01012345678", "TRK1234567890");
+
+        mockMvc.perform(put("/api/v1/deliveries/{deliveryId}", 9999L)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("404"));
+    }
+
+    @DisplayName("예외 테스트 - 배송 상태 변경 실패")
+    @Test
+    void updateDeliveryStatusInvalidTransition() throws Exception {
+        Long deliveryId = 1L;
+
+        // 상태를 COMPLETED로 설정
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
+        delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
+        deliveryRepository.save(delivery);
+
+        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("400"));
     }
 
 }
