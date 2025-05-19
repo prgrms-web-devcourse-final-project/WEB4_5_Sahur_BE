@@ -1,52 +1,28 @@
-import logo from "../assets/images/tung.png"
-import {Link, useNavigate} from "react-router-dom";
-import useConfirm from "../hooks/useConfirm";
+import logo from "../../assets/images/tung.png"
+import {Link} from "react-router-dom";
 import {Stack} from "react-bootstrap";
-import axios from "axios";
-import icoAll from "../assets/images/category/icons_ALL.png"
-import icoBeauty from "../assets/images/category/icons_BEAUTY.png"
-import icoBook from "../assets/images/category/icons_BOOK.png"
-import icoCar from "../assets/images/category/icons_CAR.png"
+import icoAll from "../../assets/images/category/icons_ALL.png"
+import icoBeauty from "../../assets/images/category/icons_BEAUTY.png"
+import icoBook from "../../assets/images/category/icons_BOOK.png"
+import icoCar from "../../assets/images/category/icons_CAR.png"
 import icoDigitalAppliance
-    from "../assets/images/category/icons_DIGITAL_APPLIANCE.png"
+    from "../../assets/images/category/icons_DIGITAL_APPLIANCE.png"
 import icoFashionAccessory
-    from "../assets/images/category/icons_FASHION_ACCESSORY.png"
+    from "../../assets/images/category/icons_FASHION_ACCESSORY.png"
 import icoFashionClothes
-    from "../assets/images/category/icons_FASHION_CLOTHES.png"
-import icoFood from "../assets/images/category/icons_FOOD.png"
-import icoFurniture from "../assets/images/category/icons_FURNITURE.png"
-import icoKids from "../assets/images/category/icons_KIDS.png"
-import icoLiving from "../assets/images/category/icons_LIVING.png"
-import icoPet from "../assets/images/category/icons_PET.png"
-import icoSports from "../assets/images/category/icons_SPORTS.png"
-import {useMutation} from "react-query";
+    from "../../assets/images/category/icons_FASHION_CLOTHES.png"
+import icoFood from "../../assets/images/category/icons_FOOD.png"
+import icoFurniture from "../../assets/images/category/icons_FURNITURE.png"
+import icoKids from "../../assets/images/category/icons_KIDS.png"
+import icoLiving from "../../assets/images/category/icons_LIVING.png"
+import icoPet from "../../assets/images/category/icons_PET.png"
+import icoSports from "../../assets/images/category/icons_SPORTS.png"
 import style from "./Header.module.scss"
 import NavigationMenu from "./components/NavigationMenu";
 import HeaderSearchBox from "./components/HeaderSearchBox";
-import Spinner from "../shared/Spinner";
 import ShoppingKeyword from "./components/ShoppingKeyword";
 
 const Header = () => {
-    const navigate = useNavigate();
-    const { openConfirm } = useConfirm();
-
-    const logoutMutation = useMutation(() => axios.post("/auth/logout", {}), {
-        onSuccess: (param) => {
-            localStorage.removeItem('token');
-            openConfirm({
-                title: "로그아웃 되었습니다."
-                , callback: () => navigate("/login")
-                , showCancelButton: false
-            });
-        }
-        , onError: (error) => {
-            openConfirm({
-                title: '처리 중 오류가 발생했습니다.',
-                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
-            });
-        }
-    });
-    
     const categoryIcon = [
         {name: "전체", icon: icoAll },
         {name: "패션의류", icon: icoFashionClothes },
@@ -84,7 +60,6 @@ const Header = () => {
                     </div>
                 })}
             </Stack>
-            <Spinner show={logoutMutation.isLoading}/>
         </header>
     );
 }

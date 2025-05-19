@@ -3,7 +3,6 @@ import styles from "./GroupBuy.module.scss"
 import GroupBuyCard from "../main/GroupBuyCard";
 import {useState} from "react";
 import ProductDescription from "./ProductDescription";
-import ProductReviewList from "./ProductReviewList";
 import clsx from "clsx";
 import ProductWrapper from "./ProductWrapper";
 import ProductImageSection from "./ProductImageSection";
@@ -12,6 +11,7 @@ import axios from "axios";
 import {useParams} from "react-router-dom";
 import {useQuery} from "react-query";
 import useConfirm from "../../hooks/useConfirm";
+import ProductReviewList from "./review/ProductReviewList";
 
 const fetchGroupBuyById = async (groupBuyId) => {
     const response = await axios.get(`/api/v1/groupBuy/${groupBuyId}`);
@@ -82,7 +82,7 @@ const GroupBuy = () => {
                     <Col md={12}>
                         <Stack direction={"horizontal"} className="justify-content-center align-items-center p-2" style={{ background: "var(--BackGround, #F1F5F9)" }}>
                             <Button variant={""} className={clsx(styles.view, currentView === 'description' && styles.active)} onClick={() => setCurrentView('description')}>상품상세</Button>
-                            <Button variant={""} className={clsx(styles.view, currentView === 'review' && styles.active)} onClick={() => setCurrentView('review')}>리뷰 (100)</Button>
+                            <Button variant={""} className={clsx(styles.view, currentView === 'review' && styles.active)} onClick={() => setCurrentView('review')}>리뷰 ({groupBuyInfo?.reviewCount})</Button>
                         </Stack>
                     </Col>
                 </Row> {/* 상품상세, 리뷰 버튼 로우 끝 */}

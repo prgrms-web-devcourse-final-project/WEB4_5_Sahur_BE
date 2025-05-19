@@ -1,6 +1,6 @@
-import {Button, Card, Col, Overlay, Row, Stack} from "react-bootstrap";
+import {Button, Col, Overlay, Row, Stack} from "react-bootstrap";
 import ProductReviewItem from "./ProductReviewItem";
-import styles from "./GroupBuy.module.scss"
+import styles from "../GroupBuy.module.scss"
 import {useRef, useState} from "react";
 import CreateReviewCard from "./CreateReviewCard";
 
@@ -13,13 +13,14 @@ const ProductReviewList = () => {
                 <Stack direction="horizontal" className="justify-content-between align-items-center">
                     <h5>상품 리뷰</h5>
                     <Button variant={""} className={styles.reviewButton} size={"sm"}
-                            ref={target} onClick={() => setShow(!show)}>리뷰 작성</Button>
+                            ref={target} onClick={() => setShow(!show)}>리뷰 작성
+                    </Button>
                     <Overlay target={target.current} show={show} placement="left"
                              popperConfig={{
                                  modifiers: [{name: 'offset', options: {offset: [30, 10]}}]
                              }}>
                         <div>
-                            <CreateReviewCard />
+                            <CreateReviewCard handleClose={() => setShow(false)}/>
                         </div>
                     </Overlay>
                 </Stack>
