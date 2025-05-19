@@ -135,7 +135,7 @@ public class BaseInitData implements CommandLineRunner {
                     .imageUrl("http://example.com/admin.jpg")
                     .build());
 
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 62; i++) {
                 Member requester = members.get(i % members.size());
                 Category category = categories.get(i % categories.size());
                 String title = productTitles.get(i % productTitles.size());
@@ -168,12 +168,13 @@ public class BaseInitData implements CommandLineRunner {
                         .currentParticipantCount((i % 6) + 1)
                         .round(1 + (i % 3))
                         .deadline(LocalDateTime.now().plusDays(5 - (i % 3)))
-                        .status(i % 2 == 0 ? GroupBuyStatus.ONGOING : GroupBuyStatus.CLOSED)
+                        .status(GroupBuyStatus.ONGOING)
                         .build());
 
                 Member buyer = members.get((i + 1) % members.size());
                 Long orderId = orderIdGenerator.generateOrderId();
                 Order order = orderRepository.save(Order.create(orderId, buyer, groupBuy, product, 1));
+                order.markAsPaid();
                 paymentRepository.save(Payment.create(order, UUID.randomUUID().toString()));
 
                 deliveryRepository.save(Delivery.builder()
@@ -187,18 +188,18 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(buyer).product(product).build());
                 dibsRepository.save(Dibs.builder().member(requester).product(product).build());
 
+                boolean shouldWriteReview = i % 2 == 0;
+
                 History history = historyRepository.save(History.builder()
                         .member(buyer)
                         .product(product)
                         .groupBuy(groupBuy)
                         .order(order)
-                        .writable(i % 2 == 0) // true면 리뷰 작성 가능
+                        .writable(!shouldWriteReview)  // 리뷰를 쓸 거면 false로 저장, 아닐 땐 true 유지
                         .createdAt(LocalDateTime.now())
                         .build());
 
-                if (history.getWritable()) {
-                    history.setWritable(false); // 리뷰 작성 이후 writable false 처리
-
+                if (shouldWriteReview) {
                     reviewRepository.save(Review.builder()
                             .member(buyer)
                             .product(product)
@@ -244,6 +245,7 @@ public class BaseInitData implements CommandLineRunner {
             }
         }
     }
+
 
     private Member createMember(String name, String email, String nickname, Address address, String imageFile) {
         return memberRepository.save(Member.builder()

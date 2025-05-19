@@ -1,6 +1,7 @@
 package com.team5.backend.domain.groupBuy.service;
 
 import com.team5.backend.domain.category.entity.Category;
+import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
@@ -334,21 +335,40 @@ class GroupBuyServiceTest {
     }
 
     @Test
-    @DisplayName("같은 카테고리 랜덤 공동구매 3개 조회")
-    void getRandomTop3GroupBuysBySameCategory_shouldReturn3Items() {
-        GroupBuy base = groupBuys.get(0);
-        base.getProduct().updateCategory(testCategory);
+    @DisplayName("같은 카테고리 랜덤 공동구매 3개 조회 - 자기 자신 제외 후 최대 3개 반환")
+    void getRandomTop3GroupBuysBySameCategory_shouldReturnUpTo3Items() {
+        // given
+        CategoryType categoryType = CategoryType.BEAUTY;
 
-        List<GroupBuy> randoms = List.of(base, groupBuys.get(1));
-        Pageable pageable = PageRequest.of(0, 3);
+        // 자기 자신
+        GroupBuy base = GroupBuy.builder()
+                .groupBuyId(1L)
+                .product(Product.builder()
+                        .productId(100L)
+                        .category(Category.builder().categoryType(categoryType).build())
+                        .build())
+                .build();
+
+        // 같은 카테고리의 다른 GroupBuy들
+        GroupBuy other1 = GroupBuy.builder().groupBuyId(2L).build();
+        GroupBuy other2 = GroupBuy.builder().groupBuyId(3L).build();
+        GroupBuy other3 = GroupBuy.builder().groupBuyId(4L).build();
+
+        List<GroupBuy> groupBuyList = List.of(base, other1, other2, other3);
 
         when(groupBuyRepository.findById(1L)).thenReturn(Optional.of(base));
-        when(groupBuyRepository.findRandomTop3ByCategoryIdExcludingSelf(1L, 1L, pageable)).thenReturn(randoms);
+        when(groupBuyRepository.findAllByCategoryType(categoryType)).thenReturn(groupBuyList);
 
+        // when
         List<GroupBuyResDto> result = groupBuyService.getRandomTop3GroupBuysBySameCategory(1L);
 
-        assertEquals(2, result.size());
-        verify(groupBuyRepository).findRandomTop3ByCategoryIdExcludingSelf(1L, 1L, pageable);
+        // then
+        assertEquals(3, result.size());
+        assertFalse(result.stream().anyMatch(dto -> dto.getGroupBuyId().equals(1L))); // 자기 자신 제외 확인
+        verify(groupBuyRepository).findAllByCategoryType(categoryType);
     }
+
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.repository;
 
+import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import org.springframework.data.domain.Page;
@@ -26,16 +27,17 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     SELECT g FROM GroupBuy g
     JOIN FETCH g.product p
     JOIN FETCH p.category c
-    WHERE c.categoryId = :categoryId
+    WHERE c.categoryType = :categoryType
     AND g.status = 'ONGOING'
-    AND g.groupBuyId <> :excludedGroupBuyId
-    ORDER BY FUNCTION('RAND')
 """)
-    List<GroupBuy> findRandomTop3ByCategoryIdExcludingSelf(
-            @Param("categoryId") Long categoryId,
-            @Param("excludedGroupBuyId") Long excludedGroupBuyId,
-            Pageable pageable
-    );
+    List<GroupBuy> findAllByCategoryType(@Param("categoryType") CategoryType categoryType);
+
+
+
+
+
+
+
     @Query("""
     SELECT g FROM GroupBuy g
     JOIN g.product p
@@ -50,9 +52,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     WHERE g.groupBuyId = :groupBuyId
 """)
     Optional<GroupBuy> findWithProductAndCategoryById(@Param("groupBuyId") Long groupBuyId);
-
-
-
 
 
 

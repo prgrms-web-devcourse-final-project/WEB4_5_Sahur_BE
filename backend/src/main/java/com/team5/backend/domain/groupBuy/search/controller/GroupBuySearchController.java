@@ -1,12 +1,15 @@
-package com.team5.backend.domain.product.search.controller;
+package com.team5.backend.domain.groupBuy.search.controller;
 
 import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
-import com.team5.backend.domain.product.search.service.GroupBuySearchService;
+import com.team5.backend.domain.groupBuy.search.service.GroupBuySearchService;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
