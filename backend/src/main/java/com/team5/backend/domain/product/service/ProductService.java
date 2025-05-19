@@ -7,8 +7,6 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
-import com.team5.backend.domain.product.search.repository.ProductSearchRepository;
-import com.team5.backend.domain.product.search.service.ProductSearchService;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductErrorCode;
 import lombok.RequiredArgsConstructor;
