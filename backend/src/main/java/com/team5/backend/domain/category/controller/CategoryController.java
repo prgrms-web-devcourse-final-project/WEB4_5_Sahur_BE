@@ -5,22 +5,17 @@ import com.team5.backend.domain.category.dto.CategoryResDto;
 import com.team5.backend.domain.category.dto.CategoryUpdateReqDto;
 import com.team5.backend.domain.category.dto.KeywordResDto;
 import com.team5.backend.domain.category.entity.CategoryType;
-import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.service.CategoryService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Tag(name = "Category", description = "카테고리 관련 API")
