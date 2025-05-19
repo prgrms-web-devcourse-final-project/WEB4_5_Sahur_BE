@@ -16,12 +16,14 @@ import org.springframework.web.client.RestClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
+import com.team5.backend.domain.payment.util.CardCodeMapper;
 import com.team5.backend.global.config.toss.TossPaymentConfig;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.PaymentErrorCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -38,6 +40,9 @@ class TossServiceTest {
     @MockBean
     private TossPaymentConfig tossPaymentConfig;
 
+    @MockBean
+    private CardCodeMapper cardCodeMapper;
+
     private TossService tossService;
     private MockRestServiceServer mockServer;
 
@@ -49,11 +54,12 @@ class TossServiceTest {
     @BeforeEach
     void setUp() {
         when(tossPaymentConfig.getSecretKey()).thenReturn("testSecretKey");
+        when(cardCodeMapper.getInstitutionName(any())).thenReturn("신한카드");
 
         mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
         RestClient restClient = restClientBuilder.build();
 
-        this.tossService = new TossService(tossPaymentConfig, restClient);
+        this.tossService = new TossService(tossPaymentConfig, restClient, cardCodeMapper);
 
         confirmReq = new ConfirmReqDto("testKey", 123456789L, 10000);
     }
@@ -92,8 +98,7 @@ class TossServiceTest {
                 "status", "DONE",
                 "approvedAt", "2024-01-01T00:00:00Z",
                 "card", Map.of(
-                        "issuerCode", "BC",
-                        "acquirerCode", "신한",
+                        "paymentName", "신한카드",
                         "number", "1111-****-****-1111"
                 )
         );
