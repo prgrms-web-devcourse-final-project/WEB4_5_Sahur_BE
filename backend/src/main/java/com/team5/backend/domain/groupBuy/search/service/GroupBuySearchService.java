@@ -14,7 +14,7 @@ import com.team5.backend.domain.groupBuy.search.document.GroupBuyDocument;
 import com.team5.backend.domain.groupBuy.search.repository.GroupBuySearchRepository;
 import com.team5.backend.domain.product.dto.ProductDto;
 import com.team5.backend.global.exception.CustomException;
-import com.team5.backend.global.exception.code.ProductSearchErrorCode;
+import com.team5.backend.global.exception.code.GroupBuySearchErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -86,7 +86,7 @@ public class GroupBuySearchService {
 
         } catch (IOException e) {
             e.printStackTrace();
-            throw new CustomException(ProductSearchErrorCode.SEARCH_FAILED);
+            throw new CustomException(GroupBuySearchErrorCode.SEARCH_FAILED);
         }
     }
 
