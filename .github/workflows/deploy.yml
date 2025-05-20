@@ -50,6 +50,15 @@ jobs:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
         run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
 
+      - name: Check if org_code.csv exists
+        run: |
+          if [ -f backend/src/main/resources/data/org_code.csv ]; then
+            echo "✅ 기관코드 org_code.csv 파일이 존재합니다."
+          else
+            echo "❌ 기관코드 org_code.csv 파일이 존재하지 않습니다."
+            exit 1
+          fi
+
       - name: Docker Buildx 설치
         uses: docker/setup-buildx-action@v2
 
