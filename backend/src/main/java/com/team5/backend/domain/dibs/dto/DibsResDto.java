@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,12 +16,14 @@ public class DibsResDto {
     private Long dibsId;
     private Long memberId;
     private Long productId;
+    private LocalDateTime createdAt;
 
     public static DibsResDto fromEntity(Dibs dibs) {
         return DibsResDto.builder()
                 .dibsId(dibs.getDibsId())
                 .memberId(dibs.getMember().getMemberId())
                 .productId(dibs.getProduct().getProductId())
+                .createdAt(dibs.getCreatedAt())
                 .build();
     }
 }
