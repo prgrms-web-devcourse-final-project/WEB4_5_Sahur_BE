@@ -11,6 +11,7 @@ import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public class HistoryController {
     @PostMapping
     public RsData<HistoryResDto> createHistory(
             @AuthenticationPrincipal PrincipalDetails userDetails,
-            @RequestBody HistoryCreateReqDto request) {
+            @Valid @RequestBody HistoryCreateReqDto request) {
 
         HistoryResDto response = historyService.createHistory(request, userDetails);
         return RsDataUtil.success("구매 이력이 생성되었습니다.", response);
@@ -60,7 +61,7 @@ public class HistoryController {
     @PutMapping("/{id}")
     public RsData<HistoryResDto> updateHistory(
             @Parameter(description = "구매 이력 ID") @PathVariable Long id,
-            @RequestBody HistoryUpdateReqDto request) {
+            @Valid @RequestBody HistoryUpdateReqDto request) {
 
         HistoryResDto response = historyService.updateHistory(id, request);
         return RsDataUtil.success("구매 이력 수정 성공", response);
