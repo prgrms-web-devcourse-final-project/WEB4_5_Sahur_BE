@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.global.security.PrincipalDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +19,6 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderDetailResDto;
-import com.team5.backend.domain.order.dto.OrderListResDto;
-import com.team5.backend.domain.order.dto.OrderPaymentInfoResDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.FilterStatus;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -51,7 +47,7 @@ public class OrderService {
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
 
-    public Order createOrder(OrderCreateReqDto request, PrincipalDetails userDetails) {
+    public OrderCreateResDto createOrder(OrderCreateReqDto request, PrincipalDetails userDetails) {
         Member member = memberRepository.findById(userDetails.getMember().getMemberId())
                 .orElseThrow(() -> new CustomException(OrderErrorCode.MEMBER_NOT_FOUND));
 
@@ -63,7 +59,8 @@ public class OrderService {
 
         Long orderId = orderIdGenerator.generateOrderId();
         Order order = Order.create(orderId, member, groupBuy, product, request.getQuantity());
-        return orderRepository.save(order);
+        orderRepository.save(order);
+        return OrderCreateResDto.from(order);
     }
 
     @Transactional(readOnly = true)
