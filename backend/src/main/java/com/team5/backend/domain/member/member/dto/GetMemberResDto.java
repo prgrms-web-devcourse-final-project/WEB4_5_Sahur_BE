@@ -21,7 +21,7 @@ public class GetMemberResDto {
     private Role role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isLogged; // 로그인 여부
+    private Boolean isLoggedIn; // 로그인 여부
 
     public static GetMemberResDto fromEntity(Member member) {
 
@@ -35,7 +35,7 @@ public class GetMemberResDto {
                 .role(member.getRole())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
-                .isLogged(true) // 엔티티에서 생성 시 로그인 상태는 true
+                .isLoggedIn(true) // 엔티티에서 생성 시 로그인 상태는 true
                 .build();
     }
 }
