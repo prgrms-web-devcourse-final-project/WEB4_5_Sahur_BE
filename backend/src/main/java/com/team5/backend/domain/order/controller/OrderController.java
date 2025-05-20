@@ -53,9 +53,10 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RsData<OrderCreateResDto> createOrder(
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @RequestBody @Valid OrderCreateReqDto request
     ) {
-        Order order = orderService.createOrder(request);
+        Order order = orderService.createOrder(request, userDetails);
         return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
     }
 
