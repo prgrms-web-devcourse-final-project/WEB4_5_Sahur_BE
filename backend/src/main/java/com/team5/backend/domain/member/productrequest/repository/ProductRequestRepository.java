@@ -1,7 +1,7 @@
-package com.team5.backend.domain.member.admin.repository;
+package com.team5.backend.domain.member.productrequest.repository;
 
-import com.team5.backend.domain.member.admin.entity.ProductRequest;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

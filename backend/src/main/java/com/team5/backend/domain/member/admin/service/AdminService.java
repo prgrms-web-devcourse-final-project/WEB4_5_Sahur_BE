@@ -1,9 +1,9 @@
 package com.team5.backend.domain.member.admin.service;
 
-import com.team5.backend.domain.member.admin.dto.ProductRequestResDto;
-import com.team5.backend.domain.member.admin.entity.ProductRequest;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.AdminErrorCode;
 import lombok.RequiredArgsConstructor;

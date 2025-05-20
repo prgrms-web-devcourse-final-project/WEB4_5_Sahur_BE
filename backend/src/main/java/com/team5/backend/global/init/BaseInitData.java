@@ -14,9 +14,9 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.admin.entity.ProductRequest;
-import com.team5.backend.domain.member.admin.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.admin.repository.ProductRequestRepository;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
@@ -147,8 +147,10 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title + " 요청")
                         .productUrl("https://i.pravatar.cc/150?img=" + i + ".jpg")
-                        .etc("옵션: 다양함 / 이미지: " + imageUrl)
-                        .status(ProductRequestStatus.APPROVED)
+                        .description("옵션: 다양함 / 이미지: " + imageUrl)
+                        .status(i % 3 == 0
+                                ? ProductRequestStatus.APPROVED
+                                : ProductRequestStatus.WAITING)
                         .createdAt(LocalDateTime.now().minusDays(i % 7))
                         .build());
 

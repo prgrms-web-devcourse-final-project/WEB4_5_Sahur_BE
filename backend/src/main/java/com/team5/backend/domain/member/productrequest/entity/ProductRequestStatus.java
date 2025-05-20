@@ -1,4 +1,4 @@
-package com.team5.backend.domain.member.admin.entity;
+package com.team5.backend.domain.member.productrequest.entity;
 
 public enum ProductRequestStatus {
     WAITING, // 승인 대기
