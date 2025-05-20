@@ -7,6 +7,7 @@ public enum HistoryErrorCode implements ErrorCode {
     PRODUCT_NOT_FOUND(404, "PRODUCT_NOT_FOUND", "상품을 찾을 수 없습니다."),
     GROUP_BUY_NOT_FOUND(404, "GROUP_BUY_NOT_FOUND", "공동구매를 찾을 수 없습니다."),
     HISTORY_NOT_FOUND(404, "HISTORY_NOT_FOUND", "구매 이력을 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(404, "ORDER_NOT_FOUND", "주문 이력을 찾을 수 없습니다."),
     TOKEN_INVALID(401, "TOKEN_INVALID", "유효하지 않은 토큰입니다."),
     TOKEN_BLACKLISTED(401, "TOKEN_BLACKLISTED", "로그아웃된 토큰입니다.");
 

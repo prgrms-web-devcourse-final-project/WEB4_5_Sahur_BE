@@ -3,10 +3,9 @@ package com.team5.backend.domain.history.controller;
 import com.team5.backend.domain.history.dto.HistoryCreateReqDto;
 import com.team5.backend.domain.history.dto.HistoryResDto;
 import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
-import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.service.HistoryService;
-import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.dto.Empty;
+import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,9 +18,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "History", description = "구매 이력 관련 API")
 @RestController
@@ -87,6 +84,5 @@ public class HistoryController {
         List<HistoryResDto> writableHistories = historyService.getWritableHistories(productId, userDetails);
         return RsDataUtil.success("리뷰 작성 가능한 구매 이력 조회 성공", writableHistories);
     }
-
 
 }
