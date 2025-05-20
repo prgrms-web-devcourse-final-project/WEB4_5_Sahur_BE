@@ -137,6 +137,11 @@ public class MailService {
                 throw new CustomException(MemberErrorCode.EMAIL_ALREADY_USED);
             }
 
+            // MX 레코드 검증 추가
+            if (!EmailValidator.isValidEmailDomain(email)) {
+                throw new CustomException(MemberErrorCode.INVALID_EMAIL_DOMAIN);
+            }
+
             // 기존에 저장된 인증 코드가 있으면 삭제
             String key = EMAIL_AUTH_PREFIX + email;
             if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
@@ -174,6 +179,11 @@ public class MailService {
             // 이메일 중복 확인
             if (memberRepository.existsByEmail(email)) {
                 throw new CustomException(MemberErrorCode.EMAIL_ALREADY_USED);
+            }
+
+            // MX 레코드 검증 추가
+            if (!EmailValidator.isValidEmailDomain(email)) {
+                throw new CustomException(MemberErrorCode.INVALID_EMAIL_DOMAIN);
             }
 
             // Redis에서 인증 코드 조회

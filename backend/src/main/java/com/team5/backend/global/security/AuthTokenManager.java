@@ -171,6 +171,8 @@ public class AuthTokenManager {
         Long memberId = jwtUtil.extractMemberId(refreshToken);
         String role = jwtUtil.extractRole(refreshToken);
 
+        MemberTokenInfo memberTokenInfo = new MemberTokenInfo(memberId, email, role);
+
         // 기존 액세스 토큰 무효화
         if (oldAccessToken != null) {
             try {
@@ -181,8 +183,8 @@ public class AuthTokenManager {
         }
 
         // 새로운 토큰 발급
-        String newAccessToken = jwtUtil.generateAccessToken(memberId, email, role);
-        String newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
+        String newAccessToken = jwtUtil.generateAccessToken(memberTokenInfo);
+        String newRefreshToken = jwtUtil.generateRefreshToken(memberTokenInfo);
 
         // 기존 리프레시 토큰 무효화
         jwtUtil.addRefreshTokenToBlacklist(refreshToken);
@@ -284,9 +286,11 @@ public class AuthTokenManager {
         Long memberId = jwtUtil.extractMemberId(rememberMeToken);
         String role = jwtUtil.extractRole(rememberMeToken);
 
+        MemberTokenInfo memberTokenInfo = new MemberTokenInfo(memberId, email, role);
+
         // 새로운 액세스 및 리프레시 토큰 발급
-        String newAccessToken = jwtUtil.generateAccessToken(memberId, email, role);
-        String newRefreshToken = jwtUtil.generateRefreshToken(memberId, email, role);
+        String newAccessToken = jwtUtil.generateAccessToken(memberTokenInfo);
+        String newRefreshToken = jwtUtil.generateRefreshToken(memberTokenInfo);
 
         // 쿠키에 새 토큰 저장
         int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);

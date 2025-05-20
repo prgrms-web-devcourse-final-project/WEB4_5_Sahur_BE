@@ -1,5 +1,6 @@
 package com.team5.backend.global.util;
 
+import com.team5.backend.global.security.MemberTokenInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -41,13 +42,13 @@ public class JwtUtil {
     private static final long REMEMBER_ME_EXPIRATION = 1209600000;
 
     // 액세스 토큰 생성
-    public String generateAccessToken(Long memberId, String email, String role) {
+    public String generateAccessToken(MemberTokenInfo memberTokenInfo) {
 
-        String token = generateToken(memberId, email, role, accessTokenExpiration);
+        String token = generateToken(memberTokenInfo.memberId(), memberTokenInfo.email(), memberTokenInfo.role(), accessTokenExpiration);
 
         // Redis에 액세스 토큰 저장
         redisTemplate.opsForValue().set(
-                REDIS_ACCESS_TOKEN_PREFIX + email,
+                REDIS_ACCESS_TOKEN_PREFIX + memberTokenInfo.email(),
                 token,
                 accessTokenExpiration,
                 TimeUnit.MILLISECONDS
@@ -56,14 +57,14 @@ public class JwtUtil {
         return token;
     }
 
-    // 리프레시 토큰 생성 (필수 정보만 파라미터로 받음)
-    public String generateRefreshToken(Long memberId, String email, String role) {
+    // 리프레시 토큰 생성
+    public String generateRefreshToken(MemberTokenInfo memberTokenInfo) {
 
-        String refreshToken = generateToken(memberId, email, role, refreshTokenExpiration);
+        String refreshToken = generateToken(memberTokenInfo.memberId(), memberTokenInfo.email(), memberTokenInfo.role(), refreshTokenExpiration);
 
         // Redis에 리프레시 토큰 저장
         redisTemplate.opsForValue().set(
-                REDIS_REFRESH_TOKEN_PREFIX + email,
+                REDIS_REFRESH_TOKEN_PREFIX + memberTokenInfo.email(),
                 refreshToken,
                 refreshTokenExpiration,
                 TimeUnit.MILLISECONDS
@@ -248,13 +249,13 @@ public class JwtUtil {
     }
 
     // Remember Me 토큰 생성
-    public String generateRememberMeToken(Long memberId, String email, String role) {
+    public String generateRememberMeToken(MemberTokenInfo memberTokenInfo) {
 
-        String token = generateToken(memberId, email, role, REMEMBER_ME_EXPIRATION);
+        String token = generateToken(memberTokenInfo.memberId(), memberTokenInfo.email(), memberTokenInfo.role(), REMEMBER_ME_EXPIRATION);
 
         // Redis에 Remember Me 토큰 저장
         redisTemplate.opsForValue().set(
-                REDIS_REMEMBER_ME_PREFIX + email,
+                REDIS_REMEMBER_ME_PREFIX + memberTokenInfo.email(),
                 token,
                 REMEMBER_ME_EXPIRATION,
                 TimeUnit.MILLISECONDS
@@ -290,19 +291,19 @@ public class JwtUtil {
     }
 
     // 탈퇴 회원용 임시 토큰 생성
-    public String generateDeletedMemberToken(Long memberId, String email, String role) {
+    public String generateDeletedMemberToken(MemberTokenInfo memberTokenInfo) {
 
         // 토큰에 삭제된 회원임을 표시
         Map<String, Object> claims = new HashMap<>();
-        claims.put("memberId", memberId);
-        claims.put("role", role);
+        claims.put("memberId", memberTokenInfo.memberId());
+        claims.put("role", memberTokenInfo.role());
         claims.put("isDeleted", true);  // 삭제된 회원 표시
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + temporaryTokenExpiration);
 
         String token = Jwts.builder()
-                .setSubject(email)
+                .setSubject(memberTokenInfo.email())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .addClaims(claims)
@@ -311,7 +312,7 @@ public class JwtUtil {
 
         // Redis에 임시 토큰 저장 (다른 접두사 사용)
         redisTemplate.opsForValue().set(
-                "deleted_member:" + email,
+                "deleted_member:" + memberTokenInfo.email(),
                 token,
                 temporaryTokenExpiration,
                 TimeUnit.MILLISECONDS
