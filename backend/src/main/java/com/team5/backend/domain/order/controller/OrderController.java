@@ -53,10 +53,11 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RsData<OrderCreateResDto> createOrder(
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @RequestBody @Valid OrderCreateReqDto request
     ) {
-        Order order = orderService.createOrder(request);
-        return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
+        OrderCreateResDto dto = orderService.createOrder(request, userDetails);
+        return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", dto);
     }
 
     @Operation(summary = "주문 목록 조회", description = "모든 주문 목록을 조회하거나 주문번호, 상태로 필터링할 수 있습니다.")
