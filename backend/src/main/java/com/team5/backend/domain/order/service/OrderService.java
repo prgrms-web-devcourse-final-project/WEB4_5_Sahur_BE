@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 
+import com.team5.backend.global.security.PrincipalDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,8 +51,8 @@ public class OrderService {
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
 
-    public Order createOrder(OrderCreateReqDto request) {
-        Member member = memberRepository.findById(request.getMemberId())
+    public Order createOrder(OrderCreateReqDto request, PrincipalDetails userDetails) {
+        Member member = memberRepository.findById(userDetails.getMember().getMemberId())
                 .orElseThrow(() -> new CustomException(OrderErrorCode.MEMBER_NOT_FOUND));
 
         GroupBuy groupBuy = groupBuyRepository.findById(request.getGroupBuyId())
