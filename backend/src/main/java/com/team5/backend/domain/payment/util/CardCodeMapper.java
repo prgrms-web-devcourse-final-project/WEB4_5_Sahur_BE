@@ -1,5 +1,11 @@
 package com.team5.backend.domain.payment.util;
 
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,14 +13,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
-
-import com.team5.backend.global.exception.CustomException;
-import com.team5.backend.global.exception.code.PaymentErrorCode;
-
-import jakarta.annotation.PostConstruct;
 
 @Component
 public class CardCodeMapper {
@@ -25,7 +23,7 @@ public class CardCodeMapper {
     public void init() {
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(
-                        ResourceUtils.getFile("classpath:data/기관코드.csv")), StandardCharsets.UTF_8))) {
+                        ResourceUtils.getFile("classpath:data/기관코드.csv.default")), StandardCharsets.UTF_8))) {
             String line;
             boolean isFirst = true;
 
