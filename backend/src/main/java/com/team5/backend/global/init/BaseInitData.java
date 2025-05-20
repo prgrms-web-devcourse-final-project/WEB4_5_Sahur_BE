@@ -187,8 +187,8 @@ public class BaseInitData implements CommandLineRunner {
                         .shipping("TRK" + String.format("%07d", i * 37))
                         .build());
 
-                dibsRepository.save(Dibs.builder().member(buyer).product(product).build());
-                dibsRepository.save(Dibs.builder().member(requester).product(product).build());
+                dibsRepository.save(Dibs.builder().member(buyer).product(product).createdAt(LocalDateTime.now()).build());
+                dibsRepository.save(Dibs.builder().member(requester).product(product).createdAt(LocalDateTime.now()).build());
 
                 boolean shouldWriteReview = i % 2 == 0;
 
