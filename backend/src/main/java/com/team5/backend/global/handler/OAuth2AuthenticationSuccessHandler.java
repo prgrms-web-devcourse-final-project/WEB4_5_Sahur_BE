@@ -3,6 +3,7 @@ package com.team5.backend.global.handler;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.global.app.AppConfig;
 import com.team5.backend.global.security.AuthTokenManager;
+import com.team5.backend.global.security.MemberTokenInfo;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
@@ -46,19 +47,13 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
             log.info("OAuth2 인증 성공! 사용자: {}", member.getEmail());
 
+            MemberTokenInfo memberTokenInfo = MemberTokenInfo.from(member);
+
             // JWT 토큰 생성
-            String accessToken = jwtUtil.generateAccessToken(
-                    member.getMemberId(),
-                    member.getEmail(),
-                    member.getRole().name()
-            );
+            String accessToken = jwtUtil.generateAccessToken(memberTokenInfo);
 
             // JWT 리프레시 토큰 생성
-            String refreshToken = jwtUtil.generateRefreshToken(
-                    member.getMemberId(),
-                    member.getEmail(),
-                    member.getRole().name()
-            );
+            String refreshToken = jwtUtil.generateRefreshToken(memberTokenInfo);
 
             // 토큰 만료 시간 계산
             int accessTokenMaxAge = (int)(jwtUtil.getAccessTokenExpiration() / 1000);
@@ -107,10 +102,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // 리디렉션 URI 가져오기
             String targetUrl = determineTargetUrl(request, response, authentication);
 
-            // 리디렉션 URI에 토큰 추가 - 쿠키가 작동하지 않을 경우를 대비해 URL 파라미터로도 전달
+            // 리디렉션 URI에 인증 성공 상태 포함
             targetUrl = UriComponentsBuilder.fromUriString(targetUrl)
-                    .queryParam("accessToken", accessToken)
-                    .queryParam("refreshToken", refreshToken)
+                    .queryParam("auth_status", "success")
+                    .queryParam("user_email", member.getEmail())
                     .build().toUriString();
 
             log.info("최종 리다이렉트 URL: {}", targetUrl);

@@ -7,6 +7,7 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
+import com.team5.backend.global.security.MemberTokenInfo;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,17 +44,19 @@ public class AuthService {
             return deleteMemberLogin(member, response);
         }
 
+        MemberTokenInfo memberTokenInfo = MemberTokenInfo.from(member);
+
         // 액세스 토큰 및 리프레시 토큰 생성
-        String accessToken = jwtUtil.generateAccessToken(member.getMemberId(), member.getEmail(), member.getRole().name());
-        String refreshToken = jwtUtil.generateRefreshToken(member.getMemberId(), member.getEmail(), member.getRole().name());
+        String accessToken = jwtUtil.generateAccessToken(memberTokenInfo);
+        String refreshToken = jwtUtil.generateRefreshToken(memberTokenInfo);
 
         // Remember Me 쿠키 설정 (사용자가 Remember Me를 선택했을 경우)
         if (loginReqDto.isRememberMe()) {
 
-            String rememberMeToken = jwtUtil.generateRememberMeToken(member.getMemberId(), member.getEmail(), member.getRole().name());
+            String rememberMeToken = jwtUtil.generateRememberMeToken(memberTokenInfo);
 
             int rememberMeMaxAge = (int) (jwtUtil.getRememberMeExpiration() / 1000);
-            authTokenManager.addCookie(response, "remember-me", rememberMeToken, rememberMeMaxAge);
+            authTokenManager.addCookie(response, "rememberMe", rememberMeToken, rememberMeMaxAge);
         }
 
         // 기존 쿠키 설정 로직
@@ -69,12 +72,10 @@ public class AuthService {
 
     private LoginResDto deleteMemberLogin(Member member, HttpServletResponse response) {
 
+        MemberTokenInfo memberTokenInfo = MemberTokenInfo.from(member);
+
         // 짧은 유효기간의 임시 액세스 토큰 생성 (리프레시 토큰 없음)
-        String tempAccessToken = jwtUtil.generateDeletedMemberToken(
-                member.getMemberId(),
-                member.getEmail(),
-                member.getRole().name()
-        );
+        String tempAccessToken = jwtUtil.generateDeletedMemberToken(memberTokenInfo);
 
         // 쿠키에 임시 토큰 설정 (5분)
         int tempTokenMaxAge = (int) (jwtUtil.getTemporaryTokenExpiration() / 1000);
@@ -234,9 +235,11 @@ public class AuthService {
     @Transactional
     public MemberRestoreResDto handleMemberRestoreAuth(Member restoredMember, HttpServletResponse response) {
 
+        MemberTokenInfo memberTokenInfo = MemberTokenInfo.from(restoredMember);
+
         // 회원 복구 후 인증 처리 (토큰 발급 및 쿠키 저장)
-        String accessToken = jwtUtil.generateAccessToken(restoredMember.getMemberId(), restoredMember.getEmail(), restoredMember.getRole().name());
-        String refreshToken = jwtUtil.generateRefreshToken(restoredMember.getMemberId(), restoredMember.getEmail(), restoredMember.getRole().name());
+        String accessToken = jwtUtil.generateAccessToken(memberTokenInfo);
+        String refreshToken = jwtUtil.generateRefreshToken(memberTokenInfo);
 
         // 토큰을 쿠키에 저장
         int accessTokenMaxAge = (int) (jwtUtil.getAccessTokenExpiration() / 1000);

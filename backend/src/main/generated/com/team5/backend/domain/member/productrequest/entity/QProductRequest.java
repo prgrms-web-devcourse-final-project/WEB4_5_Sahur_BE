@@ -1,4 +1,4 @@
-package com.team5.backend.domain.member.admin.entity;
+package com.team5.backend.domain.member.productrequest.entity;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -16,7 +16,7 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QProductRequest extends EntityPathBase<ProductRequest> {
 
-    private static final long serialVersionUID = -1796517979L;
+    private static final long serialVersionUID = 626044612L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -26,7 +26,9 @@ public class QProductRequest extends EntityPathBase<ProductRequest> {
 
     public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
-    public final StringPath etc = createString("etc");
+    public final StringPath description = createString("description");
+
+    public final ListPath<String, StringPath> imageUrls = this.<String, StringPath>createList("imageUrls", String.class, StringPath.class, PathInits.DIRECT2);
 
     public final com.team5.backend.domain.member.member.entity.QMember member;
 
