@@ -8,7 +8,6 @@ import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
 import com.team5.backend.domain.category.repository.CategoryRepository;
-import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,10 +87,13 @@ public class CategoryService {
      * 카테고리(대분류)에 속한 키워드(중분류) 목록 조회
      */
     public List<KeywordResDto> getKeywordsByCategory(CategoryType category) {
-        return KeywordType.ofParent(category).stream()
+
+        // null을 반환하면 NPE 발생 → Exception으로 잡히고 500 발생
+        return Optional.ofNullable(KeywordType.ofParent(category))
+                .orElse(List.of()) // 빈값 반환
+                .stream()
                 .map(k -> new KeywordResDto(k.name(), k.getDisplayName()))
                 .toList();
     }
-
 
 }

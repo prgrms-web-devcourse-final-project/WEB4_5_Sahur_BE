@@ -108,7 +108,6 @@ public class GroupBuyService {
         ).map(this::toDto);
     }
 
-
     @Transactional(readOnly = true)
     public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, PrincipalDetails userDetails) {
         GroupBuy groupBuy = groupBuyRepository.findWithProductAndCategoryById(groupBuyId)
@@ -134,8 +133,6 @@ public class GroupBuyService {
 
         return GroupBuyDetailResDto.fromEntity(groupBuy, isTodayDeadline, isDibs, averageRate, reviewCount);
     }
-
-
 
     @Transactional
     public GroupBuyResDto updateGroupBuy(Long id, GroupBuyUpdateReqDto request) {
@@ -230,9 +227,6 @@ public class GroupBuyService {
         Page<GroupBuy> groupBuys = groupBuyRepository.findOngoingByCategoryId(categoryId, sortedPageable);
         return groupBuys.map(this::toDto);
     }
-
-
-
 
     private GroupBuyResDto toDto(GroupBuy groupBuy) {
         boolean isDeadlineToday = groupBuy.getDeadline() != null &&

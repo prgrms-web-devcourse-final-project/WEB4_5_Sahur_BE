@@ -22,6 +22,8 @@ public class QDibs extends EntityPathBase<Dibs> {
 
     public static final QDibs dibs = new QDibs("dibs");
 
+    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
+
     public final NumberPath<Long> dibsId = createNumber("dibsId", Long.class);
 
     public final com.team5.backend.domain.member.member.entity.QMember member;

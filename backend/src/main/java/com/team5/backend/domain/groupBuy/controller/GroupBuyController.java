@@ -78,7 +78,6 @@ public class GroupBuyController {
         return RsDataUtil.success("공동구매 단건 조회 성공", data);
     }
 
-
     @Operation(summary = "공동구매 수정", description = "전체 필드를 수정합니다.")
     @PutMapping("/{groupBuyId}")
     public RsData<GroupBuyResDto> updateGroupBuy(
@@ -123,7 +122,6 @@ public class GroupBuyController {
         return RsDataUtil.success("회원 참여 공동구매 조회 성공", responses);
     }
 
-
     @Operation(summary = "공동구매 마감 처리", description = "공동구매를 CLOSED 상태로 마감합니다.")
     @PatchMapping("/{groupBuyId}/close")
     public RsData<Empty> closeGroupBuy(
@@ -131,7 +129,6 @@ public class GroupBuyController {
         groupBuyService.closeGroupBuy(groupBuyId);
         return RsDataUtil.success("공동구매 상태 마감 성공");
     }
-
     @Operation(summary = "인기순 Top 3 공동구매 조회", description = "Dib(관심상품) 수 기준 상위 3개의 공동구매를 조회합니다.")
     @GetMapping("/popular")
     public RsData<List<GroupBuyResDto>> getTop3GroupBuysByDibs() {

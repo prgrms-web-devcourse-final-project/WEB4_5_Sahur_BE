@@ -11,6 +11,7 @@ import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class NotificationController {
     @PostMapping
     public RsData<NotificationResDto> createNotification(
             @AuthenticationPrincipal PrincipalDetails userDetails,
-            @RequestBody NotificationCreateReqDto request
+            @Valid @RequestBody NotificationCreateReqDto request
     ) {
         NotificationResDto response = notificationService.createNotification(request, userDetails);
         return RsDataUtil.success("알림 생성 성공", response);
@@ -58,7 +59,7 @@ public class NotificationController {
     @PutMapping("/{id}")
     public RsData<NotificationResDto> updateNotification(
             @PathVariable Long id,
-            @RequestBody NotificationUpdateReqDto request
+            @Valid @RequestBody NotificationUpdateReqDto request
     ) {
         NotificationResDto response = notificationService.updateNotification(id, request);
         return RsDataUtil.success("알림 수정 성공", response);
