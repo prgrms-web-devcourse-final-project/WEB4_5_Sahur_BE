@@ -1,23 +1,10 @@
 import {Image, Stack} from "react-bootstrap";
-import sampleImg from "../../assets/images/sample.png";
+import sampleImg from "../../../assets/images/sample.png";
 import Rating from "react-rating";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar as faStarSolid } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
-import {useState} from "react";
-
-const StarRating = () => {
-    const [rating, setRating] = useState(3);
-    return (
-        <Rating
-            initialRating={rating}
-            onChange={setRating}
-            fullSymbol={<FontAwesomeIcon icon={faStarSolid} color="#facc15" size="lg" />}
-            emptySymbol={<FontAwesomeIcon icon={faStarRegular} color="#facc15" size="lg" />}
-        />
-    );
-};
-
+import ReviewImageBox from "./ReviewImageBox";
 
 const ProductReviewItem = () => {
     return (
@@ -30,9 +17,14 @@ const ProductReviewItem = () => {
                         <desc className={"text-gray-300"}>2025.05.08</desc>
                     </Stack>
                 </Stack>
-                <StarRating />
+                <Rating initialRating={2}
+                        readonly
+                        fullSymbol={<FontAwesomeIcon icon={faStarSolid} color="#facc15" size="lg" />}
+                        emptySymbol={<FontAwesomeIcon icon={faStarRegular} color="#facc15" size="lg" />}
+                />
             </Stack>
             <div className={"ms-3"}>리뷰 내용 리뷰 내용 리뷰 내용 리뷰 내용 리뷰 리뷰 내용 리뷰 내용 리뷰 내용 리뷰 내용 리뷰 리뷰 내용 리뷰 내용 리뷰 내용 리뷰 내용 리뷰  </div>
+            <ReviewImageBox imageList={["https://i.pravatar.cc/150?img=6.jpg","https://i.pravatar.cc/150?img=7.jpg","https://i.pravatar.cc/150?img=8.jpg", "https://i.pravatar.cc/150?img=9.jpg"]} />
         </>
     );
 }
