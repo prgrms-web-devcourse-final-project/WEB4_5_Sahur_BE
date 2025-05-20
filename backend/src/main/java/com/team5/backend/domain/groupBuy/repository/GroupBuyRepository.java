@@ -33,11 +33,6 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     List<GroupBuy> findAllByCategoryType(@Param("categoryType") CategoryType categoryType);
 
 
-
-
-
-
-
     @Query("""
     SELECT g FROM GroupBuy g
     JOIN g.product p

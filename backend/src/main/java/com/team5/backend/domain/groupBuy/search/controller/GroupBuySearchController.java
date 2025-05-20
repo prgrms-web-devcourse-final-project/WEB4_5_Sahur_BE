@@ -24,6 +24,11 @@ public class GroupBuySearchController {
     @GetMapping
     public RsData<List<GroupBuyResDto>> search(@RequestParam String keyword) {
         List<GroupBuyResDto> result = groupBuySearchService.search(keyword);
+
+        if (result.isEmpty()) {
+            return RsDataUtil.success("검색 결과가 없습니다.", result);
+        }
+
         return RsDataUtil.success("검색 성공", result);
     }
 }
