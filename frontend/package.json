@@ -51,7 +51,7 @@
     "showdown": "^2.1.0",
     "styled-components": "^6.1.11",
     "swiper": "^11.2.1",
-    "yet-another-react-lightbox": "^3.21.8"
+    "yet-another-react-lightbox": "^3.23.1"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -106,34 +106,43 @@ public class MailService {
     }
 
     // 메일 발송
-    public String sendSimpleMessage(String sendEmail) throws MessagingException {
+    public String sendSimpleMessage(String sendEmail) {
 
-        String authCode = createCode(); // 랜덤 인증번호 생성
-
-        MimeMessage message = createMail(sendEmail, authCode); // 메일 생성
         try {
+            String authCode = createCode(); // 랜덤 인증번호 생성
+            MimeMessage message = createMail(sendEmail, authCode); // 메일 생성
             javaMailSender.send(message); // 메일 발송
+
             return authCode;
         } catch (MailException e) {
 
-            // 발송 실패시 커스텀 예외 등 처리 로직 필요
             log.error("메일 발송 실패: " + sendEmail, e);
-            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        } catch (MessagingException e) {
+
+            log.error("메일 메시지 생성 실패: " + sendEmail, e);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
         }
     }
 
     @Transactional
-    public EmailResDto sendAuthCode(EmailSendReqDto emailSendReqDto) throws MessagingException {
+    public EmailResDto sendAuthCode(EmailSendReqDto emailSendReqDto) {
 
         String email = emailSendReqDto.getEmail();
 
-        // 기존에 저장된 인증 코드가 있으면 삭제
-        String key = EMAIL_AUTH_PREFIX + email;
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
-            redisTemplate.delete(key);
-        }
-
         try {
+
+            // 이메일 중복 확인
+            if (memberRepository.existsByEmail(email)) {
+                throw new CustomException(MemberErrorCode.EMAIL_ALREADY_USED);
+            }
+
+            // 기존에 저장된 인증 코드가 있으면 삭제
+            String key = EMAIL_AUTH_PREFIX + email;
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+                redisTemplate.delete(key);
+            }
+
             // 새로운 인증 코드 발송
             String authCode = sendSimpleMessage(email);
 
@@ -146,10 +155,12 @@ public class MailService {
                     .success(true)
                     .message("인증 코드가 전송되었습니다.")
                     .build();
-        } catch (MailException | MessagingException e) {
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
 
-            log.info("인증번호 메일 발송 실패: " + email, e);
-            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+            log.error("인증 코드 전송 중 오류 발생: " + email, e);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
         }
     }
 
@@ -158,13 +169,27 @@ public class MailService {
         String email = emailVerificationReqDto.getEmail();
         String authCode = emailVerificationReqDto.getAuthCode();
 
-        // Redis에서 인증 코드 조회
-        ValueOperations<String, String> values = redisTemplate.opsForValue();
-        String key = EMAIL_AUTH_PREFIX + email;
-        String storedAuthCode = values.get(key);
+        try {
 
-        // 인증 코드 검증
-        if (storedAuthCode != null && storedAuthCode.equals(authCode)) {
+            // 이메일 중복 확인
+            if (memberRepository.existsByEmail(email)) {
+                throw new CustomException(MemberErrorCode.EMAIL_ALREADY_USED);
+            }
+
+            // Redis에서 인증 코드 조회
+            ValueOperations<String, String> values = redisTemplate.opsForValue();
+            String key = EMAIL_AUTH_PREFIX + email;
+            String storedAuthCode = values.get(key);
+
+            // 인증 코드 유효성 검증
+            if (storedAuthCode == null) {
+                throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+            }
+
+            // 인증 코드 일치 검증
+            if (!storedAuthCode.equals(authCode)) {
+                throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+            }
 
             // 인증 성공 시 Redis에 인증 완료 상태 저장
             String verifiedKey = EMAIL_VERIFIED_PREFIX + email;
@@ -178,33 +203,38 @@ public class MailService {
                     .success(true)
                     .message("이메일 인증에 성공하였습니다.")
                     .build();
-        }
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
 
-        throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+            log.error("인증 코드 검증 중 오류 발생: " + email, e);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        }
     }
 
     @Transactional
-    public EmailResDto sendPasswordResetAuthCode(EmailSendReqDto emailSendReqDto) throws MessagingException {
+    public EmailResDto sendPasswordResetAuthCode(EmailSendReqDto emailSendReqDto) {
 
         String email = emailSendReqDto.getEmail();
 
-        // 이메일이 존재하는지 확인
-        if (!memberRepository.existsByEmail(email)) {
-            throw new CustomException(MemberErrorCode.MEMBER_NOT_FOUND);
-        }
-
-        // 기존에 저장된 인증 코드가 있으면 삭제
-        String key = PASSWORD_RESET_AUTH_PREFIX + email;
-        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
-            redisTemplate.delete(key);
-        }
-
-        // 새로운 인증 코드 생성
-        String authCode = createCode();
-
-        // 인증코드가 있는 메일 발송
-        MimeMessage message = createPasswordResetMail(email, authCode);
         try {
+
+            // 이메일이 존재하는지 확인
+            if (!memberRepository.existsByEmail(email)) {
+                throw new CustomException(MemberErrorCode.MEMBER_NOT_FOUND);
+            }
+
+            // 기존에 저장된 인증 코드가 있으면 삭제
+            String key = PASSWORD_RESET_AUTH_PREFIX + email;
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+                redisTemplate.delete(key);
+            }
+
+            // 새로운 인증 코드 생성
+            String authCode = createCode();
+
+            // 인증코드가 있는 메일 생성 및 발송
+            MimeMessage message = createPasswordResetMail(email, authCode);
             javaMailSender.send(message);
 
             // Redis에 인증 코드 저장(만료 시간 설정)
@@ -216,10 +246,20 @@ public class MailService {
                     .success(true)
                     .message("비밀번호 재설정 인증번호가 이메일로 전송되었습니다.")
                     .build();
+        } catch (CustomException e) {
+            throw e;
+        } catch (MessagingException e) {
+
+            log.error("비밀번호 재설정 메일 생성 실패: " + email, e);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
         } catch (MailException e) {
 
-            log.info("비밀번호 재설정 인증번호 메일 발송 실패: " + email, e);
-            throw new CustomException(CommonErrorCode.INTERNAL_ERROR);
+            log.error("비밀번호 재설정 메일 발송 실패: " + email, e);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        } catch (Exception e) {
+
+            log.error("비밀번호 재설정 인증코드 처리 중 오류 발생: " + email, e);
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
         }
     }
 

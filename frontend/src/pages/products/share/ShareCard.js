@@ -1,6 +1,7 @@
 import {Button, Card, Col, Row} from "react-bootstrap";
-import {ReactComponent as KakaoIcon} from "../../assets/images/oauth/kakao_squer.svg";
+import {ReactComponent as KakaoIcon} from "../../../assets/images/oauth/kakao_squer.svg";
 import ShareLinkBox from "./ShareLinkBox";
+import styles from "../GroupBuy.module.scss"
 
 const ShareCard = ({ onClose }) => {
     return (
@@ -21,7 +22,7 @@ const ShareCard = ({ onClose }) => {
                 </Row>
             </Card.Body>
             <Card.Footer className={"d-flex justify-content-center m-3"}>
-                <Button onClick={onClose}>닫기</Button>
+                <Button variant={""} className={styles.reviewButton} onClick={onClose}>닫기</Button>
             </Card.Footer>
         </Card>
     );

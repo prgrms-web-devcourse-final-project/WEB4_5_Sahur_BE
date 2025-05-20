@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.entity.Payment;
@@ -96,8 +97,8 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<String> getPaymentKeysByMember(Long memberId, Pageable pageable) {
-        return paymentRepository.findPaymentKeysByMemberId(memberId, pageable);
+    public Page<String> getPaymentKeysByMember(Long memberId, OrderStatus status, String search, Pageable pageable) {
+        return paymentRepository.findPaymentKeysByMemberId(memberId, status, search, pageable);
     }
 
     @Transactional(readOnly = true)
