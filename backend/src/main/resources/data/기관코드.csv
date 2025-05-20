@@ -1,0 +1,97 @@
+﻿분류,기관,금융결제원 공식 코드,숫자 코드,한글 코드,영문 코드
+국내 카드사 코드,기업 BC,3K,-,기업비씨,IBK_BC
+국내 카드사 코드,광주은행,46,-,광주,GWANGJUBANK
+국내 카드사 코드,롯데카드,71,-,롯데,LOTTE
+국내 카드사 코드,KDB산업은행,30,-,산업,KDBBANK
+국내 카드사 코드,BC카드,31,-,-,BC
+국내 카드사 코드,삼성카드,51,-,삼성,SAMSUNG
+국내 카드사 코드,새마을금고,38,-,새마을,SAEMAUL
+국내 카드사 코드,신한카드,41,-,신한,SHINHAN
+국내 카드사 코드,신협,62,-,신협,SHINHYEOP
+국내 카드사 코드,씨티카드,36,-,씨티,CITI
+국내 카드사 코드,우리BC카드(BC 매입),33,-,우리,WOORI
+국내 카드사 코드,우리카드(우리 매입),W1,-,우리,WOORI
+국내 카드사 코드,우체국예금보험,37,-,우체국,POST
+국내 카드사 코드,저축은행중앙회,39,-,저축,SAVINGBANK
+국내 카드사 코드,전북은행,35,-,전북,JEONBUKBANK
+국내 카드사 코드,제주은행,42,-,제주,JEJUBANK
+국내 카드사 코드,카카오뱅크,15,-,카카오뱅크,KAKAOBANK
+국내 카드사 코드,케이뱅크,3A,-,케이뱅크,KBANK
+국내 카드사 코드,토스뱅크,24,-,토스뱅크,TOSSBANK
+국내 카드사 코드,하나카드,21,-,하나,HANA
+국내 카드사 코드,현대카드,61,-,현대,HYUNDAI
+국내 카드사 코드,KB국민카드,11,-,국민,KOOKMIN
+국내 카드사 코드,NH농협카드,91,-,농협,NONGHYEOP
+국내 카드사 코드,Sh수협은행,34,-,수협,SUHYEOP
+해외 카드사 코드,다이너스 클럽,6D,-,다이너스,DINERS
+해외 카드사 코드,마스터카드,4M,-,마스터,MASTER
+해외 카드사 코드,유니온페이,3C,-,유니온페이,UNIONPAY
+해외 카드사 코드,아메리칸 익스프레스,7A,-,-,AMEX
+해외 카드사 코드,JCB,4J,-,-,JCB
+해외 카드사 코드,VISA,4V,-,비자,VISA
+은행 & 증권사 코드,경남은행,039,39,경남,KYONGNAMBANK
+은행 & 증권사 코드,광주은행,034,34,광주,GWANGJUBANK
+은행 & 증권사 코드,교보증권,261,S8,교보증권,KYOBO_SECURITIES
+은행 & 증권사 코드,단위농협(지역농축협),012,12,단위농협,LOCALNONGHYEOP
+은행 & 증권사 코드,대신증권,267,SE,대신증권,DAISHIN_SECURITIES
+은행 & 증권사 코드,메리츠증권,287,SK,메리츠증권,MERITZ_SECURITIES
+은행 & 증권사 코드,미래에셋증권,238,S5,미래에셋증권,MIRAE_ASSET_SECURITIES
+은행 & 증권사 코드,부국증권,290,SM,부국,BOOKOOK_SECURITIES
+은행 & 증권사 코드,부산은행,032,32,부산,BUSANBANK
+은행 & 증권사 코드,삼성증권,240,S3,삼성증권,SAMSUNG_SECURITIES
+은행 & 증권사 코드,새마을금고,045,45,새마을,SAEMAUL
+은행 & 증권사 코드,산림조합,064,64,산림,SANLIM
+은행 & 증권사 코드,신영증권,291,SN,신영증권,SHINYOUNG_SECURITIES
+은행 & 증권사 코드,신한금융투자,278,S2,신한금융투자,SHINHAN_INVESTMENT
+은행 & 증권사 코드,신한은행,088,88,신한,SHINHAN
+은행 & 증권사 코드,신협,048,48,신협,SHINHYEOP
+은행 & 증권사 코드,씨티은행,027,27,씨티,CITI
+은행 & 증권사 코드,우리은행,020,20,우리,WOORI
+은행 & 증권사 코드,우체국예금보험,071,71,우체국,POST
+은행 & 증권사 코드,유안타증권,209,S0,유안타증권,YUANTA_SECURITES
+은행 & 증권사 코드,유진투자증권,280,SJ,유진투자증권,EUGENE_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,저축은행중앙회,050,50,저축,SAVINGBANK
+은행 & 증권사 코드,전북은행,037,37,전북,JEONBUKBANK
+은행 & 증권사 코드,제주은행,035,35,제주,JEJUBANK
+은행 & 증권사 코드,카카오뱅크,090,90,카카오,KAKAOBANK
+은행 & 증권사 코드,카카오페이증권,288,SQ,카카오페이증권,KAKAOPAY_SECURITIES
+은행 & 증권사 코드,케이뱅크,089,89,케이,KBANK
+은행 & 증권사 코드,키움증권,264,SB,키움증권,KIWOOM
+은행 & 증권사 코드,토스머니,-,-,토스머니,TOSS_MONEY
+은행 & 증권사 코드,토스뱅크,092,92,토스,TOSSBANK
+은행 & 증권사 코드,토스증권,271,ST,토스증권,TOSS_SECURITIES
+은행 & 증권사 코드,펀드온라인코리아(한국포스증권),294,SR,펀드온라인코리아,KOREA_FOSS_SECURITIES
+은행 & 증권사 코드,하나금융투자,270,SH,하나금융투자,HANA_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,하나은행,081,81,하나,HANA
+은행 & 증권사 코드,하이투자증권,262,S9,하이투자증권,HI_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,한국투자증권,243,S6,한국투자증권,KOREA_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,한화투자증권,269,SG,한화투자증권,HANHWA_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,현대차증권,263,SA,현대차증권,HYUNDAI_MOTOR_SECURITIES
+은행 & 증권사 코드,홍콩상하이은행,054,54,-,HSBC
+은행 & 증권사 코드,DB금융투자,279,SI,DB금융투자,DB_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,DGB대구은행,031,31,대구,DAEGUBANK
+은행 & 증권사 코드,IBK기업은행,003,03,기업,IBK
+은행 & 증권사 코드,KB국민은행,004,06,국민,KOOKMIN
+은행 & 증권사 코드,KB증권,218,S4,KB증권,KB_SECURITIES
+은행 & 증권사 코드,KDB산업은행,002,02,산업,KDBBANK
+은행 & 증권사 코드,KTB투자증권(다올투자증권),227,SP,KTB투자증권,DAOL_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,LIG투자증권,292,SO,LIG투자,LIG_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,NH농협은행,011,11,농협,NONGHYEOP
+은행 & 증권사 코드,NH투자증권,247,SL,NH투자증권,NH_INVESTMENT_AND_SECURITIES
+은행 & 증권사 코드,SC제일은행,023,23,SC제일,SC
+은행 & 증권사 코드,Sh수협은행,007,07,수협,SUHYEOP
+은행 & 증권사 코드,SK증권,266,SD,SK증권,SK_SECURITIES
+간편결제사 코드,토스페이,-,-,토스페이,TOSSPAY
+간편결제사 코드,네이버페이,-,-,네이버페이,NAVERPAY
+간편결제사 코드,삼성페이,-,-,삼성페이,SAMSUNGPAY
+간편결제사 코드,애플페이,-,-,애플페이,APPLEPAY
+간편결제사 코드,엘페이,-,-,엘페이,LPAY
+간편결제사 코드,카카오페이,-,-,카카오페이,KAKAOPAY
+간편결제사 코드,페이코,-,-,페이코,PAYCO
+간편결제사 코드,SSG페이,-,-,SSG페이,SSG
+통신사 코드,KT,-,-,KT,KT
+통신사 코드,LGU,-,-,LGU,LG 유플러스
+통신사 코드,SKT,-,-,SKT,SK 텔레콤
+통신사 코드,HELLO,-,-,HELLO,LG 헬로모바일
+통신사 코드,KCT,-,-,KCT,티플러스
+통신사 코드,SK7,-,-,SK7,SK 세븐모바일

@@ -1,6 +1,6 @@
 package com.team5.backend.domain.member.admin.controller;
 
-import com.team5.backend.domain.product.search.service.GroupBuyReindexService;
+import com.team5.backend.domain.groupBuy.search.service.GroupBuyReindexService;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import io.swagger.v3.oas.annotations.Operation;

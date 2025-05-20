@@ -1,21 +1,28 @@
-import sampleImg from "../../assets/images/sample.png";
 import styles from "./GroupBuy.module.scss";
 import {Col, Image, Row} from "react-bootstrap";
+import {useEffect, useState} from "react";
 
-const ProductImageSection = () => {
-    const subImages = [1,2,3,4,5];
+const ProductImageSection = ({ imageUrlList }) => {
+    const [titleImageUrl, setTitleImageUrl] = useState();
 
+    useEffect(() => {
+        if (imageUrlList) {
+            setTitleImageUrl(imageUrlList[0])
+        }
+    }, [imageUrlList])
     return (
         <>
-            <div>
-                <img src={sampleImg} className={styles.mainImage} />
+            <div style={{ height: '400px' }}>
+                <img src={titleImageUrl} className={styles.mainImage} />
             </div>
             <Row className="justify-content-center gx-3 p-2">
-                {subImages.map((num) => (
-                    <Col key={num} style={{ flex: "1 0 20%", maxWidth: "20%" }}>
-                        <Image src={sampleImg}
-                               className={styles.subImage}
+                {imageUrlList?.map((imageUrl) => (
+                    <Col key={imageUrl} style={{ flex: "1 0 20%", maxWidth: "20%" }}>
+                        <Image src={imageUrl}
+                               className={`${styles.subImage} cursor-pointer`}
                                rounded
+                               style={{ height: '90px' }}
+                               onClick={() => setTitleImageUrl(imageUrl)}
                         />
                     </Col>
                 ))}

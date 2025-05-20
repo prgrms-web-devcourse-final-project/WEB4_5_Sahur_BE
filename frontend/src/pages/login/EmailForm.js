@@ -19,14 +19,14 @@ const EmailForm = ({ email, setEmail , error, setError, setInputStatus}) => {
             setTimeLeft(180); // 3분
             setEmailAuthStep('pending');
             openConfirm({
-                title: response.data.msg
+                title: response.data.data.message
                 , showCancelButton: false
             });
         }
         , onError: (error) => {
             openConfirm({
                 title: '처리 중 오류가 발생했습니다.',
-                html: error.response?.data?.msg || "에러: 관리자에게 문의바랍니다."
+                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
             });
         }
     });
@@ -37,7 +37,7 @@ const EmailForm = ({ email, setEmail , error, setError, setInputStatus}) => {
             setError({ ...error, email: '' });
             setInputStatus(prev => ({ ...prev, email: true }))
             openConfirm({
-                title: response.data.msg
+                title: response.data.data.message
                 , showCancelButton: false
             });
         }
@@ -45,7 +45,7 @@ const EmailForm = ({ email, setEmail , error, setError, setInputStatus}) => {
             console.log(error)
             openConfirm({
                 title: '처리 중 오류가 발생했습니다.',
-                html: error.response?.data?.msg || "에러: 관리자에게 문의바랍니다."
+                html: error.response?.data?.message || "에러: 관리자에게 문의바랍니다."
             });
         }
     });

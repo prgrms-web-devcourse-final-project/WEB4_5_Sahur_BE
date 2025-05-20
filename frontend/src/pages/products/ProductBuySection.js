@@ -16,46 +16,65 @@ import {
 } from "../../assets/images/icon/empty-like.svg";
 import {ReactComponent as ShareIcon} from "../../assets/images/icon/share.svg";
 import {useRef, useState} from "react";
-import CreateReviewCard from "./CreateReviewCard";
-import ShareCard from "./ShareCard";
 import {useNavigate} from "react-router-dom";
+import DeadlineTimer from "../main/DeadlineTimer";
+import Count from "./Count";
+import {normalizeNumber} from "../../utils/utils";
+import ShareCard from "./share/ShareCard";
 
-const ProductBuySection = () => {
-    const [isZzim, setZzim] = useState(false)        ;
+const ProductBuySection = ({ groupBuyInfo }) => {
+    const [isZzim, setZzim] = useState(false);
     const [show, setShow] = useState(false);
-    const target = useRef(null);;
-    const navigate = useNavigate()
+    const target = useRef(null);
+    const navigate = useNavigate();
+    const currentParticipantCount = groupBuyInfo?.currentParticipantCount ?? 0;
+    const targetParticipants = groupBuyInfo?.targetParticipants ?? 0;
+    const percent = targetParticipants > 0 ? Math.round((currentParticipantCount / targetParticipants) * 100) : 0;
+    const maxCount = targetParticipants - currentParticipantCount;
+    const [count, setCount] = useState(1);
+
+    const handleCountChange = (newCount) => {
+        if (newCount === '') {
+            setCount('');
+        }
+        newCount = normalizeNumber(newCount)
+        if (newCount < 1 || newCount > maxCount) return;
+        setCount(newCount);
+    };
+
     return (
         <Stack gap={3} >
             <Stack direction={"horizontal"} gap={3}>
-                <h4>프리미엄 블루투스 이어폰 XS-500</h4>
-                <Badge className={styles.roundBadge}>5회차</Badge>
+                <h4>{groupBuyInfo?.product.title}</h4>
+                <Badge className={styles.roundBadge}>{groupBuyInfo?.round}회차</Badge>
             </Stack>
             <div>
-                <Rating initialRating={4}
+                <Rating initialRating={groupBuyInfo?.averageRate}
                         readonly
                         fullSymbol={<FontAwesomeIcon icon={faStarSolid} color="#facc15" size="lg" />}
                         emptySymbol={<FontAwesomeIcon icon={faStarRegular} color="#facc15" size="lg" />}
                 />
-                <small> 4.0 (128개 리뷰)</small>
+                <small> {groupBuyInfo?.averageRate.toFixed(1)} ({groupBuyInfo?.reviewCount}개 리뷰)</small>
             </div>
-            <h3>39,000원</h3>
+            <h3>{groupBuyInfo?.product.price.toLocaleString()}원</h3>
             <div className={"p-3"} style={{ background: "#FAF5FF", borderRadius: "8px" }}>
                 <Stack direction={"horizontal"} className={"d-flex justify-content-between mb-1"} >
                     <span>공동 구매 현황</span>
-                    <span style={{ color: "#9333EA" }}><ParticipationIcon /> 28/50명 참여</span>
+                    <span style={{ color: "#9333EA" }}><ParticipationIcon /> {`${currentParticipantCount}/${targetParticipants}개 주문중`}</span>
                 </Stack>
-                <ProgressBar className={styles.customProgress} now={60} />
+                <ProgressBar className={styles.customProgress} now={percent} />
                 <Stack direction={"horizontal"} className={"d-flex justify-content-between mb-1"} >
-                    <small>목표 인원: 50명</small>
-                    <span style={{ color: "#DC2626" }}><ClockIcon /> 2시간 남음</span>
+                    <small>목표 수량: {targetParticipants}개</small>
+                    <span style={{ color: "#DC2626" }}>
+                        <ClockIcon /><DeadlineTimer deadline={groupBuyInfo?.deadline} />
+                    </span>
                 </Stack>
             </div>
             <div className={"p-3 border rounded"}>
                 <div>수량 선택</div>
                 <Stack direction={"horizontal"} className={"d-flex justify-content-between"} >
-                    <span>카운터</span>
-                    <span>총 39,000원</span>
+                    <span><Count count={count} handleChange={handleCountChange} max={maxCount} /></span>
+                    <span>총 {(groupBuyInfo?.product.price * (Number(count) || 1)).toLocaleString()}원</span>
                 </Stack>
             </div>
             <Stack direction={"horizontal"} gap={2} >
@@ -66,9 +85,9 @@ const ProductBuySection = () => {
                 <span style={{ width: "42px",height: "100%", cursor: "pointer" }} ref={target} onClick={() => setShow(!show)}>
                     <ShareIcon width={"100%"} height={"100%"}/>
                 </span>
-                <Overlay target={target.current} show={show} placement="bottom"
+                <Overlay target={target.current} show={show} placement="bottom-start"
                          popperConfig={{
-                             modifiers: [{name: 'offset', options: {offset: [-50, 20]}}]
+                             modifiers: [{name: 'offset', options: {offset: [-390, 20]}}]
                          }}>
                     <div>
                         <ShareCard onClose={() => setShow(false)}/>

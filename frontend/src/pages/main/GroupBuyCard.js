@@ -12,7 +12,7 @@ const GroupBuyCard = ({ product }) => {
     const percent = target > 0 ? Math.round((current / target) * 100) : 0;
     return (
         <Card className={`p-2 m-1 cursor-pointer ${styles.groupBuyCardBorder}`}
-              onClick={() => navigate(`/groupBuy/${product?.groupById}`)}>
+              onClick={() => navigate(`/groupBuy/${product?.groupBuyId}`)}>
             <div className={styles.imageWrapper}>
                 <img src={product?.product.imageUrl[0]} alt="썸네일" className={styles.img} />
                 {product?.deadlineToday && <Badge className={styles.badgeTopRight}>마감임박</Badge>}

@@ -41,7 +41,7 @@ public class History {
     private Order order;
 
     @Column(nullable = false)
-    private Boolean writable = false; // 작성 가능 여부
+    private Boolean writable = true; // 작성 가능 여부
 
     @CreatedDate
     private LocalDateTime createdAt;

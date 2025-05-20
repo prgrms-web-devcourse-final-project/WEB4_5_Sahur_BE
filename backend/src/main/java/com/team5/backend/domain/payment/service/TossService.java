@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientException;
 
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
+import com.team5.backend.domain.payment.util.CardCodeMapper;
 import com.team5.backend.global.config.toss.TossPaymentConfig;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.PaymentErrorCode;
@@ -28,6 +29,7 @@ public class TossService {
 
     private final TossPaymentConfig tossPaymentConfig;
     private final RestClient restClient;
+    private final CardCodeMapper cardCodeMapper;
 
     private String encodeSecretKey() {
         return "Basic " + Base64.getEncoder()
@@ -87,20 +89,33 @@ public class TossService {
 
             log.info("[Toss 결제 조회 성공] paymentKey: {}", paymentKey);
 
-            // 카드 정보가 포함된 경우 파싱
-            Map<String, Object> card = (Map<String, Object>) body.get("card");
+            String method = (String) body.get("method");
+            String paymentName = null;
+            String cardNumber = null;
+
+            switch (method) {
+                case "카드" -> {
+                    Map<String, Object> card = (Map<String, Object>) body.get("card");
+                    String issuerCode = (String) card.get("issuerCode");
+                    paymentName = cardCodeMapper.getInstitutionName(issuerCode);
+                    cardNumber = (String) card.get("number");
+                }
+                case "간편결제" -> {
+                    Map<String, Object> easyPay = (Map<String, Object>) body.get("easyPay");
+                    paymentName = (String) easyPay.get("provider");
+                }
+            }
 
             return PaymentResDto.builder()
                     .paymentKey((String) body.get("paymentKey"))
                     .orderId((String) body.get("orderId"))
                     .orderName((String) body.get("orderName"))
                     .totalAmount((Integer) body.get("totalAmount"))
-                    .method((String) body.get("method"))
+                    .method(method)
                     .status((String) body.get("status"))
                     .approvedAt((String) body.get("approvedAt"))
-                    .issuerCode(card != null ? (String) card.get("issuerCode") : null)
-                    .acquirerCode(card != null ? (String) card.get("acquirerCode") : null)
-                    .cardNumber(card != null ? (String) card.get("number") : null)
+                    .paymentName(paymentName)
+                    .cardNumber(cardNumber)
                     .build();
 
         } catch (RestClientException e) {

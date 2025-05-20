@@ -19,5 +19,6 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
     @Query("select h.product from History h where h.member.memberId = :memberId and h.writable = true")
     Page<Product> findWritableProductsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
-    History findByMember_MemberIdAndProduct_ProductId(Long memberId, Long productId);
+    List<History> findByMember_MemberIdAndProduct_ProductId(Long memberId, Long productId);
+
 }

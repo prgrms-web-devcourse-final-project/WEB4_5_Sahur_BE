@@ -2,7 +2,6 @@ package com.team5.backend.global.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.member.member.dto.AuthResDto;
-import com.team5.backend.domain.member.member.dto.TokenRefreshResDto;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.ErrorCode;
@@ -10,6 +9,7 @@ import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
+import com.team5.backend.global.security.CookieRequestWrapper;
 import com.team5.backend.global.security.CustomUserDetailsService;
 import com.team5.backend.global.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -30,6 +30,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -47,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 회원 복구일 경우 JwtAuthenticationFilter에서는 처리하지 않고 필터 체인을 계속 진행
         String requestPath = request.getServletPath();
-        if (requestPath.equals("/api/v1/members/restore")) {
+        if (requestPath.startsWith("/h2-console") || requestPath.equals("/api/v1/members/restore")) {
 
             filterChain.doFilter(request, response);
             return ;
@@ -81,8 +83,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // SecurityContextHolder에 인증 정보 설정
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    // 토큰 갱신 응답 전송
-                    sendTokenRefreshResponse(response, authResDto.getAccessToken(), authResDto.getRefreshToken());
+                    // 쿠키 값을 담은 Map 생성
+                    Map<String, String> newCookies = new HashMap<>();
+                    newCookies.put("accessToken", authResDto.getAccessToken());
+                    newCookies.put("refreshToken", authResDto.getRefreshToken());
+
+                    // 새 쿠키 값을 포함한 요청 래퍼 생성
+                    HttpServletRequest wrappedRequest = new CookieRequestWrapper(request, newCookies);
+
+                    // 응답 헤더에 토큰 갱신 표시 (선택 사항)
+                    response.setHeader("X-Token-Refreshed", "true");
+
+                    // 필터 체인 계속 진행 (원래 API 요청 처리)
+                    filterChain.doFilter(wrappedRequest, response);
                     return ;
                 } catch (Exception e) {
 
@@ -133,11 +146,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         filterChain.doFilter(request, response);
                         return;
                     } catch (Exception e) {
-                        sendTokenErrorResponse(response, CommonErrorCode.INTERNAL_ERROR);
+                        sendTokenErrorResponse(response, CommonErrorCode.VALIDATION_ERROR);
                         return;
                     }
                 } else {
-                    sendTokenErrorResponse(response, CommonErrorCode.INTERNAL_ERROR);
+                    sendTokenErrorResponse(response, CommonErrorCode.VALIDATION_ERROR);
                     return;
                 }
             }
@@ -170,11 +183,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (refreshToken != null) {
                 try {
-                    // TokenCookieUtil을 사용하여 토큰 갱신
-                    AuthResDto authResDto = authTokenManager.refreshTokens(accessToken, refreshToken, response);
-
-                    // 클라이언트에게 토큰이 갱신되었음을 알리는 응답
-                    sendTokenRefreshResponse(response, authResDto.getAccessToken(), authResDto.getRefreshToken());
+                    refreshAndContinue(request, response, filterChain, accessToken, refreshToken);
                 } catch (Exception e) {
                     log.info("리프레시 토큰 처리 중 오류 발생", e);
                     sendTokenErrorResponse(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
@@ -190,11 +199,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (refreshToken != null) {
                 try {
-                    // TokenCookieUtil을 사용하여 토큰 갱신
-                    AuthResDto authResDto = authTokenManager.refreshTokens(accessToken, refreshToken, response);
-
-                    // 클라이언트에게 토큰이 갱신되었음을 알리는 응답
-                    sendTokenRefreshResponse(response, authResDto.getAccessToken(), authResDto.getRefreshToken());
+                    refreshAndContinue(request, response, filterChain, accessToken, refreshToken);
                 } catch (Exception ex) {
                     log.info("리프레시 토큰 처리 중 오류 발생", ex);
                     sendTokenErrorResponse(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
@@ -220,17 +225,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 
-    // 토큰 갱신 응답 전송
-    private void sendTokenRefreshResponse(HttpServletResponse response, String newAccessToken, String newRefreshToken) throws IOException {
-        
-        response.setStatus(HttpStatus.OK.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+    private void refreshAndContinue(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain,
+                                    String accessToken, String refreshToken) throws IOException {
+        try {
 
-        // 새 토큰 정보를 담은 응답 객체
-        TokenRefreshResDto tokenRefreshResDto = new TokenRefreshResDto(newAccessToken, newRefreshToken, true);
+            // 토큰 갱신
+            AuthResDto authResDto = authTokenManager.refreshTokens(accessToken, refreshToken, response);
+            String newAccessToken = authResDto.getAccessToken();
+            String newRefreshToken = authResDto.getRefreshToken();
 
-        RsData<TokenRefreshResDto> refreshResponse = RsDataUtil.success("토큰이 재발급되었습니다.", tokenRefreshResDto);
-        response.getWriter().write(objectMapper.writeValueAsString(refreshResponse));
+            // 새 액세스 토큰으로 사용자 정보 로드
+            String email = jwtUtil.extractEmail(newAccessToken);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+
+            // 인증 객체 생성 및 SecurityContext에 설정
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // 쿠키 값을 담은 Map 생성
+            Map<String, String> newCookies = new HashMap<>();
+            newCookies.put("accessToken", newAccessToken);
+            newCookies.put("refreshToken", newRefreshToken);
+
+            // 새 쿠키 값을 포함한 요청 래퍼 생성
+            HttpServletRequest wrappedRequest = new CookieRequestWrapper(request, newCookies);
+
+            // 응답 헤더에 토큰 갱신 표시 (선택 사항)
+            response.setHeader("X-Token-Refreshed", "true");
+
+            // 필터 체인 계속 진행 (원래 API 요청 처리)
+            filterChain.doFilter(wrappedRequest, response);
+        } catch (Exception e) {
+
+            log.info("토큰 갱신 및 요청 처리 중 오류", e);
+            sendTokenErrorResponse(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
     }
 }

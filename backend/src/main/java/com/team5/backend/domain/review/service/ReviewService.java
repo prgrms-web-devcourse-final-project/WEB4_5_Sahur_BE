@@ -41,10 +41,19 @@ public class ReviewService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
-        Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
         History history = historyRepository.findById(request.getHistoryId())
                 .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
+
+        if (!history.getMember().getMemberId().equals(memberId)) {
+            throw new CustomException(ReviewErrorCode.REVIEW_FORBIDDEN);
+        }
+
+        if (!history.getWritable()) {
+            throw new CustomException(ReviewErrorCode.DUPLICATE_REVIEW); // 방어 코드도 추천
+        }
+
+        Product product = history.getProduct();
 
         Review review = Review.builder()
                 .member(member)
@@ -56,10 +65,15 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        history.setWritable(false);
         Review saved = reviewRepository.save(review);
+
+        history.setWritable(false);
+        historyRepository.save(history); // 이거 꼭 필요함!!
+
         return ReviewResDto.fromEntity(saved);
     }
+
+
 
     /**
      * 전체 리뷰 목록 조회 (최신순 정렬)
@@ -130,6 +144,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ReviewErrorCode.REVIEW_NOT_FOUND));
         review.getHistory().setWritable(true);
+        historyRepository.save(review.getHistory());
         reviewRepository.deleteById(id);
     }
 

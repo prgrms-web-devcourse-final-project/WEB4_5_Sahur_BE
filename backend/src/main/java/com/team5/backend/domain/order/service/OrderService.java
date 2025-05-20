@@ -14,6 +14,7 @@ import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
@@ -65,34 +66,55 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderListResDto> getOrders(Long orderId, OrderStatus status, Pageable pageable) {
+    public Page<OrderListResDto> getOrders(Long orderId, String status, Pageable pageable) {
         Page<Order> orders = null;
+
+        // 주문 ID가 있는 경우 -> 단건 조회
         if (orderId != null) {
             orders = orderRepository.findByOrderId(orderId, pageable);
-        } else if (status != null) {
-            orders = orderRepository.findByStatus(status, pageable);
+            return orders.map(OrderListResDto::from);
+        }
+
+        // 주문 상태별 필터링
+        if (status != null) {
+            switch (status.toUpperCase()) {
+                case "BEFOREPAID" -> orders = orderRepository.findByStatus(OrderStatus.BEFOREPAID, pageable);
+                case "PAID" -> orders = orderRepository.findByStatusAndDelivery_Status(
+                        OrderStatus.PAID, DeliveryStatus.PREPARING, pageable
+                );
+                case "CANCELED" -> orders = orderRepository.findByStatus(OrderStatus.CANCELED, pageable);
+                case "INDELIVERY" ->
+                        orders = orderRepository.findByDelivery_Status(DeliveryStatus.INDELIVERY, pageable);
+                case "COMPLETED" -> orders = orderRepository.findByDelivery_Status(DeliveryStatus.COMPLETED, pageable);
+                default -> throw new CustomException(OrderErrorCode.INVALID_ORDER_STATUS);
+            }
         } else {
             orders = orderRepository.findAll(pageable);
         }
+
         return orders.map(OrderListResDto::from);
     }
 
     @Transactional(readOnly = true)
     public Page<OrderListResDto> getOrdersByMember(Long memberId, FilterStatus status, Pageable pageable) {
         Page<Order> orders = null;
-        if (FilterStatus.IN_PROGRESS.equals(status)) {
-            List<OrderStatus> statusList = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
-            orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, statusList, pageable);
-        } else if (FilterStatus.DONE.equals(status)) {
-            orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
-        } else if (FilterStatus.CANCELED.equals(status)) {
-            orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
-        } else {
-            orders = orderRepository.findByMember_MemberId(memberId, pageable);
+
+        switch (status) {
+            case IN_PROGRESS -> {
+                List<OrderStatus> progressStatuses = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
+                orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, progressStatuses, pageable);
+            }
+            case DONE ->
+                    orders = orderRepository.findByDelivery_StatusAndMember_MemberId(DeliveryStatus.COMPLETED, memberId, pageable);
+            case CANCELED ->
+                    orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
+            default -> orders = orderRepository.findByMember_MemberId(memberId, pageable);
         }
+        
         return orders.map(OrderListResDto::from);
     }
 
+    @Transactional(readOnly = true)
     public Long getMonthlyCompletedSales() {
         LocalDateTime start = YearMonth.now().atDay(1).atStartOfDay();
         LocalDateTime end = YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX);
@@ -145,14 +167,19 @@ public class OrderService {
         List<Order> expiredOrders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.BEFOREPAID, oneHourAgo);
 
         for (Order order : expiredOrders) {
-            log.info("[Order Cleanup] 삭제할 주문: orderId={}, createdAt={}", order.getOrderId(), order.getCreatedAt());
+            Long orderId = order.getOrderId();
+            log.info("[Order Cleanup] 삭제할 주문: orderId={}, createdAt={}", orderId, order.getCreatedAt());
 
             if (order.getDelivery() != null) {
                 log.info("[Order Cleanup] 연결된 배송 정보도 삭제: deliveryId={}", order.getDelivery().getDeliveryId());
                 deliveryRepository.delete(order.getDelivery());
             }
+
+            // log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
+            // historyRepository.deleteByOrder_OrderId(orderId);
+
             orderRepository.delete(order);
-            log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", order.getOrderId());
+            log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", orderId);
         }
 
         log.info("[Order Cleanup] 총 {}건의 주문이 삭제되었습니다.", expiredOrders.size());

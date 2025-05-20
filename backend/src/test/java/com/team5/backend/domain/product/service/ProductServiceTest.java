@@ -7,7 +7,6 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
-import com.team5.backend.domain.product.search.service.ProductSearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 class ProductServiceTest {
@@ -32,8 +32,6 @@ class ProductServiceTest {
     private ProductRepository productRepository;
     @Mock
     private CategoryRepository categoryRepository;
-    @Mock
-    private ProductSearchService productSearchService;
     @InjectMocks
     private ProductService productService;
 
@@ -80,8 +78,6 @@ class ProductServiceTest {
         assertEquals(testProduct.getProductId(), result.getProductId());
         assertEquals(testProduct.getTitle(), result.getTitle());
 
-        verify(productSearchService).index(any(Product.class));
-        verify(productRepository).save(any(Product.class));
     }
 
     @Test
@@ -189,9 +185,6 @@ class ProductServiceTest {
         assertEquals(req.getTitle(), result.getTitle());
         assertEquals(req.getDescription(), result.getDescription());
         assertEquals(req.getPrice(), result.getPrice());
-
-        verify(productSearchService).index(any(Product.class));
-        verify(productRepository).findById(eq(1L));
     }
 
     @Test

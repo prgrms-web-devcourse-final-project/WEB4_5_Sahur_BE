@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.team5.backend.domain.member.member.service.AuthService;
+import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.payment.dto.CancelReqDto;
 import com.team5.backend.domain.payment.dto.ConfirmReqDto;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
@@ -39,7 +40,6 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final TossService tossService;
-    private final AuthService authService;
 
     @Operation(summary = "결제 승인", description = "해당 주문에 대한 결제 승인 및 paymentKey 저장")
     @PostMapping("/confirm")
@@ -74,11 +74,13 @@ public class PaymentController {
     @GetMapping("/me")
     public RsData<Page<PaymentResDto>> getPaymentsByMember(
             @AuthenticationPrincipal PrincipalDetails userDetails,
-            @PageableDefault(size = 5, sort = "paymentId", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 5, sort = "paymentId", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(name = "status", required = false) OrderStatus status,
+            @RequestParam(name = "search", required = false) String search
     ) {
         Long memberId = userDetails.getMember().getMemberId();
 
-        Page<String> paymentKeys = paymentService.getPaymentKeysByMember(memberId, pageable);
+        Page<String> paymentKeys = paymentService.getPaymentKeysByMember(memberId, status, search, pageable);
         Page<PaymentResDto> result = paymentService.getPaymentsByKeysAsync(paymentKeys);
 
         return RsDataUtil.success("전체 결제 내역 비동기 조회 성공", result);
