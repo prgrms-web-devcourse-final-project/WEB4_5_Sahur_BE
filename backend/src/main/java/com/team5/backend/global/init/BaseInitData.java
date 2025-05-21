@@ -120,7 +120,7 @@ public class BaseInitData implements CommandLineRunner {
                     createMember("박지훈", "bob@example.com", "지훈이", "01023456789", new Address("34121", "대전 서구 둔산로 123", "301호"), "user_bob.jpg"),
                     createMember("최유리", "carol@example.com", "율무차", "01034567890", new Address("48058", "부산 해운대구 센텀서로 30", "1501호"), "user_carol.jpg"),
                     createMember("정예린", "yerin@example.com", "예린스타", "01045678901", new Address("21945", "인천 연수구 송도과학로 16", "A동 1804호"), "user_yerin.jpg"),
-                    createMember("김태호", "taeho@example.com", "호박고구마", "01045678901", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg")
+                    createMember("김태호", "taeho@example.com", "호박고구마", "01056789012", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg")
             );
 
             Member admin = memberRepository.save(Member.builder()
@@ -147,7 +147,7 @@ public class BaseInitData implements CommandLineRunner {
                         .member(requester)
                         .category(category)
                         .title(title + " 요청")
-                        .productUrl("https://i.pravatar.cc/150?img=" + i + ".jpg")
+                        .productUrl(imageUrl)
                         .description("옵션: 다양함 / 이미지: " + imageUrl)
                         .status(i % 3 == 0
                                 ? ProductRequestStatus.APPROVED
@@ -159,7 +159,7 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl(List.of("https://i.pravatar.cc/150?img=" + i + ".jpg"))
+                        .imageUrl(List.of(imageUrl))
                         .price((int) (100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
@@ -198,7 +198,7 @@ public class BaseInitData implements CommandLineRunner {
                         .product(product)
                         .groupBuy(groupBuy)
                         .order(order)
-                        .writable(!shouldWriteReview)  // 리뷰를 쓸 거면 false로 저장, 아닐 땐 true 유지
+                        .writable(!shouldWriteReview)
                         .createdAt(LocalDateTime.now())
                         .build());
 
@@ -261,7 +261,7 @@ public class BaseInitData implements CommandLineRunner {
                 .role(Role.USER)
                 .deleted(false)
                 .emailVerified(true)
-                .imageUrl("http://example.com/" + imageFile)
+                .imageUrl("https://example.com/images/" + imageFile)
                 .build());
     }
 }
