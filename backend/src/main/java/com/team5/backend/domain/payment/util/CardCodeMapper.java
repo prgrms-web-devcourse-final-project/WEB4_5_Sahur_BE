@@ -1,5 +1,11 @@
 package com.team5.backend.domain.payment.util;
 
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
