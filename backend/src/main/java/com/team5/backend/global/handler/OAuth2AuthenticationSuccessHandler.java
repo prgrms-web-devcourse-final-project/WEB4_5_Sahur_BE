@@ -55,7 +55,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             // JWT 리프레시 토큰 생성
             String refreshToken = jwtUtil.generateRefreshToken(memberTokenInfo);
 
-            // 토큰 만료 시간 계산
+            // 토큰 만료 시간 계산 - 정확히 초 단위로 변환
             int accessTokenMaxAge = (int)(jwtUtil.getAccessTokenExpiration() / 1000);
             int refreshTokenMaxAge = (int)(jwtUtil.getRefreshTokenExpiration() / 1000);
 
@@ -124,27 +124,26 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     // 배포 환경에서 쿠키 헤더 직접 설정 메서드
     private void setCookieHeader(HttpServletResponse response, String name, String value,
                                  int maxAge, String domain) {
+
         try {
-            Cookie cookie = new Cookie(name, value);
-            cookie.setPath("/");
-            cookie.setMaxAge(maxAge);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setAttribute("SameSite", "None");
+            // 쿠키 객체를 사용하지 않고 직접 헤더를 설정
+            StringBuilder cookieBuilder = new StringBuilder();
+            cookieBuilder.append(name).append("=").append(value).append(";");
+            cookieBuilder.append(" Path=/;");
+            cookieBuilder.append(" Max-Age=").append(maxAge).append(";");
 
             // 도메인이 유효한 경우에만 설정
             if (domain != null && !domain.isEmpty()) {
-                cookie.setDomain(domain);
+                cookieBuilder.append(" Domain=").append(domain).append(";");
                 log.info("쿠키 도메인 설정: {}", domain);
             }
 
-            response.addCookie(cookie);
+            cookieBuilder.append(" HttpOnly;");
+            cookieBuilder.append(" Secure;");
+            cookieBuilder.append(" SameSite=None");
 
-            // SameSite=None 설정을 직접 헤더에 추가
-            String cookieHeader = response.getHeader("Set-Cookie");
-            if (cookieHeader != null) {
-                response.setHeader("Set-Cookie", cookieHeader + "; SameSite=None");
-            }
+            // 쿠키 헤더를 직접 추가
+            response.addHeader("Set-Cookie", cookieBuilder.toString());
 
             log.info("쿠키 설정 완료: {}", name);
         } catch (Exception e) {

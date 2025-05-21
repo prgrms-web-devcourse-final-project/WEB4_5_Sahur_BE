@@ -2,6 +2,7 @@ package com.team5.backend.global.util;
 
 import com.team5.backend.global.security.MemberTokenInfo;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -334,5 +335,22 @@ public class JwtUtil {
 
     public long getTemporaryTokenExpiration() {
         return temporaryTokenExpiration;
+    }
+
+    public String extractEmailIgnoringExpiration(String token) {
+
+        try {
+
+            Claims claims = Jwts.parser()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰에서도 클레임 추출
+            return e.getClaims().getSubject();
+        }
     }
 }
