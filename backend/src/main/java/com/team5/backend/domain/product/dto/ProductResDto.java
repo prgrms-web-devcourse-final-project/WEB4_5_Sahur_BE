@@ -20,6 +20,11 @@ public class ProductResDto {
     private LocalDateTime createdAt;
 
     public static ProductResDto fromEntity(Product product) {
+
+        if (product == null) {
+            throw new IllegalArgumentException("Product는 null일 수 없습니다.");
+        }
+
         return ProductResDto.builder()
                 .productId(product.getProductId())
                 .categoryId(product.getCategory().getCategoryId())
