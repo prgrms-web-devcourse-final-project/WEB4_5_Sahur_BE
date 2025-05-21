@@ -6,10 +6,7 @@ import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
-import com.team5.backend.domain.review.dto.ReviewCreateReqDto;
-import com.team5.backend.domain.review.dto.ReviewPatchReqDto;
-import com.team5.backend.domain.review.dto.ReviewResDto;
-import com.team5.backend.domain.review.dto.ReviewUpdateReqDto;
+import com.team5.backend.domain.review.dto.*;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.entity.ReviewSortField;
 import com.team5.backend.domain.review.repository.ReviewRepository;
@@ -50,7 +47,7 @@ public class ReviewService {
         }
 
         if (!history.getWritable()) {
-            throw new CustomException(ReviewErrorCode.DUPLICATE_REVIEW); // 방어 코드도 추천
+            throw new CustomException(ReviewErrorCode.DUPLICATE_REVIEW);
         }
 
         Product product = history.getProduct();
@@ -68,19 +65,17 @@ public class ReviewService {
         Review saved = reviewRepository.save(review);
 
         history.setWritable(false);
-        historyRepository.save(history); // 이거 꼭 필요함!!
+        historyRepository.save(history);
 
         return ReviewResDto.fromEntity(saved);
     }
 
-
-
     /**
-     * 전체 리뷰 목록 조회 (최신순 정렬)
+     * 전체 리뷰 목록 조회 (정렬 옵션 포함)
      */
     @Transactional(readOnly = true)
-    public Page<ReviewResDto> getAllReviews(Pageable pageable) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+    public Page<ReviewResDto> getAllReviews(Pageable pageable, ReviewSortField sortField) {
+        Sort sort = sortField.toSort();
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
         return reviewRepository.findAll(sortedPageable)
