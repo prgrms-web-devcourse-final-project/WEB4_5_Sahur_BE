@@ -16,7 +16,10 @@ public class GetMemberResDto {
     private String email;
     private String nickname;
     private String name;
-    private String address;
+    private String phoneNumber;
+    private String zipCode;
+    private String streetAdr;
+    private String detailAdr;
     private String imageUrl;
     private Role role;
     private LocalDateTime createdAt;
@@ -30,7 +33,10 @@ public class GetMemberResDto {
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .name(member.getName())
-                .address(member.getAddress().toString())
+                .phoneNumber(member.getPhoneNumber())
+                .zipCode(member.getAddress().getZipCode())
+                .streetAdr(member.getAddress().getStreetAdr())
+                .detailAdr(member.getAddress().getDetailAdr())
                 .imageUrl(member.getImageUrl())
                 .role(member.getRole())
                 .createdAt(member.getCreatedAt())

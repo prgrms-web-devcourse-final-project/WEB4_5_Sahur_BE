@@ -33,6 +33,9 @@ public class Member {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "phoneNumber", nullable = false)
+    private String phoneNumber;
+
     @Column(name = "password", nullable = false)
     private String password;
 
@@ -68,6 +71,7 @@ public class Member {
         if (patchMemberReqDto.getEmail() != null) this.email = patchMemberReqDto.getEmail();
         if (patchMemberReqDto.getNickname() != null) this.nickname = patchMemberReqDto.getNickname();
         if (patchMemberReqDto.getName() != null) this.name = patchMemberReqDto.getName();
+        if (patchMemberReqDto.getPhoneNumber() != null) this.phoneNumber = patchMemberReqDto.getPhoneNumber();
         if (patchMemberReqDto.getPassword() != null) this.password = passwordEncoder.encode(patchMemberReqDto.getPassword());
         if (patchMemberReqDto.getZipCode() != null || patchMemberReqDto.getStreetAdr() != null || patchMemberReqDto.getDetailAdr() != null)
             this.address = patchMemberReqDto.toAddress();

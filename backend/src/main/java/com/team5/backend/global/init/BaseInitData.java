@@ -116,11 +116,11 @@ public class BaseInitData implements CommandLineRunner {
             }
 
             List<Member> members = List.of(
-                    createMember("이수민", "alice@example.com", "수민짱", new Address("04524", "서울 마포구 월드컵북로 396", "102동 1101호"), "user_alice.jpg"),
-                    createMember("박지훈", "bob@example.com", "지훈이", new Address("34121", "대전 서구 둔산로 123", "301호"), "user_bob.jpg"),
-                    createMember("최유리", "carol@example.com", "율무차", new Address("48058", "부산 해운대구 센텀서로 30", "1501호"), "user_carol.jpg"),
-                    createMember("정예린", "yerin@example.com", "예린스타", new Address("21945", "인천 연수구 송도과학로 16", "A동 1804호"), "user_yerin.jpg"),
-                    createMember("김태호", "taeho@example.com", "호박고구마", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg")
+                    createMember("이수민", "alice@example.com", "수민짱", "01012345678", new Address("04524", "서울 마포구 월드컵북로 396", "102동 1101호"), "user_alice.jpg"),
+                    createMember("박지훈", "bob@example.com", "지훈이", "01023456789", new Address("34121", "대전 서구 둔산로 123", "301호"), "user_bob.jpg"),
+                    createMember("최유리", "carol@example.com", "율무차", "01034567890", new Address("48058", "부산 해운대구 센텀서로 30", "1501호"), "user_carol.jpg"),
+                    createMember("정예린", "yerin@example.com", "예린스타", "01045678901", new Address("21945", "인천 연수구 송도과학로 16", "A동 1804호"), "user_yerin.jpg"),
+                    createMember("김태호", "taeho@example.com", "호박고구마", "01045678901", new Address("61177", "광주 북구 설죽로 150", "101동 202호"), "user_taeho.jpg")
             );
 
             Member admin = memberRepository.save(Member.builder()
@@ -128,6 +128,7 @@ public class BaseInitData implements CommandLineRunner {
                     .email("admin@example.com")
                     .password(passwordEncoder.encode("admin123!"))
                     .nickname("관리자계정")
+                    .phoneNumber("01099999999")
                     .address(new Address("00000", "서울 종로구 청와대로 1", "청사 101호"))
                     .role(Role.ADMIN)
                     .deleted(false)
@@ -249,12 +250,13 @@ public class BaseInitData implements CommandLineRunner {
     }
 
 
-    private Member createMember(String name, String email, String nickname, Address address, String imageFile) {
+    private Member createMember(String name, String email, String nickname, String phoneNumber, Address address, String imageFile) {
         return memberRepository.save(Member.builder()
                 .name(name)
                 .email(email)
                 .password(passwordEncoder.encode("password123!"))
                 .nickname(nickname)
+                .phoneNumber(phoneNumber)
                 .address(address)
                 .role(Role.USER)
                 .deleted(false)
