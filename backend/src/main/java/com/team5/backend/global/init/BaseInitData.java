@@ -146,7 +146,7 @@ public class BaseInitData implements CommandLineRunner {
                         .member(requester)
                         .category(category)
                         .title(title + " 요청")
-                        .productUrl("https://i.pravatar.cc/150?img=" + i + ".jpg")
+                        .productUrl(imageUrl)
                         .description("옵션: 다양함 / 이미지: " + imageUrl)
                         .status(i % 3 == 0
                                 ? ProductRequestStatus.APPROVED
@@ -158,7 +158,7 @@ public class BaseInitData implements CommandLineRunner {
                         .category(category)
                         .title(title)
                         .description(description)
-                        .imageUrl(List.of("https://i.pravatar.cc/150?img=" + i + ".jpg"))
+                        .imageUrl(List.of(imageUrl))
                         .price((int) (100000 + (i * 7000L)))
                         .dibCount((long) (3 + (i % 10)))
                         .createdAt(LocalDateTime.now().minusDays(i % 5))
@@ -197,7 +197,7 @@ public class BaseInitData implements CommandLineRunner {
                         .product(product)
                         .groupBuy(groupBuy)
                         .order(order)
-                        .writable(!shouldWriteReview)  // 리뷰를 쓸 거면 false로 저장, 아닐 땐 true 유지
+                        .writable(!shouldWriteReview)
                         .createdAt(LocalDateTime.now())
                         .build());
 
@@ -248,7 +248,6 @@ public class BaseInitData implements CommandLineRunner {
         }
     }
 
-
     private Member createMember(String name, String email, String nickname, Address address, String imageFile) {
         return memberRepository.save(Member.builder()
                 .name(name)
@@ -259,7 +258,7 @@ public class BaseInitData implements CommandLineRunner {
                 .role(Role.USER)
                 .deleted(false)
                 .emailVerified(true)
-                .imageUrl("http://example.com/" + imageFile)
+                .imageUrl("https://example.com/images/" + imageFile)
                 .build());
     }
 }
