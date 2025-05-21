@@ -93,6 +93,7 @@ public class MemberService {
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(encodedPassword)
+                .phoneNumber(signupReqDto.getPhoneNumber())
                 .deleted(false)
                 .address(address)
                 .imageUrl(imageUrl)
