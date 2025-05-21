@@ -6,7 +6,9 @@ import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
 import com.team5.backend.domain.history.service.HistoryService;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
+import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,6 +83,10 @@ public class HistoryController {
     public RsData<List<HistoryResDto>> getWritableHistories(
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @PathVariable Long productId) {
+
+        if (userDetails == null) {
+            throw new CustomException(CommonErrorCode.UNAUTHORIZED);
+        }
 
         List<HistoryResDto> writableHistories = historyService.getWritableHistories(productId, userDetails);
         return RsDataUtil.success("리뷰 작성 가능한 구매 이력 조회 성공", writableHistories);
