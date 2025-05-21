@@ -33,7 +33,7 @@ public class Member {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "phoneNumber", nullable = false)
+    @Column(name = "phoneNumber")
     private String phoneNumber;
 
     @Column(name = "password", nullable = false)
