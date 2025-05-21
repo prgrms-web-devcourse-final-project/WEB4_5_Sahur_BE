@@ -3,24 +3,15 @@ package com.team5.backend.domain.payment.util;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.PaymentErrorCode;
 import jakarta.annotation.PostConstruct;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
-
-import com.team5.backend.global.exception.CustomException;
-import com.team5.backend.global.exception.code.PaymentErrorCode;
-
-import jakarta.annotation.PostConstruct;
 
 @Component
 public class CardCodeMapper {
