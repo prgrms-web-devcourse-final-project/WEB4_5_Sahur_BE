@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -38,7 +39,7 @@ public class ProductController {
     public RsData<Page<ProductResDto>> getAllProducts(
             @Parameter(description = "카테고리명") @RequestParam(required = false) String category,
             @Parameter(description = "검색 키워드") @RequestParam(required = false) String keyword,
-            @Parameter(description = "페이지 정보") @PageableDefault(size = 5) Pageable pageable
+            @ParameterObject @Parameter(description = "페이지 정보") @PageableDefault(size = 5) Pageable pageable
     ) {
         Page<Product> page = productService.getAllProducts(category, keyword, pageable);
         Page<ProductResDto> response = page.map(ProductResDto::fromEntity);
