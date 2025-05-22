@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRequestRepository extends JpaRepository<ProductRequest, Long> {
     Page<ProductRequest> findAllByStatus(ProductRequestStatus status, Pageable pageable);
+    Page<ProductRequest> findByMemberMemberId(Long memberId, Pageable pageable);
+
 }
