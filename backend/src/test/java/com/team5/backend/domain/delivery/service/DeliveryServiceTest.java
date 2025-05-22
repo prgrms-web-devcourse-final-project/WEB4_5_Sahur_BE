@@ -45,16 +45,15 @@ class DeliveryServiceTest {
     @Test
     @DisplayName("배송 등록 성공")
     void createDelivery_success() {
-        OrderCreateReqDto orderReq = new OrderCreateReqDto(1L, 1L, 1L, 3);
-        Order order = orderService.createOrder(orderReq);
+        OrderCreateReqDto orderReq = new OrderCreateReqDto(1L, 1L, 3);
+        Order order = orderService.createOrder(orderReq, 1L);
 
         DeliveryReqDto deliveryReq = new DeliveryReqDto(
                 "12345",
                 "서울시 어쩌구",
                 "테스트 123",
                 12345,
-                "01012345678",
-                "12345"
+                "01012345678"
         );
         Delivery delivery = deliveryService.createDelivery(order.getOrderId(), deliveryReq);
 
@@ -62,7 +61,6 @@ class DeliveryServiceTest {
         assertThat(delivery.getPccc()).isEqualTo(12345);
         assertThat(delivery.getContact()).isEqualTo("01012345678");
         assertThat(delivery.getStatus()).isEqualTo(DeliveryStatus.PREPARING);
-        assertThat(delivery.getShipping()).isEqualTo("12345");
     }
 
     @Test
@@ -73,8 +71,7 @@ class DeliveryServiceTest {
                 "서울시 어쩌구",
                 "테스트 123",
                 12345,
-                "01012345678",
-                "12345"
+                "01012345678"
         );
 
         CustomException e = assertThrows(CustomException.class,
@@ -95,8 +92,8 @@ class DeliveryServiceTest {
     @Test
     @DisplayName("주문별 배송 정보 조회 실패 - 존재하지 않는 배송 정보")
     void getDeliveryByOrder_fail() {
-        OrderCreateReqDto request = new OrderCreateReqDto(1L, 1L, 1L, 3);
-        Order order = orderService.createOrder(request);
+        OrderCreateReqDto orderReq = new OrderCreateReqDto(1L, 1L, 3);
+        Order order = orderService.createOrder(orderReq, 1L);
 
         CustomException e = assertThrows(CustomException.class,
                 () -> deliveryService.getDeliveryByOrder(order.getOrderId()));
@@ -129,15 +126,13 @@ class DeliveryServiceTest {
                 "서울시 00구",
                 "테스트 123",
                 77777,
-                "01012345678",
-                "98765"
+                "01012345678"
         );
         Delivery result = deliveryService.updateDeliveryInfo(deliveryId, request);
 
         assertThat(result.getAddress().toString()).isEqualTo("서울시 00구 테스트 123");
         assertThat(result.getPccc()).isEqualTo(77777);
         assertThat(result.getContact()).isEqualTo("01012345678");
-        assertThat(result.getShipping()).isEqualTo("98765");
     }
 
     @Test
@@ -148,8 +143,7 @@ class DeliveryServiceTest {
                 "서울시 00구",
                 "테스트 123",
                 55555,
-                "01099998888",
-                "12121"
+                "01099998888"
         );
 
         CustomException e = assertThrows(CustomException.class,
