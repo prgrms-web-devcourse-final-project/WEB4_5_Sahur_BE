@@ -8,14 +8,17 @@ import GroupBuy from "../pages/products/GroupBuy";
 import Payment from "../pages/payment/Payment";
 import PaymentSuccess from "../pages/payment/PaymentSuccess";
 import PaymentFail from "../pages/payment/PaymentFail";
-import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
 import MypageDashboard from "../pages/mypage/MypageDashboard";
 import AdminLayout from "../layout/admin/AdminLayout";
 import Layout from "../layout/main/Layout";
-import AdminProducts from "../pages/admin/AdminProducts";
-import AdminGroupBuy from "../pages/admin/AdminGroupBuy";
-import AdminOrders from "../pages/admin/AdminOrders";
-import AdminReviews from "../pages/admin/AdminReviews";
+import AdminProducts from "../pages/admin/products/AdminProducts";
+import AdminGroupBuy from "../pages/admin/groupbuy/AdminGroupBuy";
+import AdminOrders from "../pages/admin/orders/AdminOrders";
+import AdminReviews from "../pages/admin/review/AdminReviews";
+import AdminProductsDetail from "../pages/admin/products/AdminProductsDetail";
+import AdminProductsRequestDetail
+    from "../pages/admin/products/AdminProductsRequestDetail";
 
 const BaseRoutes = () => {
     return (
@@ -35,6 +38,9 @@ const BaseRoutes = () => {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
+                <Route path="productsRequests" element={<AdminProducts />} />
+                <Route path="products/:productId" element={<AdminProductsDetail />} />
+                <Route path="productsRequests/:productId" element={<AdminProductsRequestDetail />} />
                 <Route path="groupBuy" element={<AdminGroupBuy />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="reviews" element={<AdminReviews />} />

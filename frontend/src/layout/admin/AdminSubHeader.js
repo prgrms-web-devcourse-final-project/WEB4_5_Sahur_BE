@@ -11,7 +11,7 @@ const AdminSubHeader = ({ pageId }) => {
     return (
         <Card style={{ borderRadius: 0 }}>
             <Card.Body className={"py-4"}>
-                <h4 style={{ fontWeight: 600 }}>{title[pageId]}</h4>
+                <h4 style={{ fontWeight: 600, textAlign: 'center' }}>{title[pageId]}</h4>
             </Card.Body>
         </Card>
     );

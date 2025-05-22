@@ -21,3 +21,10 @@ export const confirmAtom = atom({
         , onCancel : null
     },
 });
+
+export const userAtom = atom({
+    key: 'userAtom', // 고유 키
+    default: {
+
+    },
+});

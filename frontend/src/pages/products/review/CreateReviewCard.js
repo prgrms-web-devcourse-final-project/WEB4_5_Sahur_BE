@@ -17,7 +17,6 @@ const CreateReviewCard = ({ handleClose }) => {
     const [reviewText, setReviewText] = useState();
 
     const handleConfirmClick = () => {
-        console.log(rating, reviewImageFileList, reviewText)
         handleClose();
     }
     return (

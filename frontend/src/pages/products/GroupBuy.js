@@ -86,7 +86,7 @@ const GroupBuy = () => {
                         </Stack>
                     </Col>
                 </Row> {/* 상품상세, 리뷰 버튼 로우 끝 */}
-                {currentView === 'description' ? <ProductDescription product={groupBuyInfo?.product} /> : <ProductReviewList />}
+                {currentView === 'description' ? <ProductDescription product={groupBuyInfo?.product} /> : <ProductReviewList product={groupBuyInfo?.product}/>}
             </Row>
         </ProductWrapper>
     );

@@ -7,7 +7,7 @@ const ProductDescription = ({product}) => {
                     <h5 >상품 설명</h5>
                     <desc className={"text-gray-300"}>{product?.description}</desc>
                     {product?.imageUrl.map((item) => {
-                        return  <Image src={item} />
+                        return  <Image key={item} src={item} />
                     })}
                 </Stack>
             </Col>

@@ -1,19 +1,24 @@
 import {Card, Form, Stack} from "react-bootstrap";
 import NameForm from "../login/NameForm";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import PhoneForm from "../login/PhoneForm";
 import AddressForm from "../login/AddressForm";
 import DetailAdrForm from "../login/DetailAdrForm";
 import styles from "./Payment.module.scss"
 import DeliveryMemoForm from "./DeliveryMemoForm";
+import {useRecoilValue} from "recoil";
+import {userAtom} from "../../state/atoms";
+import PcccForm from "./PcccForm";
 
-const DeliverySection = () => {
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [zipCode, setZipCode] = useState("");
-    const [streetAdr, setStreetAdr] = useState("");
-    const [detailAdr, setDetailAdr] = useState("");
+const DeliverySection = ({setDeliveryInfo}) => {
+    const loginUser = useRecoilValue(userAtom);
+    const [name, setName] = useState(loginUser.name);
+    const [phone, setPhone] = useState(loginUser.phoneNumber);
+    const [zipCode, setZipCode] = useState(loginUser.zipCode);
+    const [streetAdr, setStreetAdr] = useState(loginUser.streetAdr);
+    const [detailAdr, setDetailAdr] = useState(loginUser.detailAdr);
     const [deliveryMemo, setDeliveryMemo] = useState("");
+    const [pccc, setPccc] = useState("P");
 
     const [error, setError] = useState({
         name: '',
@@ -21,16 +26,41 @@ const DeliverySection = () => {
         zipCode: '',
         streetAdr: '',
         detailAdr: '',
-        deliveryMemo: ''
+        deliveryMemo: '',
+        pccc: ''
     })
     const [inputStatus, setInputStatus] = useState({
-        name: false,
-        phone: false,
-        zipCode: false,
-        streetAdr: false,
-        detailAdr: false,
-        deliveryMemo: false
+        name: true,
+        phone: true,
+        zipCode: true,
+        streetAdr: true,
+        detailAdr: true,
+        deliveryMemo: true,
+        pccc: false
     });
+
+    //필수정보가 불완전하면 결제를 막기 위한 사이드이펙트
+    useEffect(() => {
+        if (Object.values(inputStatus).every(Boolean)) {
+            setDeliveryInfo({
+                ready: true,
+                name,
+                phone,
+                zipCode,
+                streetAdr,
+                detailAdr,
+                deliveryMemo,
+                pccc
+            });
+        } else {
+            setDeliveryInfo(prev => {
+                return {
+                    ...prev,
+                    ready: false
+                }
+            });
+        }
+    }, [inputStatus])
 
     const handleAddressSelect = (data) => {
         setZipCode(data.zonecode);
@@ -51,6 +81,7 @@ const DeliverySection = () => {
                 <AddressForm zipCode={zipCode} streetAdr={streetAdr} handleAddressSelect={handleAddressSelect} error={error} />
                 <DetailAdrForm detailAdr={detailAdr} setDetailAdr={setDetailAdr} error={error} setError={setError} setInputStatus={setInputStatus} />
                 <DeliveryMemoForm deliveryMemo={deliveryMemo} setDeliveryMemo={setDeliveryMemo} error={error} setError={setError} setInputStatus={setInputStatus} />
+                <PcccForm pccc={pccc} setPccc={setPccc} error={error} setError={setError} setInputStatus={setInputStatus} />
             </Form>
         </>
     )
