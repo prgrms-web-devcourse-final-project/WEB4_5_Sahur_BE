@@ -11,7 +11,9 @@ public enum AuthErrorCode implements ErrorCode {
     LOGOUT_TOKEN(401, "LOGOUT_TOKEN", "로그아웃된 토큰입니다."),
     INVALID_TOKEN(401, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(401, "EXPIRED_TOKEN", "만료된 토큰입니다."),
-    REFRESH_TOKEN_NOT_FOUND(401, "REFRESH_TOKEN_NOT_FOUND", "리프레시 토큰이 존재하지 않습니다.");
+    REFRESH_TOKEN_NOT_FOUND(401, "REFRESH_TOKEN_NOT_FOUND", "리프레시 토큰이 존재하지 않습니다."),
+    UNAUTHORIZED(401, "UNAUTHORIZED", "로그인이 필요합니다."),
+    FORBIDDEN(403, "FORBIDDEN", "접근 권한이 없습니다.");
 
     private final int status;
     private final String code;
