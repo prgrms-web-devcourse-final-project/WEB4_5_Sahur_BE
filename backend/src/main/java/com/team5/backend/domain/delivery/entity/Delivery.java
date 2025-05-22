@@ -61,14 +61,14 @@ public class Delivery {
         this.shipping = shipping;
     }
 
-    public static Delivery create(Order order, DeliveryReqDto request) {
+    public static Delivery create(Order order, String shipping, DeliveryReqDto request) {
         Delivery delivery = new Delivery(
                 order,
                 request.toAddress(),
                 request.getPccc(),
                 request.getContact(),
                 DeliveryStatus.PREPARING,
-                request.getShipping()
+                shipping
         );
         order.setDelivery(delivery);
         return delivery;
@@ -78,7 +78,6 @@ public class Delivery {
         this.address = request.toAddress();
         this.pccc = request.getPccc();
         this.contact = request.getContact();
-        this.shipping = request.getShipping();
     }
 
     public void updateDeliveryStatus(DeliveryStatus status) {

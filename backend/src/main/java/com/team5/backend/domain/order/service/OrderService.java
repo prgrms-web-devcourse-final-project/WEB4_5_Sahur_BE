@@ -5,8 +5,6 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 
-import com.team5.backend.domain.order.dto.*;
-import com.team5.backend.global.security.PrincipalDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,9 +14,13 @@ import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
-import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.order.dto.OrderCreateReqDto;
+import com.team5.backend.domain.order.dto.OrderDetailResDto;
+import com.team5.backend.domain.order.dto.OrderListResDto;
+import com.team5.backend.domain.order.dto.OrderPaymentInfoResDto;
+import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
 import com.team5.backend.domain.order.entity.FilterStatus;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -47,8 +49,8 @@ public class OrderService {
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
 
-    public OrderCreateResDto createOrder(OrderCreateReqDto request, PrincipalDetails userDetails) {
-        Member member = memberRepository.findById(userDetails.getMember().getMemberId())
+    public Order createOrder(OrderCreateReqDto request, Long memberId) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(OrderErrorCode.MEMBER_NOT_FOUND));
 
         GroupBuy groupBuy = groupBuyRepository.findById(request.getGroupBuyId())
@@ -59,8 +61,7 @@ public class OrderService {
 
         Long orderId = orderIdGenerator.generateOrderId();
         Order order = Order.create(orderId, member, groupBuy, product, request.getQuantity());
-        orderRepository.save(order);
-        return OrderCreateResDto.from(order);
+        return orderRepository.save(order);
     }
 
     @Transactional(readOnly = true)
@@ -97,6 +98,10 @@ public class OrderService {
     public Page<OrderListResDto> getOrdersByMember(Long memberId, FilterStatus status, Pageable pageable) {
         Page<Order> orders = null;
 
+        if (status == null) {
+            status = FilterStatus.ALL; // 기본값 지정
+        }
+
         switch (status) {
             case IN_PROGRESS -> {
                 List<OrderStatus> progressStatuses = List.of(OrderStatus.BEFOREPAID, OrderStatus.PAID);
@@ -108,7 +113,7 @@ public class OrderService {
                     orders = orderRepository.findByMember_MemberIdAndStatusInOrderByCreatedAtDesc(memberId, List.of(OrderStatus.CANCELED), pageable);
             default -> orders = orderRepository.findByMember_MemberId(memberId, pageable);
         }
-        
+
         return orders.map(OrderListResDto::from);
     }
 

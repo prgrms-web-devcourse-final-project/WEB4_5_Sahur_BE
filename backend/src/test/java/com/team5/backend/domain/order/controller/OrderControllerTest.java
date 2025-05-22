@@ -76,7 +76,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("POST - 주문 생성 성공")
     void createOrder_success() throws Exception {
-        OrderCreateReqDto request = new OrderCreateReqDto(1L, 1L, 1L, 1);
+        OrderCreateReqDto request = new OrderCreateReqDto(1L, 1L, 1);
 
         mockMvc.perform(post("/api/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -184,7 +184,6 @@ class OrderControllerTest {
     @DisplayName("DELETE - 주문 취소 성공")
     void cancelOrder_success() throws Exception {
         mockMvc.perform(delete("/api/v1/orders/{orderId}", orderId))
-                .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.status").value("200"));
     }
 

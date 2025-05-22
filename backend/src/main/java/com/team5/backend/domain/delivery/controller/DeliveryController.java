@@ -1,5 +1,8 @@
 package com.team5.backend.domain.delivery.controller;
 
+import java.util.List;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryResDto;
+import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateReqDto;
+import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.service.DeliveryService;
@@ -67,6 +72,7 @@ public class DeliveryController {
     @Operation(summary = "전체 배송 조회", description = "전체 배송 정보 목록을 조회합니다.")
     @GetMapping
     public RsData<Page<DeliveryResDto>> getAllDeliveries(
+            @ParameterObject
             @Parameter(description = "페이지 정보") @PageableDefault(size = 10) Pageable pageable
     ) {
         Page<DeliveryResDto> dtoPage = deliveryService.getAllDeliveries(pageable).map(DeliveryResDto::fromEntity);
@@ -93,14 +99,25 @@ public class DeliveryController {
         return RsDataUtil.success("배송 정보 수정 성공", response);
     }
 
-    @Operation(summary = "배송 상태 변경", description = "배송 상태만 수정 (관리자)")
+    @Operation(summary = "배송 상태 변경", description = "배송 상태를 특정 상태로 수정 (관리자)")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{deliveryId}")
-    public RsData<DeliveryStatus> updateDeliveryStatus(
-            @PathVariable Long deliveryId
+    public RsData<DeliveryStatusUpdateResDto> updateDeliveryStatus(
+            @Parameter(description = "배송 ID") @PathVariable Long deliveryId,
+            @RequestParam(name = "status") DeliveryStatus status
     ) {
-        DeliveryStatus currentStatus = deliveryService.updateDeliveryStatus(deliveryId);
-        return RsDataUtil.success("배송 상태 변경 완료", currentStatus);
+        DeliveryStatusUpdateResDto response = deliveryService.updateDeliveryStatus(deliveryId, status);
+        return RsDataUtil.success("배송 상태 변경 완료", response);
+    }
+
+    @Operation(summary = "배송 상태 일괄 변경", description = "여러 배송 상태를 일괄 수정 (관리자)")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/batch")
+    public RsData<List<DeliveryStatusUpdateResDto>> updateDeliveryStatuses(
+            @RequestBody @Valid DeliveryStatusUpdateReqDto request
+    ) {
+        List<DeliveryStatusUpdateResDto> result = deliveryService.updateDeliveryStatuses(request);
+        return RsDataUtil.success("배송 상태 일괄 변경 완료", result);
     }
 
     @Operation(summary = "배송 정보 삭제", description = "배송 정보를 삭제합니다.")

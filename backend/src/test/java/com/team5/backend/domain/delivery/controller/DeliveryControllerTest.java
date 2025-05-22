@@ -58,15 +58,15 @@ class DeliveryControllerTest {
     @DisplayName("POST - 배송 등록 API")
     @Test
     void createDelivery() throws Exception {
-        order = orderService.createOrder(new OrderCreateReqDto(1L, 1L, 1L, 3));
+        OrderCreateReqDto orderReq = new OrderCreateReqDto(1L, 1L, 3);
+        order = orderService.createOrder(orderReq, 1L);
 
         DeliveryReqDto request = new DeliveryReqDto(
                 "12345",
                 "서울시 강남구",
                 "테스트 123",
                 12345,
-                "01012345678",
-                "12345"
+                "01012345678"
         );
 
         mockMvc.perform(post("/api/v1/deliveries/order/{orderId}", order.getOrderId())
@@ -112,8 +112,7 @@ class DeliveryControllerTest {
                 "서울시 강남구",
                 "테스트 123",
                 12345,
-                "01012345678",
-                "TRK1234567890"
+                "01012345678"
         );
 
         mockMvc.perform(put("/api/v1/deliveries/{deliveryId}", deliveryId)
@@ -121,7 +120,7 @@ class DeliveryControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("200"))
-                .andExpect(jsonPath("$.data.shipping").value("TRK1234567890"));
+                .andExpect(jsonPath("$.data.contact").value("01012345678"));
     }
 
     @DisplayName("PATCH - 배송 상태 변경 API")
@@ -134,10 +133,10 @@ class DeliveryControllerTest {
         delivery.updateDeliveryStatus(DeliveryStatus.PREPARING);
         deliveryRepository.save(delivery);
 
-        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
+        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}?status={status}", deliveryId, DeliveryStatus.INDELIVERY))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("200"))
-                .andExpect(jsonPath("$.data").value("INDELIVERY"));
+                .andExpect(jsonPath("$.data.afterStatus").value("INDELIVERY"));
     }
 
     @DisplayName("DELETE - 배송 정보 삭제 API")
@@ -154,7 +153,7 @@ class DeliveryControllerTest {
     @Test
     void createDeliveryWithInvalidOrderId() throws Exception {
         DeliveryReqDto request = new DeliveryReqDto(
-                "12345", "서울시 강남구", "테스트 123", 12345, "01012345678", "12345");
+                "12345", "서울시 강남구", "테스트 123", 12345, "01012345678");
 
         mockMvc.perform(post("/api/v1/deliveries/order/{orderId}", 9999L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +174,7 @@ class DeliveryControllerTest {
     @Test
     void updateDeliveryWithInvalidId() throws Exception {
         DeliveryReqDto request = new DeliveryReqDto(
-                "12345", "서울시 강남구", "테스트 123", 12345, "01012345678", "TRK1234567890");
+                "12345", "서울시 강남구", "테스트 123", 12345, "01012345678");
 
         mockMvc.perform(put("/api/v1/deliveries/{deliveryId}", 9999L)
                         .contentType("application/json")
@@ -194,7 +193,7 @@ class DeliveryControllerTest {
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
         deliveryRepository.save(delivery);
 
-        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
+        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}?status={status}", deliveryId, DeliveryStatus.INDELIVERY))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("400"));
     }

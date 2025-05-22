@@ -4,10 +4,7 @@ import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.product.converter.StringListConverter;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -20,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 @EntityListeners(AuditingEntityListener.class)
 
 public class ProductRequest {

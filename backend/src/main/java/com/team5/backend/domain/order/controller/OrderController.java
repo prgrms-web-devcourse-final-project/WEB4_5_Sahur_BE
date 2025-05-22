@@ -56,8 +56,9 @@ public class OrderController {
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @RequestBody @Valid OrderCreateReqDto request
     ) {
-        OrderCreateResDto dto = orderService.createOrder(request, userDetails);
-        return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", dto);
+        Long memberId = userDetails.getMember().getMemberId();
+        Order order = orderService.createOrder(request, memberId);
+        return RsDataUtil.success("주문이 성공적으로 생성되었습니다.", OrderCreateResDto.from(order));
     }
 
     @Operation(summary = "주문 목록 조회", description = "모든 주문 목록을 조회하거나 주문번호, 상태로 필터링할 수 있습니다.")

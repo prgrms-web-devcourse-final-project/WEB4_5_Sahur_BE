@@ -14,4 +14,8 @@ public enum DeliveryStatus {
             default -> Optional.empty();
         };
     }
+
+    public boolean canTransitionTo(DeliveryStatus target) {
+        return this.ordinal() < target.ordinal();
+    }
 }
