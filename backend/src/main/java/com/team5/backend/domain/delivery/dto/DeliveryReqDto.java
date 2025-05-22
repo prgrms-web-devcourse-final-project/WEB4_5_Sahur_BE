@@ -27,9 +27,6 @@ public class DeliveryReqDto {
     @NotBlank(message = "연락처는 필수입니다.")
     private String contact;
 
-    @NotBlank(message = "운송장 정보는 필수입니다.")
-    private String shipping;
-
     // Address 객체로 변환하는 메소드
     public Address toAddress() {
         return new Address(zipCode, streetAdr, detailAdr);
