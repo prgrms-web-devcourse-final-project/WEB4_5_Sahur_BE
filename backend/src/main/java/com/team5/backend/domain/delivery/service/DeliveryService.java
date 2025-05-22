@@ -1,11 +1,16 @@
 package com.team5.backend.domain.delivery.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateReqDto;
+import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
@@ -55,17 +60,44 @@ public class DeliveryService {
         return delivery;
     }
 
-    public DeliveryStatus updateDeliveryStatus(Long deliveryId) {
+    public DeliveryStatusUpdateResDto updateDeliveryStatus(Long deliveryId, DeliveryStatus status) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
         DeliveryStatus current = delivery.getStatus();
-        DeliveryStatus next = current.next()
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION));
 
-        delivery.updateDeliveryStatus(next);
+        if (!current.canTransitionTo(status)) {
+            throw new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION);
+        }
+
+        delivery.updateDeliveryStatus(status);
         delivery.getOrder().setDelivery(delivery);  // 동기화
-        return next;
+
+        return new DeliveryStatusUpdateResDto(deliveryId, current, status, "성공");
+    }
+
+    public List<DeliveryStatusUpdateResDto> updateDeliveryStatuses(DeliveryStatusUpdateReqDto request) {
+        List<DeliveryStatusUpdateResDto> results = new ArrayList<>();
+
+        for (Long id : request.deliveryIds()) {
+            try {
+                Delivery delivery = deliveryRepository.findById(id)
+                        .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
+
+                DeliveryStatus current = delivery.getStatus();
+                DeliveryStatus next = current.next()
+                        .orElseThrow(() -> new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION));
+
+                delivery.updateDeliveryStatus(next);
+                delivery.getOrder().setDelivery(delivery);  // 동기화
+
+                results.add(new DeliveryStatusUpdateResDto(id, current, next, "성공"));
+            } catch (CustomException e) {
+                results.add(new DeliveryStatusUpdateResDto(id, null, null, "실패: " + e.getMessage()));
+            }
+        }
+
+        return results;
     }
 
     public void deleteDelivery(Long deliveryId) {
