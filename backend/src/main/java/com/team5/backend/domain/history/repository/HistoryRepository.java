@@ -13,8 +13,28 @@ import java.util.List;
 import java.util.Optional;
 
 public interface HistoryRepository extends JpaRepository<History, Long> {
-    @Query("SELECT DISTINCT h.groupBuy FROM History h WHERE h.member.memberId = :memberId")
-    Page<GroupBuy> findDistinctGroupBuysByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+    /* 최근 내역이 있는 공동구매만 추출 + 최신순 정렬 */
+    @Query(
+            value = """
+            SELECT gb
+            FROM History h
+            JOIN h.groupBuy gb
+            WHERE h.member.memberId = :memberId
+            GROUP BY gb
+            ORDER BY MAX(h.createdAt) DESC
+            """,
+            countQuery = """
+            SELECT COUNT(DISTINCT gb)
+            FROM History h
+            JOIN h.groupBuy gb
+            WHERE h.member.memberId = :memberId
+            """
+    )
+    Page<GroupBuy> findRecentGroupBuysByMember(@Param("memberId") Long memberId,
+                                               Pageable pageable);
+
+
+
 
     @Query("select h.product from History h where h.member.memberId = :memberId and h.writable = true")
     Page<Product> findWritableProductsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
