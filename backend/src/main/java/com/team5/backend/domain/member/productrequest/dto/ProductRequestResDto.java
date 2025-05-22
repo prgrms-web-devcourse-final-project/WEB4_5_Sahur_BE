@@ -16,7 +16,6 @@ public class ProductRequestResDto {
     private Long categoryId;
     private String title;
     private String productUrl;
-    private String etc;
     private List<String> imageUrls;
     private String description;
     private ProductRequestStatus status;
@@ -28,7 +27,6 @@ public class ProductRequestResDto {
                 .categoryId(productRequest.getCategory().getCategoryId())
                 .title(productRequest.getTitle())
                 .productUrl(productRequest.getProductUrl())
-//                .etc(productRequest.getEtc())
                 .imageUrls(productRequest.getImageUrls())
                 .description(productRequest.getDescription())
                 .status(productRequest.getStatus())
