@@ -122,7 +122,6 @@ public class SecurityConfig {
                 "/api/v1/notifications",
                 "/api/v1/orders",
                 "/api/v1/reviews",
-                "/api/v1/products/request"
         };
     }
 

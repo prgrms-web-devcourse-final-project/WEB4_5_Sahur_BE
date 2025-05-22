@@ -3,6 +3,7 @@ package com.team5.backend.domain.member.productrequest.controller;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.productrequest.service.ProductRequestService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.security.PrincipalDetails;
@@ -24,6 +25,7 @@ public class ProductRequestController {
 
     private final ProductRequestService productRequestService;
 
+    @CheckAdmin
     @Operation(summary = "상품 등록 요청 생성", description = "로그인한 사용자가 상품 등록 요청을 생성합니다.")
     @PostMapping("/request")
     public RsData<ProductRequestResDto> createRequest(
