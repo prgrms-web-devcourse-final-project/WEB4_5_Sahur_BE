@@ -1,7 +1,7 @@
 package com.team5.backend.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team5.backend.global.exception.code.AuthErrorCode;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.filter.DeletedMemberAuthenticationFilter;
 import com.team5.backend.global.filter.JwtAuthenticationFilter;
 import com.team5.backend.global.handler.OAuth2AuthenticationSuccessHandler;
@@ -67,11 +67,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
-                            AuthErrorCode errorCode = AuthErrorCode.UNAUTHORIZED;
+                            CommonErrorCode errorCode = CommonErrorCode.UNAUTHORIZED;
                             sendErrorResponse(response, errorCode);
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            AuthErrorCode errorCode = AuthErrorCode.FORBIDDEN;
+                            CommonErrorCode errorCode = CommonErrorCode.FORBIDDEN;
                             sendErrorResponse(response, errorCode);
                         })
                 )
@@ -142,7 +142,7 @@ public class SecurityConfig {
         };
     }
 
-    private void sendErrorResponse(HttpServletResponse response, AuthErrorCode errorCode) throws IOException {
+    private void sendErrorResponse(HttpServletResponse response, CommonErrorCode errorCode) throws IOException {
 
         response.setStatus(errorCode.getStatus());
         response.setContentType("application/json;charset=UTF-8");
