@@ -25,7 +25,6 @@ public class ProductRequestController {
 
     private final ProductRequestService productRequestService;
 
-    @CheckAdmin
     @Operation(summary = "상품 등록 요청 생성", description = "로그인한 사용자가 상품 등록 요청을 생성합니다.")
     @PostMapping("/request")
     public RsData<ProductRequestResDto> createRequest(
