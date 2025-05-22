@@ -23,11 +23,13 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final OrderRepository orderRepository;
+    private final ShippingGenerator shippingGenerator;
 
     public Delivery createDelivery(Long orderId, DeliveryReqDto request) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.ORDER_NOT_FOUND));
-        Delivery delivery = Delivery.create(order, request);
+        String shipping = shippingGenerator.generateShipping();
+        Delivery delivery = Delivery.create(order, shipping, request);
         return deliveryRepository.save(delivery);
     }
 
