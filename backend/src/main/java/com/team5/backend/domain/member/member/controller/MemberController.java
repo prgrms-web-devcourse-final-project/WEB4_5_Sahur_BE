@@ -51,7 +51,7 @@ public class MemberController {
 
         GetMemberResDto memberResDto = memberService.getCurrentMemberInfo(userDetails);
 
-        if (memberResDto.getIsLogged() == null || !memberResDto.getIsLogged()) {
+        if (memberResDto.getIsLoggedIn() == null || !memberResDto.getIsLoggedIn()) {
             return RsDataUtil.success("로그인이 필요합니다.", memberResDto);
         }
 

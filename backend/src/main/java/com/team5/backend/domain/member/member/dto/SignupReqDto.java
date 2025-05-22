@@ -33,6 +33,10 @@ public class SignupReqDto {
             message = "비밀번호는 최소 8자, 영문/숫자/특수문자를 포함해야 합니다.")
     private String password;
 
+    @NotBlank(message = "휴대폰 번호는 필수입니다.")
+    @Pattern(regexp = "^01\\d{8,9}$", message = "유효한 휴대폰 번호 형식이 아닙니다. (예: 01012345678)")
+    private String phoneNumber;
+
     @NotBlank(message = "우편번호는 필수 입력 항목입니다.")
     private String zipCode;
 

@@ -1,6 +1,5 @@
 package com.team5.backend.domain.dibs.service;
 
-import com.team5.backend.domain.dibs.dto.DibsCreateReqDto;
 import com.team5.backend.domain.dibs.dto.DibsResDto;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
@@ -10,7 +9,7 @@ import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.DibsErrorCode;
-import com.team5.backend.global.util.JwtUtil;
+import com.team5.backend.global.security.PrincipalDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,14 +28,13 @@ public class DibsService {
     private final DibsRepository dibsRepository;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
-    private final JwtUtil jwtUtil;
 
     /**
-     * 관심상품 생성 (토큰에서 memberId 추출)
+     * 관심상품 생성
      */
     @Transactional
-    public DibsResDto createDibs(Long productId, String token) {
-        Long memberId = extractMemberIdFromToken(token);
+    public DibsResDto createDibs(Long productId, PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(DibsErrorCode.DIBS_MEMBER_NOT_FOUND));
@@ -59,11 +57,24 @@ public class DibsService {
     }
 
     /**
-     * 관심상품 페이징 조회 (토큰에서 memberId 추출)
+     * 관심상품 삭제
+     */
+    @Transactional
+    public void deleteByProductAndMember(Long productId, PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
+
+        Dibs dibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(productId, memberId)
+                .orElseThrow(() -> new CustomException(DibsErrorCode.DIBS_NOT_FOUND));
+
+        dibsRepository.delete(dibs);
+    }
+
+    /**
+     * 관심상품 페이징 조회
      */
     @Transactional(readOnly = true)
-    public Page<DibsResDto> getPagedDibsByToken(String token, Pageable pageable) {
-        Long memberId = extractMemberIdFromToken(token);
+    public Page<DibsResDto> getPagedDibsByMember(PrincipalDetails userDetails, Pageable pageable) {
+        Long memberId = userDetails.getMember().getMemberId();
 
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -76,46 +87,14 @@ public class DibsService {
     }
 
     /**
-     * 관심상품 전체 조회 (토큰에서 memberId 추출)
+     * 관심상품 전체 조회
      */
     @Transactional(readOnly = true)
-    public List<DibsResDto> getAllDibsByToken(String token) {
-        Long memberId = extractMemberIdFromToken(token);
+    public List<DibsResDto> getAllDibsByMember(PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
 
         return dibsRepository.findByMember_MemberId(memberId).stream()
                 .map(DibsResDto::fromEntity)
                 .collect(Collectors.toList());
     }
-
-    /**
-     * 관심상품 삭제 (토큰에서 memberId 추출)
-     */
-    @Transactional
-    public void deleteByProductAndToken(Long productId, String token) {
-        Long memberId = extractMemberIdFromToken(token);
-
-        Dibs dibs = dibsRepository.findByProduct_ProductIdAndMember_MemberId(productId, memberId)
-                .orElseThrow(() -> new CustomException(DibsErrorCode.DIBS_NOT_FOUND));
-
-        dibsRepository.delete(dibs);
-    }
-
-    /**
-     * JWT 토큰에서 memberId 추출 (공통 처리)
-     */
-    private Long extractMemberIdFromToken(String token) {
-        String rawToken = token.replace("Bearer ", "");
-
-        if (jwtUtil.isTokenBlacklisted(rawToken)) {
-            throw new CustomException(DibsErrorCode.DIBS_TOKEN_BLACKLISTED);
-        }
-
-        if (!jwtUtil.validateAccessTokenInRedis(jwtUtil.extractEmail(rawToken), rawToken)) {
-            throw new CustomException(DibsErrorCode.DIBS_TOKEN_INVALID);
-        }
-
-        return jwtUtil.extractMemberId(rawToken);
-    }
-
 }
- 

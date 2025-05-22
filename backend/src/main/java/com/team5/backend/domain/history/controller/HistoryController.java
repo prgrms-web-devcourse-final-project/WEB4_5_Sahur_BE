@@ -3,15 +3,17 @@ package com.team5.backend.domain.history.controller;
 import com.team5.backend.domain.history.dto.HistoryCreateReqDto;
 import com.team5.backend.domain.history.dto.HistoryResDto;
 import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
-import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.service.HistoryService;
-import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.dto.Empty;
+import com.team5.backend.global.dto.RsData;
+import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.RsDataUtil;
+import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +21,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Tag(name = "History", description = "구매 이력 관련 API")
 @RestController
@@ -35,7 +35,7 @@ public class HistoryController {
     @PostMapping
     public RsData<HistoryResDto> createHistory(
             @AuthenticationPrincipal PrincipalDetails userDetails,
-            @RequestBody HistoryCreateReqDto request) {
+            @Valid @RequestBody HistoryCreateReqDto request) {
 
         HistoryResDto response = historyService.createHistory(request, userDetails);
         return RsDataUtil.success("구매 이력이 생성되었습니다.", response);
@@ -63,7 +63,7 @@ public class HistoryController {
     @PutMapping("/{id}")
     public RsData<HistoryResDto> updateHistory(
             @Parameter(description = "구매 이력 ID") @PathVariable Long id,
-            @RequestBody HistoryUpdateReqDto request) {
+            @Valid @RequestBody HistoryUpdateReqDto request) {
 
         HistoryResDto response = historyService.updateHistory(id, request);
         return RsDataUtil.success("구매 이력 수정 성공", response);
@@ -84,9 +84,12 @@ public class HistoryController {
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @PathVariable Long productId) {
 
+        if (userDetails == null) {
+            throw new CustomException(CommonErrorCode.UNAUTHORIZED);
+        }
+
         List<HistoryResDto> writableHistories = historyService.getWritableHistories(productId, userDetails);
         return RsDataUtil.success("리뷰 작성 가능한 구매 이력 조회 성공", writableHistories);
     }
-
 
 }

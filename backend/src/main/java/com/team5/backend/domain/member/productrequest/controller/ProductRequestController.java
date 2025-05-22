@@ -6,6 +6,7 @@ import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateRe
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.service.ProductRequestService;
 import com.team5.backend.global.dto.Empty;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.security.PrincipalDetails;

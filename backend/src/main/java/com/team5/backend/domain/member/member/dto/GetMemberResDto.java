@@ -16,12 +16,15 @@ public class GetMemberResDto {
     private String email;
     private String nickname;
     private String name;
-    private String address;
+    private String phoneNumber;
+    private String zipCode;
+    private String streetAdr;
+    private String detailAdr;
     private String imageUrl;
     private Role role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isLogged; // 로그인 여부
+    private Boolean isLoggedIn; // 로그인 여부
 
     public static GetMemberResDto fromEntity(Member member) {
 
@@ -30,12 +33,15 @@ public class GetMemberResDto {
                 .email(member.getEmail())
                 .nickname(member.getNickname())
                 .name(member.getName())
-                .address(member.getAddress().toString())
+                .phoneNumber(member.getPhoneNumber())
+                .zipCode(member.getAddress().getZipCode())
+                .streetAdr(member.getAddress().getStreetAdr())
+                .detailAdr(member.getAddress().getDetailAdr())
                 .imageUrl(member.getImageUrl())
                 .role(member.getRole())
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
-                .isLogged(true) // 엔티티에서 생성 시 로그인 상태는 true
+                .isLoggedIn(true) // 엔티티에서 생성 시 로그인 상태는 true
                 .build();
     }
 }

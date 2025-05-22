@@ -93,6 +93,7 @@ public class MemberService {
                 .nickname(signupReqDto.getNickname())
                 .name(signupReqDto.getName())
                 .password(encodedPassword)
+                .phoneNumber(signupReqDto.getPhoneNumber())
                 .deleted(false)
                 .address(address)
                 .imageUrl(imageUrl)
@@ -272,7 +273,7 @@ public class MemberService {
         // 로그인 되지 않은 경우
         if (userDetails == null) {
             return GetMemberResDto.builder()
-                    .isLogged(false)
+                    .isLoggedIn(false)
                     .build();
         }
 

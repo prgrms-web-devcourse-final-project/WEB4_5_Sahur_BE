@@ -26,6 +26,9 @@ public class PatchMemberReqDto {
             message = "비밀번호는 8자 이상이며, 영문자, 숫자, 특수문자를 포함해야 합니다.")
     private String password;
 
+    @Pattern(regexp = "^01\\d{8,9}$", message = "유효한 휴대폰 번호 형식이 아닙니다. (예: 01012345678)")
+    private String phoneNumber;
+
     private String zipCode;
 
     private String streetAdr;

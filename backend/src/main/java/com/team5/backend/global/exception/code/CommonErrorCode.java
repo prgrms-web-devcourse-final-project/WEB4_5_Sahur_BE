@@ -4,7 +4,8 @@ import com.team5.backend.global.exception.ErrorCode;
 
 public enum CommonErrorCode implements ErrorCode {
     VALIDATION_ERROR(400, "VALIDATION_ERROR", "잘못된 요청입니다."),
-    UNAUTHORIZED(403, "UNAUTHORIZED", "권한이 없습니다."),
+    UNAUTHORIZED(401, "UNAUTHORIZED", "로그인이 필요합니다."),
+    FORBIDDEN(403, "FORBIDDEN", "접근 권한이 없습니다."),
     INTERNAL_ERROR(500, "INTERNAL_ERROR", "서버 오류가 발생했습니다.");
 
     private final int status;

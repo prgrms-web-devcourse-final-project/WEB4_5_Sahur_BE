@@ -36,14 +36,16 @@ public class ReviewController {
         return RsDataUtil.success("리뷰 생성 성공", response);
     }
 
-    @Operation(summary = "전체 리뷰 조회", description = "모든 리뷰를 최신순으로 페이징 조회합니다.")
+    @Operation(summary = "전체 리뷰 조회", description = "모든 리뷰를 최신순 또는 평점순으로 페이징 조회합니다.")
     @GetMapping
     public RsData<Page<ReviewResDto>> getAllReviews(
+            @RequestParam(defaultValue = "LATEST") ReviewSortField sortBy,
             @Parameter(description = "페이징 정보") @PageableDefault(size = 5) Pageable pageable
     ) {
-        Page<ReviewResDto> response = reviewService.getAllReviews(pageable);
+        Page<ReviewResDto> response = reviewService.getAllReviews(pageable, sortBy);
         return RsDataUtil.success("리뷰 목록 조회 성공", response);
     }
+
 
     @Operation(summary = "리뷰 단건 조회", description = "리뷰 ID를 기반으로 단일 리뷰 정보를 조회합니다.")
     @GetMapping("/{id}")

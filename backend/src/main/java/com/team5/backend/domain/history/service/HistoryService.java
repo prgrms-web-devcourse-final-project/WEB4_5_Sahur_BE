@@ -17,12 +17,14 @@ import com.team5.backend.global.exception.code.HistoryErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +43,7 @@ public class HistoryService {
      */
     @Transactional
     public HistoryResDto createHistory(HistoryCreateReqDto request, PrincipalDetails userDetails) {
+
         Long memberId = userDetails.getMember().getMemberId();
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(HistoryErrorCode.MEMBER_NOT_FOUND));
@@ -51,6 +54,9 @@ public class HistoryService {
         GroupBuy groupBuy = groupBuyRepository.findById(request.getGroupBuyId())
                 .orElseThrow(() -> new CustomException(HistoryErrorCode.GROUP_BUY_NOT_FOUND));
 
+        orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.ORDER_NOT_FOUND));
+
         History history = History.builder()
                 .member(member)
                 .product(product)
@@ -60,7 +66,6 @@ public class HistoryService {
 
         return HistoryResDto.fromEntity(historyRepository.save(history));
     }
-
 
     /**
      * 전체 구매 이력 조회 (최신순)
@@ -106,7 +111,10 @@ public class HistoryService {
      */
     @Transactional
     public void deleteHistory(Long id) {
-        historyRepository.deleteById(id);
+        History history = historyRepository.findById(id)
+                .orElseThrow(() -> new CustomException(HistoryErrorCode.HISTORY_NOT_FOUND));
+
+        historyRepository.delete(history);
     }
 
     @Transactional(readOnly = true)
@@ -118,7 +126,5 @@ public class HistoryService {
                 .map(HistoryResDto::fromEntity)
                 .toList();
     }
-
-
 
 }
