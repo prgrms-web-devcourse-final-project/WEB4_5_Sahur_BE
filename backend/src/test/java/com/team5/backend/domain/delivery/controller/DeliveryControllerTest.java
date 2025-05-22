@@ -133,10 +133,10 @@ class DeliveryControllerTest {
         delivery.updateDeliveryStatus(DeliveryStatus.PREPARING);
         deliveryRepository.save(delivery);
 
-        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
+        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}?status={status}", deliveryId, DeliveryStatus.INDELIVERY))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("200"))
-                .andExpect(jsonPath("$.data").value("INDELIVERY"));
+                .andExpect(jsonPath("$.data.afterStatus").value("INDELIVERY"));
     }
 
     @DisplayName("DELETE - 배송 정보 삭제 API")
@@ -193,7 +193,7 @@ class DeliveryControllerTest {
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
         deliveryRepository.save(delivery);
 
-        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}", deliveryId))
+        mockMvc.perform(patch("/api/v1/deliveries/{deliveryId}?status={status}", deliveryId, DeliveryStatus.INDELIVERY))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("400"));
     }

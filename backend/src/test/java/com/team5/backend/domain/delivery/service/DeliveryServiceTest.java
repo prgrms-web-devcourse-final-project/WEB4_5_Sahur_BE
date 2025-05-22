@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
+import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
@@ -157,9 +158,9 @@ class DeliveryServiceTest {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow();
         delivery.updateDeliveryStatus(DeliveryStatus.INDELIVERY);
 
-        DeliveryStatus result = deliveryService.updateDeliveryStatus(deliveryId);
+        DeliveryStatusUpdateResDto result = deliveryService.updateDeliveryStatus(deliveryId, DeliveryStatus.COMPLETED);
 
-        assertThat(result).isEqualTo(DeliveryStatus.COMPLETED);
+        assertThat(result.afterStatus()).isEqualTo(DeliveryStatus.COMPLETED);
     }
 
     @Test
@@ -169,7 +170,7 @@ class DeliveryServiceTest {
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
 
         CustomException e = assertThrows(CustomException.class,
-                () -> deliveryService.updateDeliveryStatus(deliveryId));
+                () -> deliveryService.updateDeliveryStatus(deliveryId, DeliveryStatus.COMPLETED));
 
         assertEquals(DeliveryErrorCode.INVALID_STATUS_TRANSITION, e.getErrorCode());
     }
