@@ -81,13 +81,12 @@ class OrderServiceTest {
     @DisplayName("주문 생성 성공")
     void createOrder_success() {
         OrderCreateReqDto request = new OrderCreateReqDto(
-                member.getMemberId(),
                 groupBuy.getGroupBuyId(),
                 product.getProductId(),
                 3
         );
 
-        Order newOrder = orderService.createOrder(request);
+        Order newOrder = orderService.createOrder(request, member.getMemberId());
 
         assertThat(newOrder.getOrderId()).isNotNull();
         assertThat(newOrder.getQuantity()).isEqualTo(3);
@@ -97,36 +96,30 @@ class OrderServiceTest {
     @Test
     @DisplayName("주문 생성 실패 - 존재하지 않는 회원")
     void createOrder_fail_memberNotFound() {
-        OrderCreateReqDto request = new OrderCreateReqDto(
-                999L, groupBuy.getGroupBuyId(), product.getProductId(), 1
-        );
+        OrderCreateReqDto request = new OrderCreateReqDto(groupBuy.getGroupBuyId(), product.getProductId(), 1);
 
         CustomException e = assertThrows(CustomException.class,
-                () -> orderService.createOrder(request));
+                () -> orderService.createOrder(request, 999L));
         assertEquals(OrderErrorCode.MEMBER_NOT_FOUND, e.getErrorCode());
     }
 
     @Test
     @DisplayName("주문 생성 실패 - 존재하지 않는 공동구매")
     void createOrder_fail_groupBuyNotFound() {
-        OrderCreateReqDto request = new OrderCreateReqDto(
-                member.getMemberId(), 999L, product.getProductId(), 1
-        );
+        OrderCreateReqDto request = new OrderCreateReqDto(999L, product.getProductId(), 1);
 
         CustomException e = assertThrows(CustomException.class,
-                () -> orderService.createOrder(request));
+                () -> orderService.createOrder(request, member.getMemberId()));
         assertEquals(OrderErrorCode.GROUPBUY_NOT_FOUND, e.getErrorCode());
     }
 
     @Test
     @DisplayName("주문 생성 실패 - 존재하지 않는 상품")
     void createOrder_fail_productNotFound() {
-        OrderCreateReqDto request = new OrderCreateReqDto(
-                member.getMemberId(), groupBuy.getGroupBuyId(), 999L, 1
-        );
+        OrderCreateReqDto request = new OrderCreateReqDto(groupBuy.getGroupBuyId(), 999L, 1);
 
         CustomException e = assertThrows(CustomException.class,
-                () -> orderService.createOrder(request));
+                () -> orderService.createOrder(request, member.getMemberId()));
         assertEquals(OrderErrorCode.PRODUCT_NOT_FOUND, e.getErrorCode());
     }
 
@@ -152,11 +145,11 @@ class OrderServiceTest {
     @Test
     @DisplayName("주문 목록 조회 - 상태로 필터링 성공")
     void getOrders_byStatus_success() {
-        Page<OrderListResDto> result = orderService.getOrders(null, OrderStatus.BEFOREPAID.toString(), pageable);
+        Page<OrderListResDto> result = orderService.getOrders(null, OrderStatus.PAID.toString(), pageable);
 
         assertThat(result.getContent())
                 .isNotEmpty()
-                .allMatch(o -> o.getStatus() == OrderStatus.BEFOREPAID.name());
+                .allMatch(o -> o.getStatus() == OrderStatus.PAID.name());
     }
 
     @Test
@@ -186,18 +179,21 @@ class OrderServiceTest {
     @Test
     @DisplayName("회원 주문 조회 성공 - FilterStatus = DONE")
     void getOrdersByMember_status_done_success() {
-        Order order = orderService.createOrder(new OrderCreateReqDto(member.getMemberId(), groupBuy.getGroupBuyId(), product.getProductId(), 3));
+        OrderCreateReqDto orderReq = new OrderCreateReqDto(groupBuy.getGroupBuyId(), product.getProductId(), 3);
+        Order order = orderService.createOrder(orderReq, member.getMemberId());
         order.markAsPaid();
         orderRepository.save(order);
 
-        Delivery delivery = Delivery.create(order, new DeliveryReqDto(
+        DeliveryReqDto deliveryReq = new DeliveryReqDto(
                 "12345",
                 "서울시 광진구",
                 "상세 주소 123",
                 12345,
-                "01012345678",
-                "TRK12345678")
+                "01012345678"
         );
+        String shipping = "TRK2505221234";
+
+        Delivery delivery = Delivery.create(order, shipping, deliveryReq);
         delivery.updateDeliveryStatus(DeliveryStatus.COMPLETED);
         deliveryRepository.save(delivery);
 
