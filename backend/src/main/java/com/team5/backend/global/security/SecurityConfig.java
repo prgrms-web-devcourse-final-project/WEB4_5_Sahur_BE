@@ -1,9 +1,12 @@
 package com.team5.backend.global.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team5.backend.global.exception.code.AuthErrorCode;
 import com.team5.backend.global.filter.DeletedMemberAuthenticationFilter;
 import com.team5.backend.global.filter.JwtAuthenticationFilter;
 import com.team5.backend.global.handler.OAuth2AuthenticationSuccessHandler;
 import com.team5.backend.global.util.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +20,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
+
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @RequiredArgsConstructor
@@ -36,12 +43,38 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
+                        // OAuth2 관련 경로 허용
+                        .requestMatchers("/oauth2/**", "/login/oauth2/code/**").permitAll()
+
+                        // 인증이 필요한 GET 요청들
+                        .requestMatchers(GET, getAuthenticatedGet()).authenticated()
+
+                        // 인증이 필요한 POST 요청들
+                        .requestMatchers(POST, getAuthenticatedPost()).authenticated()
+
+                        // 인증이 필요한 PATCH 요청들
+                        .requestMatchers(PATCH, getAuthenticatedPatch()).authenticated()
+
+                        // 인증이 필요한 DELETE 요청들
+                        .requestMatchers(DELETE, getAuthenticatedDelete()).authenticated()
+
+                        // 나머지 모든 요청은 허용
                         .anyRequest().permitAll()
                 )
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            AuthErrorCode errorCode = AuthErrorCode.UNAUTHORIZED;
+                            sendErrorResponse(response, errorCode);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            AuthErrorCode errorCode = AuthErrorCode.FORBIDDEN;
+                            sendErrorResponse(response, errorCode);
+                        })
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)
@@ -59,6 +92,70 @@ public class SecurityConfig {
                         .userDetailsService(userDetailsService));
 
         return http.build();
+    }
+
+    /**
+     * 인증이 필요한 GET 요청 경로들
+     */
+    private String[] getAuthenticatedGet() {
+
+        return new String[]{
+                "/api/v1/dibs",
+                "/api/v1/groupBuy/member",
+                "/api/v1/histories/products/*/writable-histories",
+                "/api/v1/members/me",
+                "/api/v1/notifications/member/list",
+                "/api/v1/orders/me",
+                "/api/v1/payments/me",
+                "/api/v1/member/list",
+                "/api/v1/reviews/member/list"
+        };
+    }
+
+    // 인증이 필요한 POST 요청 경로들
+    private String[] getAuthenticatedPost() {
+
+        return new String[]{
+                "/api/v1/dibs/products/*",
+                "/api/v1/histories",
+                "/api/v1/members/restore",
+                "/api/v1/notifications",
+                "/api/v1/orders",
+                "/api/v1/reviews",
+        };
+    }
+
+    // 인증이 필요한 PATCH 요청 경로들
+    private String[] getAuthenticatedPatch() {
+
+        return new String[]{
+                "/api/v1/members/modify"
+        };
+    }
+
+    // 인증이 필요한 DELETE 요청 경로들
+    private String[] getAuthenticatedDelete() {
+
+        return new String[]{
+                "/api/v1/dibs/products/*/dibs",
+                "/api/v1/members/delete"
+        };
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, AuthErrorCode errorCode) throws IOException {
+
+        response.setStatus(errorCode.getStatus());
+        response.setContentType("application/json;charset=UTF-8");
+
+        // 기존 응답 형식과 동일하게 맞춤
+        Map<String, Object> errorResponse = Map.of(
+                "success", false,
+                "status", errorCode.getStatus(),
+                "msg", errorCode.getCode(),
+                "message", errorCode.getMessage()
+        );
+
+        new ObjectMapper().writeValue(response.getWriter(), errorResponse);
     }
 
     @Bean
