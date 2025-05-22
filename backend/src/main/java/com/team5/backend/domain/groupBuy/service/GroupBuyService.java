@@ -102,11 +102,19 @@ public class GroupBuyService {
     public Page<GroupBuyResDto> getGroupBuysByMember(PrincipalDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getMemberId();
 
-        return historyRepository.findDistinctGroupBuysByMemberId(
-                memberId,
-                PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "createdAt"))
-        ).map(this::toDto);
+        // 정렬 제거한 Pageable 새로 생성
+        Pageable noSortPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+                // 정렬 생략 → 정렬 정보 없이 생성
+        );
+
+        return historyRepository
+                .findRecentGroupBuysByMember(memberId, noSortPageable)
+                .map(this::toDto);
     }
+
+
 
     @Transactional(readOnly = true)
     public GroupBuyDetailResDto getGroupBuyById(Long groupBuyId, PrincipalDetails userDetails) {
