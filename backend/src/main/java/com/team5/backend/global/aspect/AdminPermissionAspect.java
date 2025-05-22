@@ -30,7 +30,7 @@ public class AdminPermissionAspect {
 
         // 권한 확인 (ADMIN)
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
 
         if (!isAdmin) {
             throw new CustomException(MemberErrorCode.ADMIN_ONLY);
