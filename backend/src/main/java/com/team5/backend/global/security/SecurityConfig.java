@@ -103,7 +103,6 @@ public class SecurityConfig {
                 "/api/v1/dibs",
                 "/api/v1/groupBuy/member",
                 "/api/v1/histories/products/*/writable-histories",
-                "/api/v1/members/me",
                 "/api/v1/notifications/member/list",
                 "/api/v1/orders/me",
                 "/api/v1/payments/me",
