@@ -104,7 +104,7 @@ public class DeliveryController {
     @PatchMapping("/{deliveryId}")
     public RsData<DeliveryStatusUpdateResDto> updateDeliveryStatus(
             @Parameter(description = "배송 ID") @PathVariable Long deliveryId,
-            @RequestParam(name = "status", required = true) DeliveryStatus status
+            @RequestParam(name = "status") DeliveryStatus status
     ) {
         DeliveryStatusUpdateResDto response = deliveryService.updateDeliveryStatus(deliveryId, status);
         return RsDataUtil.success("배송 상태 변경 완료", response);
