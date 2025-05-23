@@ -1,6 +1,7 @@
 package com.team5.backend.domain.dibs.dto;
 
 import com.team5.backend.domain.dibs.entity.Dibs;
+import com.team5.backend.domain.product.dto.ProductResDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,14 +16,14 @@ import java.time.LocalDateTime;
 public class DibsResDto {
     private Long dibsId;
     private Long memberId;
-    private Long productId;
+    private ProductResDto product;
     private LocalDateTime createdAt;
 
     public static DibsResDto fromEntity(Dibs dibs) {
         return DibsResDto.builder()
                 .dibsId(dibs.getDibsId())
                 .memberId(dibs.getMember().getMemberId())
-                .productId(dibs.getProduct().getProductId())
+                .product(ProductResDto.fromEntity(dibs.getProduct()))
                 .createdAt(dibs.getCreatedAt())
                 .build();
     }
