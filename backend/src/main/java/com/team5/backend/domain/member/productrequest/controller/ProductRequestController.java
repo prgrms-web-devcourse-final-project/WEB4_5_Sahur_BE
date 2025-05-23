@@ -38,11 +38,11 @@ public class ProductRequestController {
         return RsDataUtil.success("상품 등록 요청 생성 완료", response);
     }
 
-    @Operation(summary = "전체 상품 요청 조회 (관리자)", description = "상태별로 상품 등록 요청 목록을 페이징 조회합니다.")
+    @Operation(summary = "전체 또는 상태별 상품 요청 조회 (관리자)", description = "전체 상품 요청 또는 특정 상태별 요청을 페이징 조회합니다.")
     @GetMapping("/list")
     public RsData<Page<ProductRequestResDto>> getAllRequests(
-            @Parameter(description = "요청 상태", example = "WAITING")
-            @RequestParam(value = "status", required = false) ProductRequestStatus status,
+            @Parameter(description = "요청 상태 (없으면 전체 조회)", example = "WAITING")
+            @RequestParam(required = false) ProductRequestStatus status,
             @Parameter(description = "페이지 정보")
             @PageableDefault(size = 10) Pageable pageable
     ) {
@@ -51,15 +51,10 @@ public class ProductRequestController {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-
-        Page<ProductRequestResDto> responses;
-        if (status == null) {
-            responses = productRequestService.getAllRequests(sortedPageable);
-        } else {
-            responses = productRequestService.getAllRequestsByStatus(status, sortedPageable);
-        }
-        return RsDataUtil.success("전체 상품 요청 조회 완료", responses);
+        Page<ProductRequestResDto> responses = productRequestService.getAllRequests(status, sortedPageable);
+        return RsDataUtil.success("상품 요청 조회 완료", responses);
     }
+
 
     @Operation(summary = "회원 본인 상품 요청 조회", description = "로그인한 사용자가 본인이 등록한 요청 목록을 조회합니다.")
     @GetMapping("/me")
