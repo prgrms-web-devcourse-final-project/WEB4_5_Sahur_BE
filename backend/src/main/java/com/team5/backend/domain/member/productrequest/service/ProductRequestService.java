@@ -81,7 +81,10 @@ public class ProductRequestService {
     }
 
     @Transactional
-    public ProductRequestResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, PrincipalDetails userDetails) {
+    public ProductRequestResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
+
+        if (dto == null) throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+
         ProductRequest request = getRequestOrThrow(productRequestId);
         Member member = getMember(userDetails);
 
@@ -102,12 +105,23 @@ public class ProductRequestService {
             request.setProductUrl(dto.getProductUrl());
         }
 
-        if (dto.getImageUrls() != null) {
-            request.setImageUrls(dto.getImageUrls());
-        }
-
         if (dto.getDescription() != null) {
             request.setDescription(dto.getDescription());
+        }
+
+        // 이미지 처리
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            // 새 이미지가 있으면 기존 이미지 삭제 후 새로 업로드
+            if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+                imageUtil.deleteImages(request.getImageUrls());
+            }
+            List<String> uploadedUrls = imageUtil.saveImages(imageFiles, ImageType.PRODUCT);
+            request.setImageUrls(uploadedUrls);
+        } else {
+            // 새 이미지 없고 기존 이미지도 없으면 예외
+            if (request.getImageUrls() == null || request.getImageUrls().isEmpty()) {
+                throw new CustomException(ProductRequestErrorCode.PRODUCT_IMAGE_NOT_FOUND);
+            }
         }
 
         return ProductRequestResDto.fromEntity(productRequestRepository.save(request));

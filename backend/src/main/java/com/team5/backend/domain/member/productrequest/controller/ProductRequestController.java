@@ -93,10 +93,11 @@ public class ProductRequestController {
     @PatchMapping("/{productRequestId}")
     public RsData<ProductRequestResDto> updateRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
-            @RequestBody @Valid ProductRequestUpdateReqDto request,
+            @RequestPart(value = "request", required = false) @Valid ProductRequestUpdateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @AuthenticationPrincipal PrincipalDetails userDetails
-    ) {
-        ProductRequestResDto response = productRequestService.updateRequest(productRequestId, request, userDetails);
+    ) throws IOException {
+        ProductRequestResDto response = productRequestService.updateRequest(productRequestId, request, imageFiles, userDetails);
         return RsDataUtil.success("상품 요청 수정 완료", response);
     }
 
