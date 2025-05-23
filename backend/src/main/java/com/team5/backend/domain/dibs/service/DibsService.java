@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -75,14 +74,12 @@ public class DibsService {
     @Transactional(readOnly = true)
     public Page<DibsResDto> getPagedDibsByMember(PrincipalDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getMemberId();
-
         Pageable sortedPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 Sort.by(Sort.Order.desc("createdAt"))
         );
-
-        return dibsRepository.findByMember_MemberId(memberId, sortedPageable)
+        return dibsRepository.findPageWithProductByMemberId(memberId, sortedPageable)
                 .map(DibsResDto::fromEntity);
     }
 
@@ -92,9 +89,8 @@ public class DibsService {
     @Transactional(readOnly = true)
     public List<DibsResDto> getAllDibsByMember(PrincipalDetails userDetails) {
         Long memberId = userDetails.getMember().getMemberId();
-
-        return dibsRepository.findByMember_MemberId(memberId).stream()
+        return dibsRepository.findAllWithProductByMemberId(memberId).stream()
                 .map(DibsResDto::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 }
