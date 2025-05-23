@@ -4,6 +4,7 @@ import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestDetailResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestListResDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
@@ -51,30 +52,30 @@ public class ProductRequestService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestDetailResDto> getAllRequests(Pageable pageable) {
+    public Page<ProductRequestListResDto> getAllRequests(Pageable pageable) {
         Pageable sorted = forceCreatedAtDesc(pageable);
         return productRequestRepository.findAll(sorted)
-                .map(ProductRequestDetailResDto::fromEntity);
+                .map(ProductRequestListResDto::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestDetailResDto> getAllRequestsByStatus(ProductRequestStatus status, Pageable pageable) {
+    public Page<ProductRequestListResDto> getAllRequestsByStatus(ProductRequestStatus status, Pageable pageable) {
         Pageable sorted = forceCreatedAtDesc(pageable);
 
         Page<ProductRequest> page = (status == null)
                 ? productRequestRepository.findAll(sorted)
                 : productRequestRepository.findAllByStatus(status, sorted);
 
-        return page.map(ProductRequestDetailResDto::fromEntity);
+        return page.map(ProductRequestListResDto::fromEntity);
     }
 
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestDetailResDto> getRequestsByMember(PrincipalDetails userDetails, Pageable pageable) {
+    public Page<ProductRequestListResDto> getRequestsByMember(PrincipalDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getMemberId();
         Pageable sorted = forceCreatedAtDesc(pageable);
         return productRequestRepository.findByMemberMemberId(memberId, sorted)
-                .map(ProductRequestDetailResDto::fromEntity);
+                .map(ProductRequestListResDto::fromEntity);
     }
 
     @Transactional(readOnly = true)

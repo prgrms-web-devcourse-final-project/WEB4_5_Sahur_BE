@@ -2,6 +2,7 @@ package com.team5.backend.domain.member.productrequest.controller;
 
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestDetailResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestListResDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.service.ProductRequestService;
@@ -39,7 +40,7 @@ public class ProductRequestController {
 
     @Operation(summary = "전체 또는 상태별 상품 요청 조회 (관리자)", description = "전체 상품 요청 또는 특정 상태별 요청을 페이징 조회합니다.")
     @GetMapping("/list")
-    public RsData<Page<ProductRequestDetailResDto>> getAllRequests(
+    public RsData<Page<ProductRequestListResDto>> getAllRequests(
             @Parameter(description = "요청 상태 (없으면 전체 조회)", example = "WAITING")
             @RequestParam(value = "status", required = false) ProductRequestStatus status,
             @Parameter(description = "페이지 정보")
@@ -50,7 +51,7 @@ public class ProductRequestController {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-        Page<ProductRequestDetailResDto> responses;
+        Page<ProductRequestListResDto> responses;
         if (status == null) {
             responses = productRequestService.getAllRequests(sortedPageable);
         } else {
@@ -62,7 +63,7 @@ public class ProductRequestController {
 
     @Operation(summary = "회원 본인 상품 요청 조회", description = "로그인한 사용자가 본인이 등록한 요청 목록을 조회합니다.")
     @GetMapping("/me")
-    public RsData<Page<ProductRequestDetailResDto>> getMyRequests(
+    public RsData<Page<ProductRequestListResDto>> getMyRequests(
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @Parameter(description = "페이지 정보")
             @PageableDefault(size = 10) Pageable pageable
@@ -73,7 +74,7 @@ public class ProductRequestController {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<ProductRequestDetailResDto> responses = productRequestService.getRequestsByMember(userDetails, sortedPageable);
+        Page<ProductRequestListResDto> responses = productRequestService.getRequestsByMember(userDetails, sortedPageable);
         return RsDataUtil.success("내 상품 요청 조회 완료", responses);
     }
 
