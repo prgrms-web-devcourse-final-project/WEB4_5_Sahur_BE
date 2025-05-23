@@ -56,6 +56,12 @@ public class MemberService {
     // 회원 생성
     @Transactional
     public SignupResDto signup(SignupReqDto signupReqDto, MultipartFile profileImage) throws IOException {
+
+        // SignupReqDto 가 null로 요청이 오면 예외 발생
+        if (signupReqDto == null) {
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        }
+
         String email = signupReqDto.getEmail();
 
         // 이메일 중복 검사
@@ -129,6 +135,11 @@ public class MemberService {
 
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 모든 값들이 없이 요청이 온다면 예외 발생
+        if (patchMemberReqDto == null && newProfileImage == null) {
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        }
 
         // 이미지가 바뀌었을 때 patchMemberReqDto가 null이면 빈 객체 생성 (이미지만 변경 시)
         if (patchMemberReqDto == null && newProfileImage != null && !newProfileImage.isEmpty()) {

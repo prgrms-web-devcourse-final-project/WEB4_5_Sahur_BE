@@ -10,8 +10,6 @@ import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateRe
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
@@ -45,7 +43,9 @@ public class ProductRequestService {
     public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
         Member member = getMember(userDetails);
 
-        if (dto == null) throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+        if (dto == null || imageFiles == null) {
+            throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+        }
 
         Category category = getCategory(dto.getCategoryId());
 
@@ -100,10 +100,12 @@ public class ProductRequestService {
     @Transactional
     public ProductRequestResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
 
-        if (dto == null) throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
-
         ProductRequest request = getRequestOrThrow(productRequestId);
         Member member = getMember(userDetails);
+
+        if (dto == null && imageFiles == null) {
+            throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+        }
 
         if (!request.getMember().equals(member)) {
             throw new CustomException(ProductRequestErrorCode.PRODUCT_REQUEST_ACCESS_DENIED);
