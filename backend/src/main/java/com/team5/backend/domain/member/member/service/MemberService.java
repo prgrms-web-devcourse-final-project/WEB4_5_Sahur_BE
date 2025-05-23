@@ -13,6 +13,7 @@ import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.security.PrincipalDetails;
+import com.team5.backend.global.util.ImageType;
 import com.team5.backend.global.util.ImageUtil;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -80,7 +81,7 @@ public class MemberService {
 
         if (profileImage != null && !profileImage.isEmpty()) {
             // 이미지가 제공된 경우 업로드
-            imageUrl = imageUtil.saveImage(profileImage);
+            imageUrl = imageUtil.saveImage(profileImage, ImageType.PROFILE);
             log.info("프로필 이미지 업로드: {}", imageUrl);
         } else {
             log.info("기본 이미지 설정");
