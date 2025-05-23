@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class ProductRequestResDto {
+public class ProductRequestDetailResDto {
 
     private Long productRequestId;
     private Long memberId;
@@ -20,8 +20,8 @@ public class ProductRequestResDto {
     private String description;
     private ProductRequestStatus status;
 
-    public static ProductRequestResDto fromEntity(ProductRequest productRequest) {
-        return ProductRequestResDto.builder()
+    public static ProductRequestDetailResDto fromEntity(ProductRequest productRequest) {
+        return ProductRequestDetailResDto.builder()
                 .productRequestId(productRequest.getProductRequestId())
                 .memberId(productRequest.getMember().getMemberId())
                 .categoryId(productRequest.getCategory().getCategoryId())

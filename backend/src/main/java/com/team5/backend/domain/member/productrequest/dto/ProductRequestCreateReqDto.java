@@ -24,8 +24,6 @@ public class ProductRequestCreateReqDto {
     @URL(message = "유효한 URL 형식이 아닙니다.")
     private String productUrl;
 
-//    private String etc;
-
     @NotEmpty(message = "이미지는 최소 1개 이상 등록해야 합니다.")
     private List<String> imageUrls;
 
