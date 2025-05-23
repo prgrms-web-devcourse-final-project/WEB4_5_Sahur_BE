@@ -2,17 +2,19 @@ package com.team5.backend.domain.member.productrequest.service;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductRequestErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
+import com.team5.backend.global.util.ImageType;
+import com.team5.backend.global.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,18 +34,24 @@ public class ProductRequestService {
     private final ProductRequestRepository productRequestRepository;
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
+    private final ImageUtil imageUtil;
 
     @Transactional
-    public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, PrincipalDetails userDetails) {
+    public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
         Member member = getMember(userDetails);
+
+        if (dto == null) throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+
         Category category = getCategory(dto.getCategoryId());
+
+        List<String> imageUrls = imageUtil.saveImages(imageFiles, ImageType.PRODUCT);
 
         ProductRequest request = ProductRequest.builder()
                 .member(member)
                 .category(category)
                 .title(dto.getTitle())
                 .productUrl(dto.getProductUrl())
-                .imageUrls(dto.getImageUrls())
+                .imageUrls(imageUrls)
                 .description(dto.getDescription())
                 .status(ProductRequestStatus.WAITING)
                 .build();
