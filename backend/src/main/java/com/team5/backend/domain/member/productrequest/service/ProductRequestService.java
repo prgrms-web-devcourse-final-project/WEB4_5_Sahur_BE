@@ -142,12 +142,18 @@ public class ProductRequestService {
     }
 
     @Transactional
-    public void deleteRequest(Long productRequestId, PrincipalDetails userDetails) {
+    public void deleteRequest(Long productRequestId, PrincipalDetails userDetails) throws IOException {
         ProductRequest request = getRequestOrThrow(productRequestId);
         Member member = getMember(userDetails);
 
         if (!request.getMember().equals(member)) {
             throw new CustomException(ProductRequestErrorCode.PRODUCT_REQUEST_ACCESS_DENIED);
+        }
+
+        // S3에 저장된 이미지 삭제
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            imageUtil.deleteImages(imageUrls);
         }
 
         productRequestRepository.delete(request);

@@ -116,7 +116,7 @@ public class ProductRequestController {
     public RsData<Empty> deleteRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
             @AuthenticationPrincipal PrincipalDetails userDetails
-    ) {
+    ) throws IOException {
         productRequestService.deleteRequest(productRequestId, userDetails);
         return RsDataUtil.success("상품 요청이 삭제되었습니다.");
     }
