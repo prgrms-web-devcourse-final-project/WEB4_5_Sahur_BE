@@ -10,6 +10,8 @@ import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatu
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.product.entity.Product;
+import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductRequestErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
@@ -28,6 +30,7 @@ public class ProductRequestService {
     private final ProductRequestRepository productRequestRepository;
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
 
     @Transactional
     public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, PrincipalDetails userDetails) {
@@ -50,9 +53,14 @@ public class ProductRequestService {
     @Transactional(readOnly = true)
     public Page<ProductRequestResDto> getAllRequests(ProductRequestStatus status, Pageable pageable) {
         Pageable sorted = forceCreatedAtDesc(pageable);
-        return productRequestRepository.findAllByStatus(status, sorted)
-                .map(ProductRequestResDto::fromEntity);
+
+        Page<ProductRequest> page = (status == null)
+                ? productRequestRepository.findAll(sorted)
+                : productRequestRepository.findAllByStatus(status, sorted);
+
+        return page.map(ProductRequestResDto::fromEntity);
     }
+
 
     @Transactional(readOnly = true)
     public Page<ProductRequestResDto> getRequestsByMember(PrincipalDetails userDetails, Pageable pageable) {
@@ -112,8 +120,22 @@ public class ProductRequestService {
         };
 
         request.changeStatus(newStatus);
+
+        // ✅ 승인 시 Product 자동 생성
+        if (newStatus == ProductRequestStatus.APPROVED) {
+            Product product = Product.create(
+                    request.getCategory(),
+                    request.getTitle(),
+                    request.getDescription(),
+                    request.getImageUrls(),
+                    0 // price 기본값 하드코딩
+            );
+            productRepository.save(product);
+        }
+
         return ProductRequestResDto.fromEntity(request);
     }
+
 
     @Transactional
     public void deleteRequest(Long productRequestId, PrincipalDetails userDetails) {
