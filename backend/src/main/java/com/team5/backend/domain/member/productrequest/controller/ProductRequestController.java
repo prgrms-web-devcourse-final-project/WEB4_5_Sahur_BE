@@ -51,7 +51,6 @@ public class ProductRequestController {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-
         Page<ProductRequestResDto> responses = productRequestService.getAllRequests(status, sortedPageable);
         return RsDataUtil.success("상품 요청 조회 완료", responses);
     }

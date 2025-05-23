@@ -51,7 +51,14 @@ public class ProductRequestService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestResDto> getAllRequests(ProductRequestStatus status, Pageable pageable) {
+    public Page<ProductRequestResDto> getAllRequests(Pageable pageable) {
+        Pageable sorted = forceCreatedAtDesc(pageable);
+        return productRequestRepository.findAll(sorted)
+                .map(ProductRequestResDto::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductRequestResDto> getAllRequestsByStatus(ProductRequestStatus status, Pageable pageable) {
         Pageable sorted = forceCreatedAtDesc(pageable);
 
         Page<ProductRequest> page = (status == null)

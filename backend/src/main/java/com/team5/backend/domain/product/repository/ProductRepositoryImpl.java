@@ -41,7 +41,7 @@ public class ProductRepositoryImpl implements ProductRepositoryCustom {
         // 기본 쿼리
         var query = queryFactory
                 .selectFrom(product)
-                .join(product.category, category)
+                .join(product.category, category).fetchJoin()
                 .where(builder);
 
         // 동적 정렬
