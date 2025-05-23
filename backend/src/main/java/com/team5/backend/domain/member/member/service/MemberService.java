@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -280,9 +281,22 @@ public class MemberService {
     @Transactional
     public void hardDeleteMembers() {
 
-        LocalDateTime thirtyDays = LocalDateTime.now().minusDays(30);
-        int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDays);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
 
+        // 삭제 대상 회원 조회
+        List<Member> deletedMembers = memberRepository.findAllDeletedMembers(thirtyDaysAgo);
+
+        for (Member member : deletedMembers) {
+            String imageUrl = member.getImageUrl(); // 프로필 이미지 URL 가져오기
+            try {
+                imageUtil.deleteImage(imageUrl); // S3에서 이미지 삭제
+            } catch (IOException e) {
+                log.error("S3 프로필 이미지 삭제 실패 (memberId={}): {}", member.getMemberId(), e.getMessage());
+            }
+        }
+
+        // 회원 하드 딜리트
+        int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDaysAgo);
         log.info("삭제된 회원 수: {}", deletedCount);
     }
 
