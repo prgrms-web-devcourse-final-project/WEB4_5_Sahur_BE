@@ -42,7 +42,7 @@ public class ProductRequestController {
     @GetMapping("/list")
     public RsData<Page<ProductRequestResDto>> getAllRequests(
             @Parameter(description = "요청 상태", example = "WAITING")
-            @RequestParam(defaultValue = "WAITING") ProductRequestStatus status,
+            @RequestParam(value = "status", required = false) ProductRequestStatus status,
             @Parameter(description = "페이지 정보")
             @PageableDefault(size = 10) Pageable pageable
     ) {
@@ -52,7 +52,12 @@ public class ProductRequestController {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<ProductRequestResDto> responses = productRequestService.getAllRequests(status, sortedPageable);
+        Page<ProductRequestResDto> responses;
+        if (status == null) {
+            responses = productRequestService.getAllRequests(sortedPageable);
+        } else {
+            responses = productRequestService.getAllRequestsByStatus(status, sortedPageable);
+        }
         return RsDataUtil.success("전체 상품 요청 조회 완료", responses);
     }
 
