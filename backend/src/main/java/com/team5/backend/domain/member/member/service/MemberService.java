@@ -124,10 +124,15 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public PatchMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
+    public PatchMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto, MultipartFile newProfileImage) throws IOException {
 
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 이미지가 바뀌었을 때 patchMemberReqDto가 null이면 빈 객체 생성 (이미지만 변경 시)
+        if (patchMemberReqDto == null && newProfileImage != null && !newProfileImage.isEmpty()) {
+            patchMemberReqDto = new PatchMemberReqDto();
+        }
 
         // 이메일 변경 시 중복 검사
         if (patchMemberReqDto.getEmail() != null && !patchMemberReqDto.getEmail().equals(existingMember.getEmail())
@@ -139,6 +144,18 @@ public class MemberService {
         if (patchMemberReqDto.getNickname() != null && !patchMemberReqDto.getNickname().equals(existingMember.getNickname())
                 && memberRepository.existsByNickname(patchMemberReqDto.getNickname())) {
             throw new CustomException(MemberErrorCode.NICKNAME_ALREADY_USED);
+        }
+
+        // 프로필 이미지 처리
+        if (newProfileImage != null && !newProfileImage.isEmpty()) {
+            // 기존 이미지 삭제
+            if (existingMember.getImageUrl() != null && !existingMember.getImageUrl().isBlank()) {
+                imageUtil.deleteImage(existingMember.getImageUrl());
+            }
+
+            // 새 이미지 업로드 및 DTO에 반영
+            String newImageUrl = imageUtil.saveImage(newProfileImage, ImageType.PROFILE);
+            patchMemberReqDto.setImageUrl(newImageUrl);
         }
 
         // 변경할 필드만 수정
