@@ -1,11 +1,6 @@
-import {Button, Card, Tab, Tabs} from "react-bootstrap";
-import TableBackGroundCard from "../../../shared/TableBackGroundCard";
-import FlexibleTable from "../../../shared/table/FlexibleTable";
-import Paging from "../../../shared/Paging";
+import {Button, Card, Form, InputGroup, Tab, Tabs} from "react-bootstrap";
 import {useQueryParam} from "../../../hooks/QueryParam";
-import {useApiQuery} from "../../../hooks/useApiQuery";
-import axios from "axios";
-import {Link, useLocation, useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import styles from "./AdminProducts.module.scss"
 import {useEffect, useState} from "react";
 import ProductsTable from "./ProductsTable";
@@ -40,23 +35,32 @@ const AdminProducts = () => {
                 <h4>등록된 상품 목록</h4>
             </Card.Header>
             <Card.Body>
-                <Tabs
-                    activeKey={activeTab}
-                    onSelect={handleTabSelect}
-                    id="uncontrolled-tab-example"
-                    className="mb-3"
-                >
-                    <Tab eventKey="products" title="등록된 상품 목록">
-                        {activeTab === 'products' && (
-                            <ProductsTable />
-                        )}
-                    </Tab>
-                    <Tab eventKey="productsRequests" title="상품 등록 요청">
-                        {activeTab === 'productsRequests' && (
-                            <ProductsRequestsTable />
-                        )}
-                    </Tab>
-                </Tabs>
+                <div className="d-flex justify-content-between mx-3">
+                    <Tabs
+                        activeKey={activeTab}
+                        onSelect={handleTabSelect}
+                        id="uncontrolled-tab-example"
+                    >
+                        <Tab eventKey="products" title="등록된 상품 목록" />
+                        <Tab eventKey="productsRequests" title="상품 등록 요청" />
+                    </Tabs>
+                    {/* 오른쪽 검색창 */}
+                    {activeTab === 'products' && (
+                        <InputGroup className="me-3" style={{ width: 360, height: 50 }}>
+                            <Form.Control
+                                type="text"
+                                placeholder="카테고리 or 키워드"
+                            />
+                            <Button className={styles.detailButton} variant="" type={"button"}>
+                                검색
+                            </Button>
+                        </InputGroup>
+                    )}
+                </div>
+
+                {/* 탭과 검색 컴포넌트를 같은 라인에 두기 위해 탭 콘텐츠는 따로 분리해서 렌더링 */}
+                {activeTab === 'products' && <ProductsTable />}
+                {activeTab === 'productsRequests' && <ProductsRequestsTable />}
             </Card.Body>
         </Card>
     );
