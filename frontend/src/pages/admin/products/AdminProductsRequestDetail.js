@@ -59,10 +59,10 @@ const AdminProductsRequestDetail = () => {
             <Card.Footer className={"mx-4 mt-4 p-5"}>
                 <Stack className={"justify-content-end"} direction={"horizontal"} gap={3}>
                     <Button className={styles.detailButton} variant={""} onClick={() => setModalOpen(true)}>거부</Button>
-                    <Button onClick={() => navigate('/admin/productsRequests')}>승인</Button>
+                    <Button onClick={() => navigate('/admin/products/requests')}>승인</Button>
                 </Stack>
             </Card.Footer>
-            <GroupBuyRegisterDenyModal show={modalOpen} onHide={() => setModalOpen(false)} onConfirm={() => navigate('/admin/productsRequests')} />
+            <GroupBuyRegisterDenyModal show={modalOpen} onHide={() => setModalOpen(false)} onConfirm={() => navigate('/admin/products/requests')} />
         </Card>
     );
 }

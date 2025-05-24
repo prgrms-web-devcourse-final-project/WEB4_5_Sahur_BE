@@ -19,6 +19,7 @@ import AdminReviews from "../pages/admin/review/AdminReviews";
 import AdminProductsDetail from "../pages/admin/products/AdminProductsDetail";
 import AdminProductsRequestDetail
     from "../pages/admin/products/AdminProductsRequestDetail";
+import AdminGroupBuyDetail from "../pages/admin/groupbuy/AdminGroupBuyDetail";
 
 const BaseRoutes = () => {
     return (
@@ -38,10 +39,11 @@ const BaseRoutes = () => {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
-                <Route path="productsRequests" element={<AdminProducts />} />
+                <Route path="products/requests" element={<AdminProducts />} />
                 <Route path="products/:productId" element={<AdminProductsDetail />} />
-                <Route path="productsRequests/:productId" element={<AdminProductsRequestDetail />} />
+                <Route path="products/requests/:productId" element={<AdminProductsRequestDetail />} />
                 <Route path="groupBuy" element={<AdminGroupBuy />} />
+                <Route path="groupBuy/:groupBuyId" element={<AdminGroupBuyDetail />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="reviews" element={<AdminReviews />} />
             </Route>

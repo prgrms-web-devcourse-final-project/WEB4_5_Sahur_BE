@@ -6,7 +6,7 @@ import AdminSubHeader from "./AdminSubHeader";
 const AdminLayout = () => {
     const location = useLocation();
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    const pageId = pathSegments[pathSegments.length - 1];
+    const pageId = pathSegments[1];
     return (
         <div className="d-flex flex-column vh-100">
             <AdminHeader />

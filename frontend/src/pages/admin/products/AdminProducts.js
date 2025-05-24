@@ -1,5 +1,4 @@
 import {Button, Card, Form, InputGroup, Tab, Tabs} from "react-bootstrap";
-import {useQueryParam} from "../../../hooks/QueryParam";
 import {useLocation, useNavigate} from "react-router-dom";
 import styles from "./AdminProducts.module.scss"
 import {useEffect, useState} from "react";
@@ -7,7 +6,6 @@ import ProductsTable from "./ProductsTable";
 import ProductsRequestsTable from "./ProductsRequestsTable";
 
 const AdminProducts = () => {
-    const [queryParam, setQueryParam] = useQueryParam();
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -20,8 +18,11 @@ const AdminProducts = () => {
     const handleTabSelect = (tabKey) => {
         setActiveTab(tabKey);
         // 현재 경로에서 마지막 segment만 변경
-        const newPath = [...pathSegments.slice(0, -1), tabKey].join('/');
-        navigate(newPath);
+        if (tabKey === 'products') {
+            navigate('/admin/products');
+        } else {
+            navigate('/admin/products/requests');
+        }
     };
 
     // URL이 바뀔 때 activeTab도 반영
@@ -42,7 +43,7 @@ const AdminProducts = () => {
                         id="uncontrolled-tab-example"
                     >
                         <Tab eventKey="products" title="등록된 상품 목록" />
-                        <Tab eventKey="productsRequests" title="상품 등록 요청" />
+                        <Tab eventKey="requests" title="상품 등록 요청" />
                     </Tabs>
                     {/* 오른쪽 검색창 */}
                     {activeTab === 'products' && (
@@ -60,7 +61,7 @@ const AdminProducts = () => {
 
                 {/* 탭과 검색 컴포넌트를 같은 라인에 두기 위해 탭 콘텐츠는 따로 분리해서 렌더링 */}
                 {activeTab === 'products' && <ProductsTable />}
-                {activeTab === 'productsRequests' && <ProductsRequestsTable />}
+                {activeTab === 'requests' && <ProductsRequestsTable />}
             </Card.Body>
         </Card>
     );
