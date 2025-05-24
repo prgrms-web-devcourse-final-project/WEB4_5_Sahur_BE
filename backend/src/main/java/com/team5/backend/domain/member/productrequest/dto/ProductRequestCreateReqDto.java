@@ -1,14 +1,11 @@
 package com.team5.backend.domain.member.productrequest.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -25,9 +22,6 @@ public class ProductRequestCreateReqDto {
     private String productUrl;
 
 //    private String etc;
-
-    @NotEmpty(message = "이미지는 최소 1개 이상 등록해야 합니다.")
-    private List<String> imageUrls;
 
     @NotBlank(message = "상품 설명은 필수입니다.")
     private String description;

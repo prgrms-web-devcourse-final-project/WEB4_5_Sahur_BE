@@ -12,6 +12,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -45,85 +47,180 @@ public class ImageUtil {
     }
 
 
-    // S3에 이미지 저장
-    public String saveImage(MultipartFile imageFile) throws IOException {
+    // 단일 이미지 저장
+    public String saveImage(MultipartFile imageFile, ImageType imageType) throws IOException {
 
         if (imageFile == null || imageFile.isEmpty()) {
-            return null; // 이미지가 없으면 null 반환
+            return null ;
         }
 
         try {
-            // 고유한 파일명 생성 및 정규화 (알파벳, 숫자, 밑줄, 하이픈, 점만 허용)
-            String originalName = imageFile.getOriginalFilename() != null ? imageFile.getOriginalFilename() : "unknown";
-            String sanitizedOriginalName = Pattern.compile("[^a-zA-Z0-9._-]").matcher(originalName).replaceAll("");
-            String fileName = "images/" + UUID.randomUUID() + "_" + sanitizedOriginalName;
-
-            // S3 클라이언트 생성
-            S3Client s3Client = getS3Client();
-
-            // S3에 업로드
-            PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(fileName)
-                    .contentType(imageFile.getContentType())
-                    .build();
-
-            s3Client.putObject(request, RequestBody.fromInputStream(
-                    imageFile.getInputStream(),
-                    imageFile.getSize()
-            ));
-
-            // URL 생성 시 슬래시 중복 방지
-            String normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-
-            // S3 객체 URL 반환
-            return normalizedBaseUrl + "/" + fileName;
-
+            String fileName = generateFileName(imageFile.getOriginalFilename(), imageType);
+            uploadToS3(imageFile, fileName);
+            return buildImageUrl(fileName);
         } catch (Exception e) {
             throw new IOException("S3 업로드 실패: " + e.getMessage(), e);
         }
     }
 
-    // S3에서 이미지 삭제
-    public void deleteImage(String imagePath) throws IOException {
+    // 다중 이미지 저장
+    public List<String> saveImages(List<MultipartFile> imageFiles, ImageType imageType) throws IOException {
 
-        if (imagePath == null || imagePath.trim().isEmpty()) {
-            return;
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            throw new IllegalArgumentException("이미지 파일이 없습니다.");
         }
 
+        List<String> imageUrls = new ArrayList<>();
+        List<String> uploadedFiles = new ArrayList<>();
+
         try {
-            // S3 URL에서 키 추출
-            // 예: https://bucket-name.s3.region.amazonaws.com/images/uuid_filename.jpg
-            // 또는: https://custom-domain.com/images/uuid_filename.jpg
-            String key;
-            if (imagePath.contains(baseUrl)) {
-                key = imagePath.substring(imagePath.indexOf(baseUrl) + baseUrl.length());
-                if (key.startsWith("/")) {
-                    key = key.substring(1);
-                }
-            } else {
-                // URL 형식이 다른 경우 images/ 디렉토리를 기준으로 처리
-                int startIndex = imagePath.indexOf("images/");
-                if (startIndex != -1) {
-                    key = imagePath.substring(startIndex);
-                } else {
-                    throw new IOException("유효하지 않은 이미지 경로: " + imagePath);
+            for (MultipartFile imageFile : imageFiles) {
+                if (imageFile != null && !imageFile.isEmpty()) {
+                    String fileName = generateFileName(imageFile.getOriginalFilename(), imageType);
+                    uploadToS3(imageFile, fileName);
+                    String imageUrl = buildImageUrl(fileName);
+                    imageUrls.add(imageUrl);
+                    uploadedFiles.add(fileName);
                 }
             }
 
-            // S3 클라이언트 생성
-            S3Client s3Client = getS3Client();
+            if (imageUrls.isEmpty()) {
+                throw new IllegalArgumentException("유효한 이미지 파일이 없습니다.");
+            }
 
-            // S3에서 객체 삭제
-            DeleteObjectRequest request = DeleteObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .build();
+            return imageUrls;
+        } catch (Exception e) {
+            // 업로드 실패 시 이미 업로드된 파일들 삭제
+            rollbackUploadedFiles(uploadedFiles);
+            throw new IOException("이미지 업로드 실패: " + e.getMessage(), e);
+        }
+    }
 
-            s3Client.deleteObject(request);
+    // 파일명 생성
+    private String generateFileName(String originalName, ImageType imageType) {
 
+        String sanitizedName = sanitizeFileName(originalName);
+        return imageType.getDirectory() + UUID.randomUUID() + "_" + sanitizedName;
+    }
+
+    // 파일명 정규화
+    private String sanitizeFileName(String originalName) {
+
+        if (originalName == null || originalName.trim().isEmpty()) {
+            return "unknown";
+        }
+        return Pattern.compile("[^a-zA-Z0-9._-]").matcher(originalName).replaceAll("");
+    }
+
+    // S3 업로드
+    private void uploadToS3(MultipartFile imageFile, String fileName) throws IOException {
+
+        S3Client s3Client = getS3Client();
+
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .contentType(imageFile.getContentType())
+                .build();
+
+        s3Client.putObject(request, RequestBody.fromInputStream(
+                imageFile.getInputStream(),
+                imageFile.getSize()
+        ));
+    }
+
+    // 이미지 URL 생성
+    private String buildImageUrl(String fileName) {
+
+        String normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        return normalizedBaseUrl + "/" + fileName;
+    }
+
+    // 업로드 실패 시 롤백
+    private void rollbackUploadedFiles(List<String> uploadedFiles) {
+
+        S3Client s3Client = getS3Client();
+
+        for (String fileName : uploadedFiles) {
+            try {
+                DeleteObjectRequest request = DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(fileName)
+                        .build();
+                s3Client.deleteObject(request);
+            } catch (Exception e) {
+                // 롤백 실패는 로그만 남기고 계속 진행
+                System.err.println("롤백 실패: " + fileName + " - " + e.getMessage());
+            }
+        }
+    }
+
+    // 단일 이미지 삭제
+    public void deleteImage(String imagePath) throws IOException {
+
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            return ;
+        }
+
+        try {
+            String key = extractKeyFromUrl(imagePath);
+            deleteFromS3(key);
         } catch (Exception e) {
             throw new IOException("S3 객체 삭제 실패: " + e.getMessage(), e);
         }
+    }
+
+    // 다중 이미지 삭제
+    public void deleteImages(List<String> imagePaths) throws IOException {
+
+        if (imagePaths == null || imagePaths.isEmpty()) {
+            return ;
+        }
+
+        List<String> failedDeletions = new ArrayList<>();
+
+        for (String imagePath : imagePaths) {
+            try {
+                deleteImage(imagePath);
+            } catch (IOException e) {
+                failedDeletions.add(imagePath);
+            }
+        }
+
+        if (!failedDeletions.isEmpty()) {
+            throw new IOException("일부 이미지 삭제 실패: " + failedDeletions);
+        }
+    }
+
+    // URL에서 S3 키 추출
+    private String extractKeyFromUrl(String imagePath) throws IOException {
+
+        if (imagePath.contains(baseUrl)) {
+
+            String key = imagePath.substring(imagePath.indexOf(baseUrl) + baseUrl.length());
+            return key.startsWith("/") ? key.substring(1) : key;
+        }
+
+        // profiles/ 또는 products/ 디렉토리를 기준으로 처리
+        for (ImageType type : ImageType.values()) {
+
+            int startIndex = imagePath.indexOf(type.getDirectory());
+            if (startIndex != -1) {
+                return imagePath.substring(startIndex);
+            }
+        }
+
+        throw new IOException("유효하지 않은 이미지 경로: " + imagePath);
+    }
+
+    // S3에서 삭제
+    private void deleteFromS3(String key) {
+
+        S3Client s3Client = getS3Client();
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        s3Client.deleteObject(request);
     }
 }

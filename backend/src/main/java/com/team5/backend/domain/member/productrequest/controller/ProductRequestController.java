@@ -6,7 +6,6 @@ import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateRe
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.service.ProductRequestService;
 import com.team5.backend.global.dto.Empty;
-import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import com.team5.backend.global.security.PrincipalDetails;
@@ -15,10 +14,17 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Tag(name = "ProductRequest", description = "상품 등록 요청 API")
 @RestController
@@ -31,10 +37,11 @@ public class ProductRequestController {
     @Operation(summary = "상품 등록 요청 생성", description = "사용자가 새로운 상품 등록 요청을 생성합니다.")
     @PostMapping
     public RsData<ProductRequestResDto> createRequest(
-            @RequestBody @Valid ProductRequestCreateReqDto request,
+            @RequestPart(value = "request", required = false) @Valid ProductRequestCreateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @AuthenticationPrincipal PrincipalDetails userDetails
-    ) {
-        ProductRequestResDto response = productRequestService.createRequest(request, userDetails);
+    ) throws IOException {
+        ProductRequestResDto response = productRequestService.createRequest(request, imageFiles, userDetails);
         return RsDataUtil.success("상품 등록 요청 생성 완료", response);
     }
 
@@ -51,7 +58,7 @@ public class ProductRequestController {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-        Page<ProductRequestResDto> responses = productRequestService.getAllRequests(status, sortedPageable);
+        Page<ProductRequestResDto> responses = productRequestService.getAllRequestsByStatus(status, sortedPageable);
         return RsDataUtil.success("상품 요청 조회 완료", responses);
     }
 
@@ -86,10 +93,11 @@ public class ProductRequestController {
     @PatchMapping("/{productRequestId}")
     public RsData<ProductRequestResDto> updateRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
-            @RequestBody @Valid ProductRequestUpdateReqDto request,
+            @RequestPart(value = "request", required = false) @Valid ProductRequestUpdateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @AuthenticationPrincipal PrincipalDetails userDetails
-    ) {
-        ProductRequestResDto response = productRequestService.updateRequest(productRequestId, request, userDetails);
+    ) throws IOException {
+        ProductRequestResDto response = productRequestService.updateRequest(productRequestId, request, imageFiles, userDetails);
         return RsDataUtil.success("상품 요청 수정 완료", response);
     }
 
@@ -108,7 +116,7 @@ public class ProductRequestController {
     public RsData<Empty> deleteRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
             @AuthenticationPrincipal PrincipalDetails userDetails
-    ) {
+    ) throws IOException {
         productRequestService.deleteRequest(productRequestId, userDetails);
         return RsDataUtil.success("상품 요청이 삭제되었습니다.");
     }

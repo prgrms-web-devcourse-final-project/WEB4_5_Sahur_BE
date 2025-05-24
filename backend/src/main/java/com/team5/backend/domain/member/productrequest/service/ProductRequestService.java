@@ -2,19 +2,21 @@ package com.team5.backend.domain.member.productrequest.service;
 
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductRequestErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
+import com.team5.backend.global.util.ImageType;
+import com.team5.backend.global.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,19 +36,27 @@ public class ProductRequestService {
     private final ProductRequestRepository productRequestRepository;
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
+    private final ImageUtil imageUtil;
     private final ProductRepository productRepository;
 
     @Transactional
-    public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, PrincipalDetails userDetails) {
+    public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
         Member member = getMember(userDetails);
+
+        if (dto == null || imageFiles == null) {
+            throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+        }
+
         Category category = getCategory(dto.getCategoryId());
+
+        List<String> imageUrls = imageUtil.saveImages(imageFiles, ImageType.PRODUCT);
 
         ProductRequest request = ProductRequest.builder()
                 .member(member)
                 .category(category)
                 .title(dto.getTitle())
                 .productUrl(dto.getProductUrl())
-                .imageUrls(dto.getImageUrls())
+                .imageUrls(imageUrls)
                 .description(dto.getDescription())
                 .status(ProductRequestStatus.WAITING)
                 .build();
@@ -84,9 +98,14 @@ public class ProductRequestService {
     }
 
     @Transactional
-    public ProductRequestResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, PrincipalDetails userDetails) {
+    public ProductRequestResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
+
         ProductRequest request = getRequestOrThrow(productRequestId);
         Member member = getMember(userDetails);
+
+        if (dto == null && imageFiles == null) {
+            throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
+        }
 
         if (!request.getMember().equals(member)) {
             throw new CustomException(ProductRequestErrorCode.PRODUCT_REQUEST_ACCESS_DENIED);
@@ -105,12 +124,23 @@ public class ProductRequestService {
             request.setProductUrl(dto.getProductUrl());
         }
 
-        if (dto.getImageUrls() != null) {
-            request.setImageUrls(dto.getImageUrls());
-        }
-
         if (dto.getDescription() != null) {
             request.setDescription(dto.getDescription());
+        }
+
+        // 이미지 처리
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            // 새 이미지가 있으면 기존 이미지 삭제 후 새로 업로드
+            if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
+                imageUtil.deleteImages(request.getImageUrls());
+            }
+            List<String> uploadedUrls = imageUtil.saveImages(imageFiles, ImageType.PRODUCT);
+            request.setImageUrls(uploadedUrls);
+        } else {
+            // 새 이미지 없고 기존 이미지도 없으면 예외
+            if (request.getImageUrls() == null || request.getImageUrls().isEmpty()) {
+                throw new CustomException(ProductRequestErrorCode.PRODUCT_IMAGE_NOT_FOUND);
+            }
         }
 
         return ProductRequestResDto.fromEntity(productRequestRepository.save(request));
@@ -145,12 +175,18 @@ public class ProductRequestService {
 
 
     @Transactional
-    public void deleteRequest(Long productRequestId, PrincipalDetails userDetails) {
+    public void deleteRequest(Long productRequestId, PrincipalDetails userDetails) throws IOException {
         ProductRequest request = getRequestOrThrow(productRequestId);
         Member member = getMember(userDetails);
 
         if (!request.getMember().equals(member)) {
             throw new CustomException(ProductRequestErrorCode.PRODUCT_REQUEST_ACCESS_DENIED);
+        }
+
+        // S3에 저장된 이미지 삭제
+        List<String> imageUrls = request.getImageUrls();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            imageUtil.deleteImages(imageUrls);
         }
 
         productRequestRepository.delete(request);
