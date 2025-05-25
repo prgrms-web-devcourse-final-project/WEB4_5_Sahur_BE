@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import styles from './AdminGroupBuy.module.scss'; // 파일 이름은 그대로라고 가정
+import styles from './AdminGroupBuy.module.scss';
 
 function FilterToggle() {
     const [active, setActive] = useState('전체');

@@ -20,6 +20,7 @@ import AdminProductsDetail from "../pages/admin/products/AdminProductsDetail";
 import AdminProductsRequestDetail
     from "../pages/admin/products/AdminProductsRequestDetail";
 import AdminGroupBuyDetail from "../pages/admin/groupbuy/AdminGroupBuyDetail";
+import AdminOrdersDetail from "../pages/admin/orders/AdminOrdersDetail";
 
 const BaseRoutes = () => {
     return (
@@ -45,6 +46,7 @@ const BaseRoutes = () => {
                 <Route path="groupBuy" element={<AdminGroupBuy />} />
                 <Route path="groupBuy/:groupBuyId" element={<AdminGroupBuyDetail />} />
                 <Route path="orders" element={<AdminOrders />} />
+                <Route path="orders/:orderId" element={<AdminOrdersDetail />} />
                 <Route path="reviews" element={<AdminReviews />} />
             </Route>
             <Route path="/mypage" element={<Layout />}>
