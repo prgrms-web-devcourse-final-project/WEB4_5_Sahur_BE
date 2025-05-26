@@ -31,7 +31,7 @@ public class Product {
     private String description;
 
     @Convert(converter = StringListConverter.class)
-    @Column(name = "imageUrl", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "imageUrl", columnDefinition = "TEXT")
     private List<String> imageUrl;
 
     @Column(nullable = false)
