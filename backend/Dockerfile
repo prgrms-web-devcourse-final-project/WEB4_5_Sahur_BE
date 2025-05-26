@@ -18,7 +18,7 @@ RUN ./gradlew dependencies --no-daemon
 COPY src src
 
 # 애플리케이션 빌드
-RUN ./gradlew bootJar -x test --no-daemon
+RUN ./gradlew bootJar -x test --no-daemon --stacktrace --warning-mode=all
 
 # 불필요한 파일 삭제 (빌드 후 불필요한 파일들을 삭제하여 이미지를 경량화)
 RUN rm -rf /app/build/libs/*-plain.jar
