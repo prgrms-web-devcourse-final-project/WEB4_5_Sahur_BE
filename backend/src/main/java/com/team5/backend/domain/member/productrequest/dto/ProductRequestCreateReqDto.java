@@ -21,8 +21,6 @@ public class ProductRequestCreateReqDto {
     @URL(message = "유효한 URL 형식이 아닙니다.")
     private String productUrl;
 
-//    private String etc;
-
     @NotBlank(message = "상품 설명은 필수입니다.")
     private String description;
 

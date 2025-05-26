@@ -12,7 +12,6 @@ const createDelivery = (params) => axios.post(`/api/v1/deliveries/order/${params
 
 const OrderSection = ({ groupBuyInfo, count, deliveryInfo }) => {
     const loginUser = useRecoilValue(userAtom);
-    console.log(deliveryInfo)
     const currentParticipantCount = groupBuyInfo?.currentParticipantCount ?? 0;
     const targetParticipants = groupBuyInfo?.targetParticipants ?? 0;
 

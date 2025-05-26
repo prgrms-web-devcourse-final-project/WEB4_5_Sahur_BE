@@ -1,7 +1,8 @@
 package com.team5.backend.domain.member.productrequest.controller;
 
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
-import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestDetailResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestListResDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.service.ProductRequestService;
@@ -36,20 +37,20 @@ public class ProductRequestController {
 
     @Operation(summary = "상품 등록 요청 생성", description = "사용자가 새로운 상품 등록 요청을 생성합니다.")
     @PostMapping
-    public RsData<ProductRequestResDto> createRequest(
+    public RsData<ProductRequestDetailResDto> createRequest(
             @RequestPart(value = "request", required = false) @Valid ProductRequestCreateReqDto request,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @AuthenticationPrincipal PrincipalDetails userDetails
     ) throws IOException {
-        ProductRequestResDto response = productRequestService.createRequest(request, imageFiles, userDetails);
+        ProductRequestDetailResDto response = productRequestService.createRequest(request, imageFiles, userDetails);
         return RsDataUtil.success("상품 등록 요청 생성 완료", response);
     }
 
     @Operation(summary = "전체 또는 상태별 상품 요청 조회 (관리자)", description = "전체 상품 요청 또는 특정 상태별 요청을 페이징 조회합니다.")
     @GetMapping("/list")
-    public RsData<Page<ProductRequestResDto>> getAllRequests(
+    public RsData<Page<ProductRequestListResDto>> getAllRequests(
             @Parameter(description = "요청 상태 (없으면 전체 조회)", example = "WAITING")
-            @RequestParam(required = false) ProductRequestStatus status,
+            @RequestParam(value = "status", required = false) ProductRequestStatus status,
             @Parameter(description = "페이지 정보")
             @PageableDefault(size = 10) Pageable pageable
     ) {
@@ -58,14 +59,20 @@ public class ProductRequestController {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-        Page<ProductRequestResDto> responses = productRequestService.getAllRequestsByStatus(status, sortedPageable);
+
+        Page<ProductRequestListResDto> responses;
+        if (status == null) {
+            responses = productRequestService.getAllRequests(sortedPageable);
+        } else {
+            responses = productRequestService.getAllRequestsByStatus(status, sortedPageable);
+        }
         return RsDataUtil.success("상품 요청 조회 완료", responses);
     }
 
 
     @Operation(summary = "회원 본인 상품 요청 조회", description = "로그인한 사용자가 본인이 등록한 요청 목록을 조회합니다.")
     @GetMapping("/me")
-    public RsData<Page<ProductRequestResDto>> getMyRequests(
+    public RsData<Page<ProductRequestListResDto>> getMyRequests(
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @Parameter(description = "페이지 정보")
             @PageableDefault(size = 10) Pageable pageable
@@ -76,38 +83,38 @@ public class ProductRequestController {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Page<ProductRequestResDto> responses = productRequestService.getRequestsByMember(userDetails, sortedPageable);
+        Page<ProductRequestListResDto> responses = productRequestService.getRequestsByMember(userDetails, sortedPageable);
         return RsDataUtil.success("내 상품 요청 조회 완료", responses);
     }
 
     @Operation(summary = "상품 요청 단건 조회", description = "상품 등록 요청 ID로 단건 상세 조회합니다.")
     @GetMapping("/{productRequestId}")
-    public RsData<ProductRequestResDto> getRequest(
+    public RsData<ProductRequestDetailResDto> getRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId
     ) {
-        ProductRequestResDto response = productRequestService.getRequest(productRequestId);
+        ProductRequestDetailResDto response = productRequestService.getRequest(productRequestId);
         return RsDataUtil.success("상품 요청 단건 조회 완료", response);
     }
 
     @Operation(summary = "회원 본인 상품 요청 수정", description = "로그인한 사용자가 본인의 요청을 수정합니다.")
     @PatchMapping("/{productRequestId}")
-    public RsData<ProductRequestResDto> updateRequest(
+    public RsData<ProductRequestDetailResDto> updateRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
             @RequestPart(value = "request", required = false) @Valid ProductRequestUpdateReqDto request,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
             @AuthenticationPrincipal PrincipalDetails userDetails
     ) throws IOException {
-        ProductRequestResDto response = productRequestService.updateRequest(productRequestId, request, imageFiles, userDetails);
+        ProductRequestDetailResDto response = productRequestService.updateRequest(productRequestId, request, imageFiles, userDetails);
         return RsDataUtil.success("상품 요청 수정 완료", response);
     }
 
     @Operation(summary = "상품 요청 승인/거절 (관리자)", description = "상품 요청을 승인하거나 거절 처리합니다.")
     @PatchMapping("/{productRequestId}/{confirm}")
-    public RsData<ProductRequestResDto> confirmRequest(
+    public RsData<ProductRequestDetailResDto> confirmRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
             @Parameter(description = "처리 타입 (approve / reject)", example = "approve") @PathVariable String confirm
     ) {
-        ProductRequestResDto response = productRequestService.updateStatus(productRequestId, confirm);
+        ProductRequestDetailResDto response = productRequestService.updateStatus(productRequestId, confirm);
         return RsDataUtil.success("상품 요청 처리 완료", response);
     }
 
