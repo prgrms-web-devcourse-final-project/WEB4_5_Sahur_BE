@@ -1,16 +1,13 @@
 import {Button, Card, Form, Stack} from "react-bootstrap";
-import styles from "./AdminProducts.module.scss";
-import React, {useState} from "react";
 import ThemedSelect from "../../../shared/ThemedSelect";
+import styles from "../products/AdminProducts.module.scss";
 import CreateReviewImageBox from "../../products/review/CreateReviewImageBox";
-import {
-    ReactComponent as InfoBrownIcon
-} from "../../../assets/images/icon/info-brown.svg";
 import {
     ReactComponent as QuestionIcon
 } from "../../../assets/images/icon/question.svg";
 import {useNavigate} from "react-router-dom";
-import GroupBuyRegisterModal from "./GroupBuyRegisterModal";
+import {useState} from "react";
+import CloseRecruitModal from "./CloseRecruitModal";
 
 const options = [
     { value: 'chocolate', label: 'Chocolate' },
@@ -18,8 +15,7 @@ const options = [
     { value: 'vanilla', label: 'Vanilla' }
 ]
 
-
-const AdminProductsDetail = () => {
+const AdminGroupBuyDetail = () => {
     const navigate = useNavigate();
     const [productTitle, setProductTitle] = useState('');
     const [productPrice, setProductPrice] = useState(0);
@@ -32,8 +28,8 @@ const AdminProductsDetail = () => {
         <Stack direction={"vertical"} gap={2} className={"m-3"}>
             <Card>
                 <Card.Body className={"m-4"}>
-                    <h3>등록 상품 관리</h3>
-                    <desc className={"text-gray-300"}>등록된 상품에 대한 처리를 합니다.</desc>
+                    <h3>등록된 공동 구매 상품 관리</h3>
+                    <desc className={"text-gray-300"}>등록된 상품에 대한 수정을 합니다.</desc>
                 </Card.Body>
             </Card>
             <Card>
@@ -74,12 +70,12 @@ const AdminProductsDetail = () => {
                             <Form.Group controlId={"productTitle"} >
                                 <Form.Label>판매가</Form.Label>
                                 <div style={{ position: 'relative' }}>
-                                <Form.Control
-                                    type="text"
-                                    value={productPrice}
-                                    onChange={(e) => setProductPrice(e.target.value)}
-                                />
-                                <span className={styles.textInControl}>원</span>
+                                    <Form.Control
+                                        type="text"
+                                        value={productPrice}
+                                        onChange={(e) => setProductPrice(e.target.value)}
+                                    />
+                                    <span className={styles.textInControl}>원</span>
                                 </div>
                             </Form.Group>
                         </Stack>
@@ -145,26 +141,16 @@ const AdminProductsDetail = () => {
                 </Card.Body>
             </Card>
             <Card>
-                <Card.Body className={"mx-3"}>
+                <Card.Body className={"m-7"}>
                     <Stack direction={"horizontal"} className={"justify-content-between"}>
-                        <Stack direction={"horizontal"}>
-                            <Button variant={"primary"} onClick={() => setModalOpen(true)}>공구 진행</Button>
-                            <div className={styles.groupBuyDesc} style={{ background: "#FEE2E2" }}>
-                                <div className={styles.groupBuyDescSubTitle} style={{ color: "#991B1B" }}>
-                                    <InfoBrownIcon style={{ color: "#F04343" }}/>  반드시 공동구매 진행전 상품 정보를 저장해주세요.
-                                </div>
-                            </div>
-                        </Stack>
-                        <Stack direction={"horizontal"} gap={5}>
-                            <Button className={styles.detailButton} variant={""} onClick={() => navigate('/admin/products')}>취소</Button>
-                            <Button variant={"primary"}>완료</Button>
-                        </Stack>
+                        <Button variant={"primary"} onClick={() => setModalOpen(true)}>모집 종료</Button>
+                        <Button className={styles.detailButton} variant={""} onClick={() => navigate('/admin/groupBuy')}>저장</Button>
                     </Stack>
                 </Card.Body>
             </Card>
-            <GroupBuyRegisterModal show={modalOpen} onHide={() => setModalOpen(false)} onConfirm={() => navigate('/admin/products')} />
+            <CloseRecruitModal show={modalOpen} onHide={() => setModalOpen(false)} onConfirm={() => navigate('/admin/groupBuy')} />
         </Stack>
     );
-}
+};
 
-export default AdminProductsDetail;
+export default AdminGroupBuyDetail;

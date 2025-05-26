@@ -62,10 +62,11 @@ public class MemberController {
     @Operation(summary = "회원 정보 수정", description = "회원 정보를 수정합니다.")
     @PatchMapping("/members/modify")
     public RsData<PatchMemberResDto> updateMember(@AuthenticationPrincipal PrincipalDetails userDetails,
-                                                  @Parameter(description = "수정할 회원 정보") @Valid @RequestBody PatchMemberReqDto patchMemberReqDto) {
+                                                  @Parameter(description = "수정할 회원 정보") @Valid @RequestPart(value = "memberData", required = false) PatchMemberReqDto patchMemberReqDto,
+                                                  @RequestPart(value = "image", required = false) MultipartFile newProfileImage) throws IOException {
 
         Long memberId = userDetails.getMember().getMemberId();
-        PatchMemberResDto updatedMember = memberService.updateMember(memberId, patchMemberReqDto);
+        PatchMemberResDto updatedMember = memberService.updateMember(memberId, patchMemberReqDto, newProfileImage);
 
         return RsDataUtil.success("회원 정보가 수정되었습니다.", updatedMember);
     }

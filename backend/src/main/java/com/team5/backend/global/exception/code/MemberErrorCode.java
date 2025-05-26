@@ -9,7 +9,8 @@ public enum MemberErrorCode implements ErrorCode {
     EMAIL_NOT_VERIFIED(400, "EMAIL_NOT_VERIFIED", "이메일 인증이 완료되지 않았습니다."),
     MEMBER_NOT_DELETED(400, "MEMBER_NOT_DELETED", "삭제된 계정이 아닙니다."),
     INVALID_EMAIL_DOMAIN(400, "INVALID_EMAIL_DOMAIN", "유효하지 않은 이메일 주소입니다."),
-    ADMIN_ONLY(403, "ADMIN_ONLY", "관리자 권한이 필요합니다.");
+    ADMIN_ONLY(403, "ADMIN_ONLY", "관리자 권한이 필요합니다."),
+    IMAGE_UPLOAD_FAILED(400, "IMAGE_UPLOAD_FAILED", "프로필 이미지를 저장하는데 실패하였습니다.");
 
     private final int status;
     private final String code;

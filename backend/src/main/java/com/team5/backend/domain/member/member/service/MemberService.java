@@ -13,6 +13,7 @@ import com.team5.backend.global.exception.code.CommonErrorCode;
 import com.team5.backend.global.exception.code.MemberErrorCode;
 import com.team5.backend.global.security.AuthTokenManager;
 import com.team5.backend.global.security.PrincipalDetails;
+import com.team5.backend.global.util.ImageType;
 import com.team5.backend.global.util.ImageUtil;
 import com.team5.backend.global.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -54,6 +56,12 @@ public class MemberService {
     // 회원 생성
     @Transactional
     public SignupResDto signup(SignupReqDto signupReqDto, MultipartFile profileImage) throws IOException {
+
+        // SignupReqDto 가 null로 요청이 오면 예외 발생
+        if (signupReqDto == null) {
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        }
+
         String email = signupReqDto.getEmail();
 
         // 이메일 중복 검사
@@ -80,7 +88,7 @@ public class MemberService {
 
         if (profileImage != null && !profileImage.isEmpty()) {
             // 이미지가 제공된 경우 업로드
-            imageUrl = imageUtil.saveImage(profileImage);
+            imageUrl = imageUtil.saveImage(profileImage, ImageType.PROFILE);
             log.info("프로필 이미지 업로드: {}", imageUrl);
         } else {
             log.info("기본 이미지 설정");
@@ -123,10 +131,20 @@ public class MemberService {
 
     // 회원 정보 수정
     @Transactional
-    public PatchMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto) {
+    public PatchMemberResDto updateMember(Long memberId, PatchMemberReqDto patchMemberReqDto, MultipartFile newProfileImage) throws IOException {
 
         Member existingMember = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 모든 값들이 없이 요청이 온다면 예외 발생
+        if (patchMemberReqDto == null && newProfileImage == null) {
+            throw new CustomException(CommonErrorCode.VALIDATION_ERROR);
+        }
+
+        // 이미지가 바뀌었을 때 patchMemberReqDto가 null이면 빈 객체 생성 (이미지만 변경 시)
+        if (patchMemberReqDto == null && newProfileImage != null && !newProfileImage.isEmpty()) {
+            patchMemberReqDto = new PatchMemberReqDto();
+        }
 
         // 이메일 변경 시 중복 검사
         if (patchMemberReqDto.getEmail() != null && !patchMemberReqDto.getEmail().equals(existingMember.getEmail())
@@ -138,6 +156,18 @@ public class MemberService {
         if (patchMemberReqDto.getNickname() != null && !patchMemberReqDto.getNickname().equals(existingMember.getNickname())
                 && memberRepository.existsByNickname(patchMemberReqDto.getNickname())) {
             throw new CustomException(MemberErrorCode.NICKNAME_ALREADY_USED);
+        }
+
+        // 프로필 이미지 처리
+        if (newProfileImage != null && !newProfileImage.isEmpty()) {
+            // 기존 이미지 삭제
+            if (existingMember.getImageUrl() != null && !existingMember.getImageUrl().isBlank()) {
+                imageUtil.deleteImage(existingMember.getImageUrl());
+            }
+
+            // 새 이미지 업로드 및 DTO에 반영
+            String newImageUrl = imageUtil.saveImage(newProfileImage, ImageType.PROFILE);
+            patchMemberReqDto.setImageUrl(newImageUrl);
         }
 
         // 변경할 필드만 수정
@@ -262,9 +292,22 @@ public class MemberService {
     @Transactional
     public void hardDeleteMembers() {
 
-        LocalDateTime thirtyDays = LocalDateTime.now().minusDays(30);
-        int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDays);
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
 
+        // 삭제 대상 회원 조회
+        List<Member> deletedMembers = memberRepository.findAllDeletedMembers(thirtyDaysAgo);
+
+        for (Member member : deletedMembers) {
+            String imageUrl = member.getImageUrl(); // 프로필 이미지 URL 가져오기
+            try {
+                imageUtil.deleteImage(imageUrl); // S3에서 이미지 삭제
+            } catch (IOException e) {
+                log.error("S3 프로필 이미지 삭제 실패 (memberId={}): {}", member.getMemberId(), e.getMessage());
+            }
+        }
+
+        // 회원 하드 딜리트
+        int deletedCount = memberRepository.hardDeleteByDeletedAt(thirtyDaysAgo);
         log.info("삭제된 회원 수: {}", deletedCount);
     }
 

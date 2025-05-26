@@ -17,7 +17,6 @@ const Payment = () => {
     const {groupBuyInfo, count} = location.state || {};
 
     useEffect(() => {
-        console.log(groupBuyInfo)
         if (isEmptyOrNull(groupBuyInfo)) {
             openConfirm({
                 title: "만료된 세션입니다.",

@@ -28,7 +28,7 @@ import {
 //schedule.js를 참고하기 바람
 //data는 table body에 렌더링될 row단위 배열이다.
 //isLoading은 스피너를 내장화 한 것임
-const FlexibleTable = ({ initColumns, data, isLoading, defaultSorting }) => {
+const FlexibleTable = ({ initColumns, data, isLoading, defaultSorting, rowProps }) => {
     const [openColumn, setOpenColumn] = useState(null); //sort, align메뉴 펼침 상태 여부
     const [sorting, setSorting] = useState([]); // 컬럼 정렬 상태
     const [columns, setColumns] = useState(initColumns.map((column) => {
@@ -212,7 +212,8 @@ const FlexibleTable = ({ initColumns, data, isLoading, defaultSorting }) => {
                             </td>
                         </tr> :
                         table.getRowModel().rows.map((row) => {
-                        return <tr key={row.id}>
+                            const extraProps = rowProps?.(row) ?? {};
+                        return <tr key={row.id} {...extraProps}>
                             {row.getVisibleCells().map((cell) => {
                                 return <SortableContext
                                     key={cell.id}

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -31,4 +32,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Transactional
     @Query("DELETE FROM Member m WHERE m.deleted = true AND m.deletedAt < :deletedAt")
     int hardDeleteByDeletedAt(@Param("deletedAt") LocalDateTime deletedAt);
+
+    @Query("SELECT m FROM Member m WHERE m.deleted = true AND m.deletedAt < :thirtyDaysAgo")
+    List<Member> findAllDeletedMembers(@Param("thirtyDaysAgo") LocalDateTime thirtyDaysAgo);
 }

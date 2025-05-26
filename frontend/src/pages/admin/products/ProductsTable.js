@@ -5,6 +5,7 @@ import {Button} from "react-bootstrap";
 import styles from "./AdminProducts.module.scss";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import {dateFormat} from "../../../utils/utils";
 
 const fetchProducts = async () => {
     const response = await axios.get(`/api/v1/products`);
@@ -30,10 +31,12 @@ const ProductsTable = () => {
         {
             accessorKey: "price",
             header: "가격",
+            cell: ({ getValue }) => (getValue().toLocaleString())
         },
         {
             accessorKey: "createdAt",
             header: "등록일",
+            cell: ({ getValue }) => (dateFormat(getValue(), "yyyy-MM-dd"))
         },
         {
             id: "adminButton",

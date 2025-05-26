@@ -18,6 +18,7 @@ const NavigationMenu = ({ menuItems }) => {
     const navigate = useNavigate();
     const { openConfirm } = useConfirm();
     const [loginUser, setLoginUser] = useRecoilState(userAtom);
+    console.log(loginUser);
 
     useEffect(() => {
         userProfileMutation.mutate();
@@ -64,6 +65,7 @@ const NavigationMenu = ({ menuItems }) => {
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Item href="/mypage">마이페이지</Dropdown.Item>
+                            <Dropdown.Item href="/admin">관리자페이지</Dropdown.Item>
                             <Dropdown.Item onClick={() => logoutMutation.mutate()}>로그아웃</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
