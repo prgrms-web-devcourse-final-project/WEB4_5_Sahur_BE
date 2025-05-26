@@ -3,44 +3,53 @@ import {Badge, Button, Card, Form, InputGroup, Stack} from "react-bootstrap";
 import TableBackGroundCard from "../../../shared/TableBackGroundCard";
 import FlexibleTable from "../../../shared/table/FlexibleTable";
 import FilterButtonGroup from "./FilterButtonGroup";
+import Rating from "react-rating";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faStar as faStarSolid} from "@fortawesome/free-solid-svg-icons";
+import {faStar as faStarRegular} from "@fortawesome/free-regular-svg-icons";
+import styles from './AdminReviews.module.scss'
 
 const AdminReviews = () => {
     const navigate = useNavigate();
     const initColumns = [
         {
-            id: "orderId",
-            header: "주문 번호",
-            cell: ({ row }) => (`ORD-2023122${row.index}`)
-        },
-        {
-            id: "orderPersonName",
-            header: "주문자",
-            cell: ({ row }) => (`구매자${row.index}`)
+            id: "reviewId",
+            header: "리뷰 ID",
+            cell: ({ row }) => (`REV-2023122${row.index}`)
         },
         {
             id: "products",
             header: "상품",
-            cell: () => ("프리미엄 블루투스 이어폰 외 1건")
+            cell: ({ row }) => (`프리미엄 블루투스 이어폰-${row.index}`)
         },
         {
-            id: "price",
-            header: "결제 금액",
-            cell: () => ("₩47000")
+            id: "creator",
+            header: "작성자",
+            cell: ({ row }) => (`구매자${row.index}`)
         },
         {
-            id: "orderDate",
-            header: "주문 일시",
+            id: "rating",
+            header: "평점",
+            cell: () => (<Rating initialRating={3.0}
+                                 readonly
+                                 fullSymbol={<FontAwesomeIcon icon={faStarSolid} color="#facc15" size="lg" />}
+                                 emptySymbol={<FontAwesomeIcon icon={faStarRegular} color="#facc15" size="lg" />}
+            />  )
+        },
+        {
+            id: "content",
+            header: "내용",
+            cell: () => ("음질이 좋고 배터리 수명이 오래갑니다."),
+        },
+        {
+            id: "createDate",
+            header: "작성일",
             cell: () => ("2025-12-19 17:00"),
         },
         {
-            id: "status",
-            header: "상태",
-            cell: () => (<Badge bg="danger">취소</Badge>),
-        },
-        {
             id: "adminButton",
-            header: "관리",
-            cell: () => (<span className={"cursor-pointer"} onClick={() => navigate("1")}>상세</span>)
+            header: "처리",
+            cell: () => (<Button variant={""} className={styles.detailButton} onClick={() => navigate("1")}>삭제</Button>)
         },
     ];
 
