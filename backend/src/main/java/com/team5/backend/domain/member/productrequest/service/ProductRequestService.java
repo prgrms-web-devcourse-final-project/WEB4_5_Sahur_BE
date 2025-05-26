@@ -5,7 +5,8 @@ import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestCreateReqDto;
-import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestDetailResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestListResDto;
 import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
@@ -40,7 +41,7 @@ public class ProductRequestService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public ProductRequestResDto createRequest(ProductRequestCreateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
+    public ProductRequestDetailResDto createRequest(ProductRequestCreateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
         Member member = getMember(userDetails);
 
         if (dto == null || imageFiles == null) {
@@ -61,44 +62,44 @@ public class ProductRequestService {
                 .status(ProductRequestStatus.WAITING)
                 .build();
 
-        return ProductRequestResDto.fromEntity(productRequestRepository.save(request));
+        return ProductRequestDetailResDto.fromEntity(productRequestRepository.save(request));
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestResDto> getAllRequests(Pageable pageable) {
+    public Page<ProductRequestListResDto> getAllRequests(Pageable pageable) {
         Pageable sorted = forceCreatedAtDesc(pageable);
         return productRequestRepository.findAll(sorted)
-                .map(ProductRequestResDto::fromEntity);
+                .map(ProductRequestListResDto::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestResDto> getAllRequestsByStatus(ProductRequestStatus status, Pageable pageable) {
+    public Page<ProductRequestListResDto> getAllRequestsByStatus(ProductRequestStatus status, Pageable pageable) {
         Pageable sorted = forceCreatedAtDesc(pageable);
 
         Page<ProductRequest> page = (status == null)
                 ? productRequestRepository.findAll(sorted)
                 : productRequestRepository.findAllByStatus(status, sorted);
 
-        return page.map(ProductRequestResDto::fromEntity);
+        return page.map(ProductRequestListResDto::fromEntity);
     }
 
 
     @Transactional(readOnly = true)
-    public Page<ProductRequestResDto> getRequestsByMember(PrincipalDetails userDetails, Pageable pageable) {
+    public Page<ProductRequestListResDto> getRequestsByMember(PrincipalDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getMemberId();
         Pageable sorted = forceCreatedAtDesc(pageable);
         return productRequestRepository.findByMemberMemberId(memberId, sorted)
-                .map(ProductRequestResDto::fromEntity);
+                .map(ProductRequestListResDto::fromEntity);
     }
 
     @Transactional(readOnly = true)
-    public ProductRequestResDto getRequest(Long productRequestId) {
+    public ProductRequestDetailResDto getRequest(Long productRequestId) {
         ProductRequest request = getRequestOrThrow(productRequestId);
-        return ProductRequestResDto.fromEntity(request);
+        return ProductRequestDetailResDto.fromEntity(request);
     }
 
     @Transactional
-    public ProductRequestResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
+    public ProductRequestDetailResDto updateRequest(Long productRequestId, ProductRequestUpdateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
 
         ProductRequest request = getRequestOrThrow(productRequestId);
         Member member = getMember(userDetails);
@@ -143,11 +144,11 @@ public class ProductRequestService {
             }
         }
 
-        return ProductRequestResDto.fromEntity(productRequestRepository.save(request));
+        return ProductRequestDetailResDto.fromEntity(productRequestRepository.save(request));
     }
 
     @Transactional
-    public ProductRequestResDto updateStatus(Long productRequestId, String confirm) {
+    public ProductRequestDetailResDto updateStatus(Long productRequestId, String confirm) {
         ProductRequest request = getRequestOrThrow(productRequestId);
 
         ProductRequestStatus newStatus = switch (confirm.toLowerCase()) {
@@ -170,7 +171,7 @@ public class ProductRequestService {
             productRepository.save(product);
         }
 
-        return ProductRequestResDto.fromEntity(request);
+        return ProductRequestDetailResDto.fromEntity(request);
     }
 
 

@@ -1,6 +1,6 @@
 package com.team5.backend.domain.member.admin.service;
 
-import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestDetailResDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
@@ -20,7 +20,7 @@ public class AdminService {
 
     private final ProductRequestRepository productRequestRepository;
 
-    public Page<ProductRequestResDto> getProductRequests(Pageable pageable, ProductRequestStatus status) {
+    public Page<ProductRequestDetailResDto> getProductRequests(Pageable pageable, ProductRequestStatus status) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
@@ -28,7 +28,7 @@ public class AdminService {
                 ? productRequestRepository.findAllByStatus(status, sortedPageable)
                 : productRequestRepository.findAll(sortedPageable);
 
-        return pageResult.map(ProductRequestResDto::fromEntity);
+        return pageResult.map(ProductRequestDetailResDto::fromEntity);
     }
 
     @Transactional

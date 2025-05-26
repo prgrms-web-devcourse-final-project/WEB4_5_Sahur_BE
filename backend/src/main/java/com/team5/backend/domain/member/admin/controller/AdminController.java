@@ -1,6 +1,6 @@
 package com.team5.backend.domain.member.admin.controller;
 
-import com.team5.backend.domain.member.productrequest.dto.ProductRequestResDto;
+import com.team5.backend.domain.member.productrequest.dto.ProductRequestDetailResDto;
 import com.team5.backend.domain.member.admin.dto.ProductRequestUpdateReqDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.admin.service.AdminService;
@@ -28,11 +28,11 @@ public class AdminController {
 
     @Operation(summary = "상품 등록 요청 목록 조회", description = "상품 등록 요청 목록을 조회합니다.")
     @GetMapping("/productRequest/list")
-    public RsData<Page<ProductRequestResDto>> getProductRequests(
+    public RsData<Page<ProductRequestDetailResDto>> getProductRequests(
             @PageableDefault(size = 5) Pageable pageable,
             @RequestParam(value = "status", required = false) ProductRequestStatus status
     ) {
-        Page<ProductRequestResDto> result = adminService.getProductRequests(pageable, status);
+        Page<ProductRequestDetailResDto> result = adminService.getProductRequests(pageable, status);
         return RsDataUtil.success("상품 등록 요청 목록 조회 성공", result);
     }
 
