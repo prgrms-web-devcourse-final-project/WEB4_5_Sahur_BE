@@ -30,8 +30,8 @@ public class Product {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "imageUrl")
     @Convert(converter = StringListConverter.class)
+    @Column(name = "imageUrl", columnDefinition = "TEXT")
     private List<String> imageUrl;
 
     @Column(nullable = false)

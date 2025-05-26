@@ -59,7 +59,7 @@ public class ProductRequestController {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-      
+
         Page<ProductRequestListResDto> responses;
         if (status == null) {
             responses = productRequestService.getAllRequests(sortedPageable);
