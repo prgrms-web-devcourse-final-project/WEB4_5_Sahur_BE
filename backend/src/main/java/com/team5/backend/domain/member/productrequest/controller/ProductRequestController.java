@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -108,6 +109,7 @@ public class ProductRequestController {
         return RsDataUtil.success("상품 요청 수정 완료", response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "상품 요청 승인/거절 (관리자)", description = "상품 요청을 승인하거나 거절 처리합니다.")
     @PatchMapping("/{productRequestId}/{confirm}")
     public RsData<ProductRequestDetailResDto> confirmRequest(
