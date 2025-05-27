@@ -101,7 +101,6 @@ public class BaseInitData implements CommandLineRunner {
     public void run(String... args) {
         if (memberRepository.count() == 0) {
             List<Category> categories = new ArrayList<>();
-            int uid = 1;
             for (CategoryType type : CategoryType.values()) {
                 if (type == CategoryType.ALL) continue;
                 for (KeywordType keyword : KeywordType.ofParent(type)) {
@@ -109,7 +108,6 @@ public class BaseInitData implements CommandLineRunner {
                             Category.builder()
                                     .categoryType(type)
                                     .keyword(keyword)
-                                    .uid(uid++)
                                     .build()
                     ));
                 }
