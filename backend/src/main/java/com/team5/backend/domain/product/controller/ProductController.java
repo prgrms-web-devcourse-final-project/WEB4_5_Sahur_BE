@@ -62,11 +62,13 @@ public class ProductController {
     }
 
     @Operation(summary = "상품 수정", description = "상품 ID로 기존 상품 정보를 수정합니다.")
-    @PutMapping("/{productId}")
+    @CheckAdmin
+    @PatchMapping("/{productId}")
     public RsData<ProductResDto> updateProduct(
             @Parameter(description = "상품 ID") @PathVariable Long productId,
-            @RequestBody @Valid ProductUpdateReqDto request) {
-        ProductResDto response = productService.updateProduct(productId, request);
+            @RequestPart(value = "request", required = false) @Valid ProductUpdateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles) throws IOException {
+        ProductResDto response = productService.updateProduct(productId, request, imageFiles);
         return RsDataUtil.success("상품 수정 성공", response);
     }
 

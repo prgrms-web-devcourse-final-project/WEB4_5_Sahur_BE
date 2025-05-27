@@ -58,10 +58,11 @@ public class Product {
     }
 
     public void update(String title, String description, List<String> imageUrl, Integer price) {
-        this.title = title;
-        this.description = description;
-        this.imageUrl = imageUrl;
-        this.price = price;
+
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (imageUrl != null) this.imageUrl = imageUrl;
+        if (price != null) this.price = price;
     }
 
     public void updateCategory(Category category) {

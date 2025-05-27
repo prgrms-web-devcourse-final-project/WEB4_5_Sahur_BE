@@ -83,18 +83,37 @@ public class ProductService {
      * 상품 정보 수정
      */
     @Transactional
-    public ProductResDto updateProduct(Long productId, ProductUpdateReqDto request) {
+    public ProductResDto updateProduct(Long productId, ProductUpdateReqDto request, List<MultipartFile> imageFiles) throws IOException {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
-        Category newCategory = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
-        product.updateCategory(newCategory);
+        if (request == null) {
+            throw new CustomException(ProductErrorCode.INVALID_PRODUCT_STATUS);
+        }
 
+        // 카테고리 업데이트
+        if (request.getCategoryId() != null) {
+            Category newCategory = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
+
+            product.updateCategory(newCategory);
+        }
+
+        // 이미지 처리
+        List<String> imageUrls = product.getImageUrl(); // 기존 이미지 URL을 기본값으로 사용
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            // 새 이미지가 있으면 기존 이미지 삭제 후 새로 업로드
+            if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+                imageUtil.deleteImages(product.getImageUrl());
+            }
+            imageUrls = imageUtil.saveImages(imageFiles, ImageType.PRODUCT);
+        }
+
+        // 상품 정보 업데이트
         product.update(
                 request.getTitle(),
                 request.getDescription(),
-                request.getImageUrl(),
+                imageUrls,
                 request.getPrice()
         );
 
