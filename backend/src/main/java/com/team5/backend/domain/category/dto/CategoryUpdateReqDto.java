@@ -14,5 +14,4 @@ import lombok.NoArgsConstructor;
 public class CategoryUpdateReqDto {
     private CategoryType categoryType;
     private KeywordType keyword;
-    private Integer uid;
 }

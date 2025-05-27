@@ -21,3 +21,24 @@
   color: #212529 !important;
   font-weight: 700;
 }
+
+
+.detailButton {
+  border: 1px solid #E2E8F0;
+  font-family: Noto Sans KR;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  color: #020817 !important;
+}
+
+.detailButton:hover,
+.detailButton:focus,
+.detailButton:active {
+  background-color: transparent !important;
+  border-color: black !important; /* 필요에 따라 유지 */
+  color: black !important;
+  box-shadow: none !important;
+}
