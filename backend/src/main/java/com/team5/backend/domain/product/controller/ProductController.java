@@ -5,6 +5,7 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.service.ProductService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
@@ -18,6 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Tag(name = "Product", description = "상품 관련 API")
 @RestController
@@ -28,9 +33,11 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(summary = "상품 생성", description = "새로운 상품을 등록합니다.")
+    @CheckAdmin
     @PostMapping
-    public RsData<ProductResDto> createProduct(@RequestBody @Valid ProductCreateReqDto request) {
-        ProductResDto response = productService.createProduct(request);
+    public RsData<ProductResDto> createProduct(@RequestPart(value = "request", required = false) @Valid ProductCreateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles) throws IOException {
+        ProductResDto response = productService.createProduct(request, imageFiles);
         return RsDataUtil.success("상품 생성 성공", response);
     }
 

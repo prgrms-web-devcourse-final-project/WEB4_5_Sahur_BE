@@ -9,11 +9,18 @@ import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductErrorCode;
+import com.team5.backend.global.util.ImageType;
+import com.team5.backend.global.util.ImageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,21 +28,31 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ImageUtil imageUtil;
 
 
     /**
      * 상품 등록
      */
     @Transactional
-    public ProductResDto createProduct(ProductCreateReqDto request) {
+    public ProductResDto createProduct(ProductCreateReqDto request, List<MultipartFile> imageFiles) throws IOException {
+
+        if (request == null) throw new CustomException(ProductErrorCode.INVALID_PRODUCT_STATUS);
+        if (imageFiles == null) throw new CustomException(ProductErrorCode.PRODUCT_IMAGE_NOT_FOUND);
+
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
+
+        List<String> imageUrls = new ArrayList<>();
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            imageUrls = imageUtil.saveImages(imageFiles, ImageType.PRODUCT);
+        }
 
         Product product = Product.create(
                 category,
                 request.getTitle(),
                 request.getDescription(),
-                request.getImageUrl(),
+                imageUrls,
                 request.getPrice()
         );
 
