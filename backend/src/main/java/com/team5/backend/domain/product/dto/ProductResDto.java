@@ -1,5 +1,6 @@
 package com.team5.backend.domain.product.dto;
 
+import com.team5.backend.domain.category.dto.CategoryDto;
 import com.team5.backend.domain.product.entity.Product;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.util.List;
 @Builder
 public class ProductResDto {
     private Long productId;
-    private Long categoryId;
+    private CategoryDto category;
     private String title;
     private String description;
     private List<String> imageUrl;
@@ -27,7 +28,7 @@ public class ProductResDto {
 
         return ProductResDto.builder()
                 .productId(product.getProductId())
-                .categoryId(product.getCategory().getCategoryId())
+                .category(CategoryDto.fromEntity(product.getCategory()))
                 .title(product.getTitle())
                 .description(product.getDescription())
                 .imageUrl(product.getImageUrl())
