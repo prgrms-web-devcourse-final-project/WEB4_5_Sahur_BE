@@ -13,6 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ProductUpdateReqDto {
+
+    @NotNull(message = "카테고리는 필수입니다.")
+    private Long categoryId;
+
     @NotNull(message = "제목은  필수입니다.")
     private String title;
 

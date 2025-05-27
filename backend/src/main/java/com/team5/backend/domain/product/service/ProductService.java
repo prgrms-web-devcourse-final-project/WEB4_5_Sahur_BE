@@ -70,13 +70,16 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
+        Category newCategory = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
+        product.updateCategory(newCategory);
+
         product.update(
                 request.getTitle(),
                 request.getDescription(),
                 request.getImageUrl(),
                 request.getPrice()
         );
-
 
         return ProductResDto.fromEntity(product);
     }
