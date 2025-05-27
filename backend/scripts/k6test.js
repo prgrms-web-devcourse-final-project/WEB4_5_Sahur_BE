@@ -6,18 +6,24 @@ import { check } from 'k6';
 export const options = {
     scenarios: {
         scenarios_example: {
-            executor: "per-vu-iterations",
+            executor: 'per-vu-iterations',
             vus: 100,
             iterations: 10,
-            maxDuration: "30s",
+            maxDuration: '30s',
         },
     },
 };
 
 export default function () {
-    const res = http.get('http://host.docker.internal:8080/api/v1/categories');
+    const keyword = '선반';
+    const url = `https://api.devapi.store/api/v1/groupBuy/search?keyword=${encodeURIComponent(keyword)}`;
+    const res = http.get(url);
 
     check(res, {
         'status is 200': (r) => r.status === 200,
+        'response has expected structure': (r) => {
+            const body = r.json();
+            return body && Array.isArray(body.data);
+        },
     });
 }
