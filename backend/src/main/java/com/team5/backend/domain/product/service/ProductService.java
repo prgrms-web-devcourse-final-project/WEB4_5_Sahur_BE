@@ -124,10 +124,18 @@ public class ProductService {
      * 상품 삭제
      */
     @Transactional
-    public void deleteProduct(Long productId) {
-        if (!productRepository.existsById(productId)) {
-            throw new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND);
+    public void deleteProduct(Long productId) throws IOException {
+        // 상품 존재 여부 확인 및 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+        // S3에 저장된 이미지 삭제
+        List<String> imageUrls = product.getImageUrl();
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            imageUtil.deleteImages(imageUrls);
         }
+
+        // 상품 삭제
         productRepository.deleteById(productId);
     }
 

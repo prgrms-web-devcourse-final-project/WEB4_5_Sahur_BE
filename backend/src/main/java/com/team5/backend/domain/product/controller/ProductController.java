@@ -73,9 +73,10 @@ public class ProductController {
     }
 
     @Operation(summary = "상품 삭제", description = "상품 ID로 상품을 삭제합니다.")
+    @CheckAdmin
     @DeleteMapping("/{productId}")
     public RsData<Empty> deleteProduct(
-            @Parameter(description = "상품 ID") @PathVariable Long productId) {
+            @Parameter(description = "상품 ID") @PathVariable Long productId) throws IOException {
         productService.deleteProduct(productId);
         return RsDataUtil.success("상품 삭제 성공");
     }
