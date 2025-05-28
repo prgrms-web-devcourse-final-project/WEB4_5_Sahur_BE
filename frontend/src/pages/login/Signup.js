@@ -20,7 +20,7 @@ const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [nickname, setNickname] = useState("");
     const [zipCode, setZipCode] = useState("");
     const [streetAdr, setStreetAdr] = useState("");
@@ -29,7 +29,7 @@ const Signup = () => {
         email: '',
         password: '',
         name: '',
-        phone: '',
+        phoneNumber: '',
         nickname: '',
         zipCode: '',
         streetAdr: '',
@@ -39,7 +39,7 @@ const Signup = () => {
         email: false,
         password: false,
         name: false,
-        phone: false,
+        phoneNumber: false,
         nickname: false,
         zipCode: false,
         streetAdr: false,
@@ -110,8 +110,8 @@ const Signup = () => {
             window.scrollTo(0, 500);
             return;
         }
-        if (phone.length === 0) {
-            setError({ ...error, phone: '휴대폰번호를 입력하세요.' });
+        if (phoneNumber.length === 0) {
+            setError({ ...error, phoneNumber: '휴대폰번호를 입력하세요.' });
             window.scrollTo(0, 500);
             return;
         }
@@ -136,7 +136,7 @@ const Signup = () => {
                 email,
                 password,
                 name,
-                phone,
+                phoneNumber,
                 nickname,
                 zipCode,
                 streetAdr,
@@ -158,7 +158,7 @@ const Signup = () => {
                 <EmailForm email={email} setEmail={setEmail} error={error} setError={setError} setInputStatus={setInputStatus} />
                 <PasswordForm password={password} setPassword={setPassword} error={error} setError={setError} setInputStatus={setInputStatus} />
                 <NameForm name={name} setName={setName} error={error} setError={setError} setInputStatus={setInputStatus} />
-                <PhoneForm phone={phone} setPhone={setPhone} error={error} setError={setError} setInputStatus={setInputStatus} />
+                <PhoneForm phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} error={error} setError={setError} setInputStatus={setInputStatus} />
                 <NicknameForm nickname={nickname} setNickname={setNickname} error={error} setError={setError} setInputStatus={setInputStatus} />
                 <AddressForm zipCode={zipCode} streetAdr={streetAdr} handleAddressSelect={handleAddressSelect} error={error} />
                 <DetailAdrForm detailAdr={detailAdr} setDetailAdr={setDetailAdr} error={error} setError={setError} setInputStatus={setInputStatus} />
