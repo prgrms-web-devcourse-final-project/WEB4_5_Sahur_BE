@@ -3,6 +3,10 @@ package com.team5.backend.domain.dibs.service;
 import com.team5.backend.domain.dibs.dto.DibsResDto;
 import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyDto;
+import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
+import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.product.entity.Product;
@@ -19,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +33,7 @@ public class DibsService {
     private final DibsRepository dibsRepository;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
+    private final GroupBuyRepository groupBuyRepository; // ✅ 추가
 
     /**
      * 관심상품 생성
@@ -69,7 +76,7 @@ public class DibsService {
     }
 
     /**
-     * 관심상품 페이징 조회
+     * 관심상품 페이징 조회 + 공동구매 Ongoing 포함
      */
     @Transactional(readOnly = true)
     public Page<DibsResDto> getPagedDibsByMember(PrincipalDetails userDetails, Pageable pageable) {
@@ -79,18 +86,33 @@ public class DibsService {
                 pageable.getPageSize(),
                 Sort.by(Sort.Order.desc("createdAt"))
         );
-        return dibsRepository.findPageWithProductByMemberId(memberId, sortedPageable)
-                .map(DibsResDto::fromEntity);
+
+        Page<Dibs> dibsPage = dibsRepository.findPageWithProductByMemberId(memberId, sortedPageable);
+
+        // 상품 ID만 추출
+        List<Long> productIds = dibsPage.stream()
+                .map(dibs -> dibs.getProduct().getProductId())
+                .distinct()
+                .toList();
+
+        // 해당 상품들에 대한 ONGOING 공동구매 미리 로딩
+        List<GroupBuy> groupBuys = groupBuyRepository.findByProduct_ProductIdInAndStatus(productIds, GroupBuyStatus.ONGOING);
+
+        // Map<productId, GroupBuy>
+        Map<Long, GroupBuyDto> groupBuyMap = groupBuys.stream()
+                .collect(Collectors.toMap(
+                        gb -> gb.getProduct().getProductId(),
+                        GroupBuyDto::fromEntity
+                ));
+
+        // 매핑된 groupBuyDto를 붙여 DibsResDto 생성
+        return dibsPage.map(dibs -> {
+            Long productId = dibs.getProduct().getProductId();
+            GroupBuyDto groupBuyDto = groupBuyMap.get(productId); // 없으면 null
+            return DibsResDto.fromEntity(dibs, groupBuyDto);
+        });
     }
 
-    /**
-     * 관심상품 전체 조회
-     */
-    @Transactional(readOnly = true)
-    public List<DibsResDto> getAllDibsByMember(PrincipalDetails userDetails) {
-        Long memberId = userDetails.getMember().getMemberId();
-        return dibsRepository.findAllWithProductByMemberId(memberId).stream()
-                .map(DibsResDto::fromEntity)
-                .toList();
-    }
+
+
 }

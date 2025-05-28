@@ -23,12 +23,8 @@ public class Category {
     @Column(nullable = false)
     private KeywordType keyword;
 
-    @Column(nullable = false)
-    private Integer uid;
-
-    public void updateCategoryInfo(CategoryType categoryType, KeywordType keyword, Integer uid) {
+    public void updateCategoryInfo(CategoryType categoryType, KeywordType keyword) {
         this.categoryType = categoryType;
         this.keyword = keyword;
-        this.uid = uid;
     }
 }

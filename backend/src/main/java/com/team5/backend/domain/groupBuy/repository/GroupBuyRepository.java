@@ -51,6 +51,9 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     WHERE g.groupBuyId = :groupBuyId
 """)
     Optional<GroupBuy> findWithProductAndCategoryById(@Param("groupBuyId") Long groupBuyId);
+    List<GroupBuy> findByProduct_ProductIdInAndStatus(List<Long> productIds, GroupBuyStatus status);
+
+
 
 
 

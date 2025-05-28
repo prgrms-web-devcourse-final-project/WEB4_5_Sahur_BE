@@ -11,6 +11,7 @@ import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.ProductErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,6 @@ public class CategoryService {
         Category category = Category.builder()
                 .categoryType(request.getCategoryType())
                 .keyword(request.getKeyword())
-                .uid(request.getUid())
                 .build();
 
         Category saved = categoryRepository.save(category);
@@ -45,7 +45,8 @@ public class CategoryService {
      */
     @Transactional(readOnly = true)
     public List<CategoryResDto> getAllCategories() {
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findAll(Sort.by("categoryId"))
+                .stream()
                 .map(CategoryResDto::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -68,7 +69,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CustomException(ProductErrorCode.CATEGORY_NOT_FOUND));
 
-        category.updateCategoryInfo(request.getCategoryType(), request.getKeyword(), request.getUid());
+        category.updateCategoryInfo(request.getCategoryType(), request.getKeyword());
         return CategoryResDto.fromEntity(category);
     }
 
@@ -86,6 +87,7 @@ public class CategoryService {
     /**
      * 카테고리(대분류)에 속한 키워드(중분류) 목록 조회
      */
+    @Transactional(readOnly = true)
     public List<KeywordResDto> getKeywordsByCategory(CategoryType category) {
 
         // null을 반환하면 NPE 발생 → Exception으로 잡히고 500 발생

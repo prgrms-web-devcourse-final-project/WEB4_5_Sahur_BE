@@ -1,5 +1,6 @@
 package com.team5.backend.domain.member.productrequest.dto;
 
+import com.team5.backend.domain.category.dto.CategoryDto;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import lombok.Builder;
@@ -13,7 +14,7 @@ public class ProductRequestDetailResDto {
 
     private Long productRequestId;
     private Long memberId;
-    private Long categoryId;
+    private CategoryDto category;
     private String title;
     private String productUrl;
     private List<String> imageUrls;
@@ -24,7 +25,7 @@ public class ProductRequestDetailResDto {
         return ProductRequestDetailResDto.builder()
                 .productRequestId(productRequest.getProductRequestId())
                 .memberId(productRequest.getMember().getMemberId())
-                .categoryId(productRequest.getCategory().getCategoryId())
+                .category(CategoryDto.fromEntity(productRequest.getCategory()))
                 .title(productRequest.getTitle())
                 .productUrl(productRequest.getProductUrl())
                 .imageUrls(productRequest.getImageUrls())

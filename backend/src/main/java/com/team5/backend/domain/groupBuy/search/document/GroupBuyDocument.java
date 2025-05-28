@@ -33,5 +33,4 @@ public class GroupBuyDocument {
     private Long categoryId;
     private String categoryType;
     private String keyword;
-    private Integer uid;
 }

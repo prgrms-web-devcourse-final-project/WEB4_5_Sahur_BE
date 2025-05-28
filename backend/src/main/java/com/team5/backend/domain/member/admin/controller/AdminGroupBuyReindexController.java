@@ -1,6 +1,7 @@
 package com.team5.backend.domain.member.admin.controller;
 
 import com.team5.backend.domain.groupBuy.search.service.GroupBuyReindexService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,7 @@ public class AdminGroupBuyReindexController {
     private final GroupBuyReindexService groupBuyReindexService;
 
     @Operation(summary = "[관리자] 공동구매 재색인", description = "모든 공동구매 데이터를 Elasticsearch에 다시 색인합니다.")
+    @CheckAdmin
     @PostMapping
     public RsData<Void> reindexAll() {
         log.info("🔁 [관리자 재색인 요청] /api/v1/admin/group-buys/reindex 호출됨");

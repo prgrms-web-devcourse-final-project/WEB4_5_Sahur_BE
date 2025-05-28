@@ -20,6 +20,4 @@ public class CategoryCreateReqDto {
     @NotNull(message = "키워드는 필수입니다.")
     private KeywordType keyword;
 
-    @NotNull(message = "UID는 필수입니다.")
-    private Integer uid;
 }

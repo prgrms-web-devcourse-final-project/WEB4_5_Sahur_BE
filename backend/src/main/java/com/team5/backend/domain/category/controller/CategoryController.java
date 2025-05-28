@@ -6,6 +6,7 @@ import com.team5.backend.domain.category.dto.CategoryUpdateReqDto;
 import com.team5.backend.domain.category.dto.KeywordResDto;
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.service.CategoryService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
@@ -27,6 +28,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @Operation(summary = "카테고리 생성", description = "새로운 카테고리를 생성합니다.")
+    @CheckAdmin
     @PostMapping
     public RsData<CategoryResDto> createCategory(@RequestBody @Valid CategoryCreateReqDto request) {
         CategoryResDto response = categoryService.createCategory(request);
@@ -49,6 +51,7 @@ public class CategoryController {
     }
 
     @Operation(summary = "카테고리 수정", description = "카테고리 정보를 수정합니다.")
+    @CheckAdmin
     @PutMapping("/{categoryId}")
     public RsData<CategoryResDto> updateCategory(
             @Parameter(description = "카테고리 ID") @PathVariable Long categoryId,
@@ -58,6 +61,7 @@ public class CategoryController {
     }
 
     @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제합니다.")
+    @CheckAdmin
     @DeleteMapping("/{categoryId}")
     public RsData<Empty> deleteCategory(
             @Parameter(description = "카테고리 ID") @PathVariable Long categoryId) {

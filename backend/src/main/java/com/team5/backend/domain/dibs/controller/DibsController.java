@@ -46,19 +46,19 @@ public class DibsController {
         return RsDataUtil.success("관심상품 삭제 완료");
     }
 
-    @Operation(summary = "관심상품 목록 조회", description = "회원 인증 기반으로 관심상품 목록을 조회합니다.")
+    @Operation(
+            summary = "관심상품 목록 조회 (페이징)",
+            description = "회원 인증 기반으로 관심상품 목록을 페이징하여 조회하며, 모집중인 공동구매가 있을 경우 함께 포함됩니다."
+    )
     @GetMapping
-    public RsData<?> getDibsByMember(
+    public RsData<Page<DibsResDto>> getDibsByMember(
             @AuthenticationPrincipal PrincipalDetails userDetails,
-            @RequestParam(required = false) Boolean paged,
             @PageableDefault(size = 6) Pageable pageable) {
 
-        if (Boolean.TRUE.equals(paged)) {
-            Page<DibsResDto> pagedDibs = dibsService.getPagedDibsByMember(userDetails, pageable);
-            return RsDataUtil.success("관심상품 페이징 조회 완료", pagedDibs);
-        }
-
-        List<DibsResDto> all = dibsService.getAllDibsByMember(userDetails);
-        return RsDataUtil.success("관심상품 전체 조회 완료", all);
+        Page<DibsResDto> pagedDibs = dibsService.getPagedDibsByMember(userDetails, pageable);
+        return RsDataUtil.success("관심상품 + 모집중 공동구매 페이징 조회 완료", pagedDibs);
     }
+
+
+
 }

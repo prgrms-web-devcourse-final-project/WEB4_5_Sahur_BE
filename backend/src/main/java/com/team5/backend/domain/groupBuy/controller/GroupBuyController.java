@@ -4,6 +4,7 @@ import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.service.GroupBuyService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
@@ -30,6 +31,7 @@ public class GroupBuyController {
     private final GroupBuyService groupBuyService;
 
     @Operation(summary = "공동구매 생성", description = "신규 공동구매를 생성합니다.")
+    @CheckAdmin
     @PostMapping
     public RsData<GroupBuyResDto> createGroupBuy(@RequestBody @Valid GroupBuyCreateReqDto request) {
         GroupBuyResDto response = groupBuyService.createGroupBuy(request);
@@ -37,6 +39,7 @@ public class GroupBuyController {
     }
 
     @Operation(summary = "전체 공동구매 조회 (전체)", description = "모든 상태의 공동구매 목록을 조회합니다.")
+    @CheckAdmin
     @GetMapping("/list")
     public RsData<Page<GroupBuyResDto>> getAllGroupBuysForAdmin(
             @Parameter(description = "페이지 정보") @PageableDefault(size = 5) Pageable pageable,
@@ -80,6 +83,7 @@ public class GroupBuyController {
     }
 
     @Operation(summary = "공동구매 수정", description = "전체 필드를 수정합니다.")
+    @CheckAdmin
     @PutMapping("/{groupBuyId}")
     public RsData<GroupBuyResDto> updateGroupBuy(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId,
@@ -89,6 +93,7 @@ public class GroupBuyController {
     }
 
     @Operation(summary = "공동구매 부분 수정", description = "특정 필드만 부분적으로 수정합니다.")
+    @CheckAdmin
     @PatchMapping("/{groupBuyId}")
     public RsData<GroupBuyResDto> patchGroupBuy(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId,
@@ -98,6 +103,7 @@ public class GroupBuyController {
     }
 
     @Operation(summary = "공동구매 삭제", description = "공동구매를 삭제합니다.")
+    @CheckAdmin
     @DeleteMapping("/{groupBuyId}")
     public RsData<Empty> deleteGroupBuy(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
@@ -124,6 +130,7 @@ public class GroupBuyController {
     }
 
     @Operation(summary = "공동구매 마감 처리", description = "공동구매를 CLOSED 상태로 마감합니다.")
+    @CheckAdmin
     @PatchMapping("/{groupBuyId}/close")
     public RsData<Empty> closeGroupBuy(
             @Parameter(description = "공동구매 ID") @PathVariable Long groupBuyId) {
