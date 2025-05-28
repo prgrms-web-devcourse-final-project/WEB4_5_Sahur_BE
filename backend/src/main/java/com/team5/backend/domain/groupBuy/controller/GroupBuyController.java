@@ -1,5 +1,6 @@
 package com.team5.backend.domain.groupBuy.controller;
 
+import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.groupBuy.dto.*;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.service.GroupBuyService;
@@ -152,22 +153,28 @@ public class GroupBuyController {
         return RsDataUtil.success("같은 카테고리의 공동구매 3개 조회 성공", relatedGroupBuys);
     }
 
-    @Operation(summary = "카테고리별 진행 중 공동구매 조회", description = "카테고리 ID를 기준으로 진행 중인 공동구매 목록을 정렬 기준과 함께 조회합니다.")
-    @GetMapping("/category/{categoryId}/onGoing")
-    public RsData<Page<GroupBuyResDto>> getOngoingGroupBuysByCategoryId(
-            @Parameter(description = "카테고리 ID") @PathVariable Long categoryId,
-            @Parameter(description = "페이지 정보") @PageableDefault(size = 8) Pageable pageable,
-            @Parameter(description = "정렬 기준", example = "LATEST") @RequestParam(defaultValue = "LATEST") GroupBuySortField sortField
+    @Operation(
+            summary = "카테고리 타입별 진행 중 공동구매 조회",
+            description = "카테고리 타입(CategoryType)을 기준으로 진행 중인 공동구매 목록을 정렬 기준과 함께 조회합니다."
+    )
+    @GetMapping("/category-type/{categoryType}/onGoing")
+    public RsData<Page<GroupBuyResDto>> getOngoingGroupBuysByCategoryType(
+            @Parameter(description = "카테고리 타입", example = "ALL")
+            @PathVariable CategoryType categoryType,
+
+            // ✅ Swagger UI에서 pageable 필드를 숨김 처리 (Swagger에서 엉뚱한 JSON 입력 못하게 함)
+            @Parameter(hidden = true)
+            @PageableDefault(size = 8) Pageable pageable,
+
+            @Parameter(description = "정렬 기준", example = "LATEST")
+            @RequestParam(defaultValue = "LATEST") GroupBuySortField sortField
     ) {
-        Page<GroupBuyResDto> responses = groupBuyService.getOngoingGroupBuysByCategoryId(categoryId, pageable, sortField);
+        Page<GroupBuyResDto> responses = groupBuyService.getOngoingGroupBuysByCategoryType(categoryType, pageable, sortField);
+
         if (responses.isEmpty()) {
-            return RsDataUtil.success("해당 카테고리에 진행 중인 공동구매가 없습니다.", responses);
+            return RsDataUtil.success("해당 카테고리 타입에 진행 중인 공동구매가 없습니다.", responses);
         }
-        return RsDataUtil.success("카테고리별 진행 중 공동구매 조회 성공", responses);
+        return RsDataUtil.success("카테고리 타입별 진행 중 공동구매 조회 성공", responses);
     }
-
-
-
-
 
 }

@@ -36,10 +36,14 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
     @Query("""
     SELECT g FROM GroupBuy g
     JOIN g.product p
-    WHERE p.category.categoryId = :categoryId
+    JOIN p.category c
+    WHERE c.categoryType = :categoryType
     AND g.status = 'ONGOING'
 """)
-    Page<GroupBuy> findOngoingByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
+    Page<GroupBuy> findOngoingByCategoryType(@Param("categoryType") CategoryType categoryType, Pageable pageable);
+
+
+
     @Query("""
     SELECT g FROM GroupBuy g
     JOIN FETCH g.product p
