@@ -178,9 +178,9 @@ const Header = () => {
   // 카테고리 클릭 처리
   const handleCategoryClick = (category) => {
     if (category.id === "ALL") {
-      navigate("/products")
+      navigate("/main")
     } else {
-      navigate(`/products?category=${category.id}`)
+      navigate(`/main?categoryType=${category.id}`)
     }
   }
 
@@ -350,7 +350,6 @@ const Header = () => {
                 <img src={item.iconUrl || getIconForCategory(item.id)} style={{ width: "40px" }} alt={item.name} />
                 <div className="text-center">
                   <div>{item.name}</div>
-                  {item.productCount !== undefined && <small className="text-muted">({item.productCount})</small>}
                 </div>
               </div>
             )
