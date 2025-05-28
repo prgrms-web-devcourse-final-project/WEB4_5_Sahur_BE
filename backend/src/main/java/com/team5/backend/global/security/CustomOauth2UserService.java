@@ -3,6 +3,7 @@ package com.team5.backend.global.security;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.global.entity.Address;
 import com.team5.backend.global.oauth2.GoogleUserInfo;
 import com.team5.backend.global.oauth2.KakaoUserInfo;
 import com.team5.backend.global.oauth2.NaverUserInfo;
@@ -71,6 +72,8 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
             System.out.println("OAuth 로그인이 최초입니다.");
 
+            Address defaultAddress = new Address("", "", "");
+
             // 새로운 Member 객체 생성
             Member memberEntity = Member.builder()
                     .email(email)
@@ -79,7 +82,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .password(password)
                     .phoneNumber(null)
                     .deleted(false)
-                    .address(null) // 기본 주소는 빈 문자열로 설정 (나중에 사용자가 업데이트할 수 있도록)
+                    .address(defaultAddress) // 기본 주소는 빈 문자열로 설정 (나중에 사용자가 업데이트할 수 있도록)
                     .imageUrl(imageUrl) // 프로필 이미지 가져와서 설정
                     .role(Role.USER)
                     .emailVerified(true) // OAuth 로그인은 이메일이 검증된 것으로 간주
