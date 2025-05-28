@@ -7,8 +7,8 @@ export const options = {
     scenarios: {
         scenarios_example: {
             executor: 'per-vu-iterations',
-            vus: 100,
-            iterations: 10,
+            vus: 1000,
+            iterations: 100,
             maxDuration: '30s',
         },
     },
@@ -16,7 +16,8 @@ export const options = {
 
 export default function () {
     const keyword = '선반';
-    const url = `https://api.devapi.store/api/v1/groupBuy/search?keyword=${encodeURIComponent(keyword)}`;
+    // const url = `https://api.devapi.store/api/v1/groupBuy/search?keyword=${encodeURIComponent(keyword)}`;
+    const url = `http://host.docker.internal:8080/api/v1/groupBuy/search?keyword=${encodeURIComponent(keyword)}`;
     const res = http.get(url);
 
     check(res, {
