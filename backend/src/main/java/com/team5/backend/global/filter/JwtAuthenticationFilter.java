@@ -109,6 +109,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
 
+            // 액세스 토큰이 없지만 리프레시 토큰이 있는 경우 - 자동 갱신 시도
+            if (refreshToken != null) {
+
+                log.info("액세스 토큰 없음, 리프레시 토큰으로 자동 갱신 시도");
+                try {
+
+                    refreshAndContinue(request, response, filterChain, null, refreshToken);
+                    return ;
+                } catch (Exception e) {
+
+                    log.info("리프레시 토큰으로 자동 갱신 실패: {}", e.getMessage());
+                    sendTokenErrorResponse(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
+                    return ;
+                }
+            }
+
             // 토큰이 없으면 필터 체인을 계속 진행
             filterChain.doFilter(request, response);
             return ;
