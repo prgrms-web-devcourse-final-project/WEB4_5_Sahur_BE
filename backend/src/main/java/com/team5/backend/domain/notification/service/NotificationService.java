@@ -1,21 +1,33 @@
 package com.team5.backend.domain.notification.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.entity.Notification;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
+import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.exception.code.NotificationErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +35,10 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
+    private final GroupBuyRepository groupBuyRepository;
+    private final OrderRepository orderRepository;
+
+    private final NotificationPublisher notificationPublisher;
 
     /**
      * 알림 생성
@@ -128,5 +144,23 @@ public class NotificationService {
 
         return notificationRepository.findByMemberMemberId(memberId, sortedPageable)
                 .map(NotificationResDto::fromEntity);
+    }
+
+    /**
+     * 공동 구매 종료시 알림 일괄 생성
+     */
+    @Transactional
+    public void groupBuyCloseNotifications(Long groupBuyId, String message) {
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        List<Long> memberIds = orderRepository.findParticipantMemberIdsByGroupBuyId(groupBuyId);
+
+        notificationPublisher.publish(
+                NotificationTemplateType.GROUP_CLOSED,
+                groupBuyId,
+                memberIds,
+                message
+        );
     }
 }

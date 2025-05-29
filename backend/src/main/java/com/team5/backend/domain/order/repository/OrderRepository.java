@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.order.entity.Order;
@@ -31,4 +33,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByStatusAndCreatedAtBetween(OrderStatus status, LocalDateTime start, LocalDateTime end);
 
     List<Order> findByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime threshold);
+
+    @Query("SELECT DISTINCT o.member.memberId FROM Order o WHERE o.groupBuy.groupBuyId = :groupBuyId")
+    List<Long> findParticipantMemberIdsByGroupBuyId(@Param("groupBuyId") Long groupBuyId);
 }
