@@ -189,7 +189,7 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(buyer).product(product).createdAt(LocalDateTime.now()).build());
                 dibsRepository.save(Dibs.builder().member(requester).product(product).createdAt(LocalDateTime.now()).build());
 
-                // 모든 상품에 대해 5개의 리뷰 생성
+                // 기존 리뷰 5개 생성 (유지)
                 for (int j = 0; j < 5; j++) {
                     Member reviewer = members.get((i + j) % members.size());
 
@@ -198,7 +198,7 @@ public class BaseInitData implements CommandLineRunner {
                             .product(product)
                             .groupBuy(groupBuy)
                             .order(order)
-                            .writable(false)
+                            .writable(false)  // 기존 리뷰는 작성 불가 처리
                             .createdAt(LocalDateTime.now())
                             .build());
 
@@ -212,6 +212,19 @@ public class BaseInitData implements CommandLineRunner {
                             .imageUrl(List.of("https://example.com/review/img" + i + "_" + j + ".jpg"))
                             .build());
                 }
+
+// 모든 일반 사용자에게 작성 가능한 히스토리 1개씩 추가
+                for (Member user : members) {
+                    historyRepository.save(History.builder()
+                            .member(user)
+                            .product(product)
+                            .groupBuy(groupBuy)
+                            .order(order)
+                            .writable(true)  // 작성 가능
+                            .createdAt(LocalDateTime.now())
+                            .build());
+                }
+
 
 
                 notificationRepository.save(Notification.builder()
