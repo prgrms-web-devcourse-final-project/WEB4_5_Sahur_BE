@@ -189,28 +189,30 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(buyer).product(product).createdAt(LocalDateTime.now()).build());
                 dibsRepository.save(Dibs.builder().member(requester).product(product).createdAt(LocalDateTime.now()).build());
 
-                boolean shouldWriteReview = i % 2 == 0;
+                // 모든 상품에 대해 5개의 리뷰 생성
+                for (int j = 0; j < 5; j++) {
+                    Member reviewer = members.get((i + j) % members.size());
 
-                History history = historyRepository.save(History.builder()
-                        .member(buyer)
-                        .product(product)
-                        .groupBuy(groupBuy)
-                        .order(order)
-                        .writable(!shouldWriteReview)
-                        .createdAt(LocalDateTime.now())
-                        .build());
-
-                if (shouldWriteReview) {
-                    reviewRepository.save(Review.builder()
-                            .member(buyer)
+                    History reviewHistory = historyRepository.save(History.builder()
+                            .member(reviewer)
                             .product(product)
-                            .history(history)
-                            .comment(reviewComments.get(i % reviewComments.size()))
-                            .rate(3 + (i % 3))
+                            .groupBuy(groupBuy)
+                            .order(order)
+                            .writable(false)
                             .createdAt(LocalDateTime.now())
-                            .imageUrl(List.of("https://example.com/review/img" + i + ".jpg"))
+                            .build());
+
+                    reviewRepository.save(Review.builder()
+                            .member(reviewer)
+                            .product(product)
+                            .history(reviewHistory)
+                            .comment(reviewComments.get((i + j) % reviewComments.size()))
+                            .rate(3 + ((i + j) % 3))
+                            .createdAt(LocalDateTime.now())
+                            .imageUrl(List.of("https://example.com/review/img" + i + "_" + j + ".jpg"))
                             .build());
                 }
+
 
                 notificationRepository.save(Notification.builder()
                         .member(buyer)
