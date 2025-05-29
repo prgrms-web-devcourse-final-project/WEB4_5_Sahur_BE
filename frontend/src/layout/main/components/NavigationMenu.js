@@ -51,6 +51,20 @@ const NavigationMenu = ({ menuItems }) => {
             });
         }
     });
+
+    // 이미지 URL 처리 함수 추가
+    const getImageUrl = (imageUrl) => {
+        if (!imageUrl) return '/images/default-profile.png';
+        
+        // 외부 URL인 경우 (소셜 로그인)
+        if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+            return imageUrl;
+        }
+        
+        // 내부 경로인 경우 절대경로로 변환
+        return imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+    };
+
     return (
         <Stack direction={"horizontal"} style={{ boxShadow: 'inset 0px -5px 0px rgb(211, 211, 211)' }} >
         <span className={"ms-3 me-3 ico-menu"} />
@@ -61,7 +75,10 @@ const NavigationMenu = ({ menuItems }) => {
                     <EmptyBellIcon width={"20"} height={"20"}/>
                     <Dropdown>
                         <Dropdown.Toggle id="dropdown-custom-components" variant={""} className={"text-black"}>
-                            <Image src={loginUser.imageUrl} width={25} height={25} roundedCircle />{loginUser.nickname}
+                            <Image src={getImageUrl(loginUser.imageUrl)} width={25} height={25} roundedCircle onError={(e) => {
+                                    e.target.src = '/images/default-profile.png';
+                                }}
+                            />{loginUser.nickname}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Item href="/mypage">마이페이지</Dropdown.Item>
