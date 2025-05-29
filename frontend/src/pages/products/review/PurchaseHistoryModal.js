@@ -35,23 +35,32 @@ const PurchaseHistoryModal = ({ show, onHide, purchaseHistories, onSelectHistory
               <Card key={history.historyId || index} className="border">
                 <Card.Body>
                   <Stack direction="horizontal" className="justify-content-between align-items-center">
-                    <div>
-                      <Stack direction="horizontal" gap={2} className="mb-2">
+                    <div className="flex-grow-1">
+                      <Stack direction="horizontal" gap={2} className="mb-2 flex-wrap">
                         <FontAwesomeIcon icon={faShoppingCart} className="text-primary" />
-                        <span className="fw-bold">주문번호: {history.historyId}</span>
-                        <Badge bg="success">리뷰 작성 가능</Badge>
+                        <span className="fw-bold">주문번호: {history.order?.orderId || history.historyId}</span>
+                        {history.writable && <Badge bg="success">리뷰 작성 가능</Badge>}
                       </Stack>
-                      <Stack direction="horizontal" gap={3} className="text-muted small">
+                      <Stack direction="horizontal" gap={3} className="text-muted small flex-wrap">
                         <span>
                           <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
-                          구매일: {formatDate(history.createdAt || history.orderDate)}
+                          구매일: {formatDate(history.order?.createdAt)}
                         </span>
-                        <span>수량: {history.quantity || 1}개</span>
-                        <span>금액: {formatPrice(history.price || history.totalPrice)}원</span>
+                        <span>수량: {history.order?.quantity || 1}개</span>
+                        <span>금액: {formatPrice(history.order?.totalPrice)}원</span>
                       </Stack>
+                      {history.groupBuyId && (
+                        <div className="text-muted small mt-1">공동구매 ID: {history.groupBuyId}</div>
+                      )}
                     </div>
-                    <Button variant="primary" size="sm" onClick={() => onSelectHistory(history)}>
-                      리뷰 작성
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => onSelectHistory(history)}
+                      disabled={!history.writable}
+                      className="ms-3"
+                    >
+                      {history.writable ? "리뷰 작성" : "작성 불가"}
                     </Button>
                   </Stack>
                 </Card.Body>
