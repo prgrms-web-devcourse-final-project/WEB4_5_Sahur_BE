@@ -9,6 +9,7 @@ public record NotificationEventMessage(
         NotificationTemplateType type,
         Long resourceId,
         List<Long> memberIds,
-        Long groupBuyId
+        Long groupBuyId,
+        String adminMessage
 ) implements Serializable {
 }

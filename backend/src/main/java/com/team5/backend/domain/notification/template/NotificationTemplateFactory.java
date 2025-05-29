@@ -16,7 +16,7 @@ import com.team5.backend.domain.product.entity.Product;
 @Component
 public class NotificationTemplateFactory {
 
-    public List<Notification> createAll(NotificationTemplateType type, Object payload, List<Member> members, Long groupBuyId) {
+    public List<Notification> createAll(NotificationTemplateType type, Object payload, List<Member> members, Long groupBuyId, String adminMessage) {
         return switch (type) {
             case PURCHASED -> {
                 Order order = (Order) payload;
@@ -50,9 +50,11 @@ public class NotificationTemplateFactory {
             }
             case REQUEST_REJECTED -> {
                 ProductRequest request = (ProductRequest) payload;
-                yield List.of(build(request.getMember(), NotificationType.REQUEST, "상품 요청 반려",
-                        "[" + request.getTitle() + "] 상품 요청이 반려되었습니다.",
-                        "/mypage/requests/me"));
+                String message = (adminMessage != null)
+                        ? "[" + request.getTitle() + "] 상품 요청이 반려되었습니다. 사유: " + adminMessage
+                        : "[" + request.getTitle() + "] 상품 요청이 반려되었습니다.";
+                yield List.of(build(request.getMember(), NotificationType.REQUEST,
+                        "상품 요청 반려", message, "/mypage/requests/me"));
             }
             case DIBS_REOPENED -> {
                 Dibs dibs = (Dibs) payload;
@@ -76,11 +78,12 @@ public class NotificationTemplateFactory {
             }
             case GROUP_CLOSED -> {
                 GroupBuy group = (GroupBuy) payload;
+                String message = (adminMessage != null)
+                        ? "[" + group.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다. 사유: " + adminMessage
+                        : "[" + group.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다.";
                 yield members.stream()
                         .map(member -> build(member, NotificationType.GROUP_BUY,
-                                "공동구매 종료 알림",
-                                "[" + group.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다.",
-                                "/groupBuy/" + group.getGroupBuyId()))
+                                "공동구매 종료 알림", message, "/groupBuy/" + group.getGroupBuyId()))
                         .toList();
             }
         };

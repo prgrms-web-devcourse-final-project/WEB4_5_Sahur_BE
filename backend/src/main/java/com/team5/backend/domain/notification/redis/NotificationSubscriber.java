@@ -59,7 +59,7 @@ public class NotificationSubscriber implements MessageListener {
                     : null;
 
             List<Notification> notifications = templateFactory.createAll(
-                    type, target, members, event.groupBuyId()
+                    type, target, members, event.groupBuyId(), event.adminMessage()
             );
 
             notificationRepository.saveAll(notifications);
