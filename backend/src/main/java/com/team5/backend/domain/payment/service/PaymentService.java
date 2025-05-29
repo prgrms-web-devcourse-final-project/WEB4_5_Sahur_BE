@@ -11,9 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.notification.entity.Notification;
-import com.team5.backend.domain.notification.repository.NotificationRepository;
-import com.team5.backend.domain.notification.template.NotificationTemplateFactory;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -38,8 +36,7 @@ public class PaymentService {
     private final TossService tossService;
     private final HistoryRepository historyRepository;
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationTemplateFactory templateFactory;
+    private final NotificationPublisher notificationPublisher;
 
     @Transactional
     public void savePayment(Long orderId, String paymentKey) {
@@ -64,9 +61,8 @@ public class PaymentService {
                 .build();
         historyRepository.save(history);
 
-        // Notification 생성
-        Notification notification = templateFactory.create(NotificationTemplateType.PURCHASED, order);
-        notificationRepository.save(notification);
+        // 구매 완료 알림 생성
+        notificationPublisher.publish(NotificationTemplateType.PURCHASED, orderId);
     }
 
     public String getPaymentKey(Long paymentId) {
