@@ -14,9 +14,7 @@ import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
-import com.team5.backend.domain.notification.entity.Notification;
-import com.team5.backend.domain.notification.repository.NotificationRepository;
-import com.team5.backend.domain.notification.template.NotificationTemplateFactory;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
@@ -34,8 +32,7 @@ public class DeliveryService {
     private final OrderRepository orderRepository;
     private final ShippingGenerator shippingGenerator;
 
-    private final NotificationRepository notificationRepository;
-    private final NotificationTemplateFactory templateFactory;
+    private final NotificationPublisher notificationPublisher;
 
     public Delivery createDelivery(Long orderId, DeliveryReqDto request) {
         Order order = orderRepository.findById(orderId)
@@ -116,15 +113,10 @@ public class DeliveryService {
     }
 
     public void notifyDeliveryStatus(Delivery delivery) {
-        Order order = delivery.getOrder();
-        Notification notification = switch (delivery.getStatus()) {
-            case INDELIVERY -> templateFactory.create(NotificationTemplateType.IN_DELIVERY, order);
-            case COMPLETED -> templateFactory.create(NotificationTemplateType.DELIVERY_DONE, order);
-            default -> null;
-        };
-
-        if (notification != null) {
-            notificationRepository.save(notification);
+        Long orderId = delivery.getOrder().getOrderId();
+        switch (delivery.getStatus()) {
+            case INDELIVERY -> notificationPublisher.publish(NotificationTemplateType.IN_DELIVERY, orderId);
+            case COMPLETED -> notificationPublisher.publish(NotificationTemplateType.DELIVERY_DONE, orderId);
         }
     }
 }
