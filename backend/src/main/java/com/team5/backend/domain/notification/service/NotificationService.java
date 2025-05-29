@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.team5.backend.domain.dibs.repository.DibsRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -37,6 +38,7 @@ public class NotificationService {
     private final MemberRepository memberRepository;
     private final GroupBuyRepository groupBuyRepository;
     private final OrderRepository orderRepository;
+    private final DibsRepository dibsRepository;
 
     private final NotificationPublisher notificationPublisher;
 
@@ -151,10 +153,13 @@ public class NotificationService {
      */
     @Transactional
     public void groupBuyCloseNotifications(Long groupBuyId, String message) {
-        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+        groupBuyRepository.findById(groupBuyId)
                 .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
 
         List<Long> memberIds = orderRepository.findParticipantMemberIdsByGroupBuyId(groupBuyId);
+        if (memberIds.isEmpty()) {
+            return;
+        }
 
         notificationPublisher.publish(
                 NotificationTemplateType.GROUP_CLOSED,
@@ -162,5 +167,51 @@ public class NotificationService {
                 memberIds,
                 message
         );
+    }
+
+    /**
+     * 관심 상품에서 공동구매 재오픈 알림 일괄 생성
+     */
+    @Transactional
+    public void dibsReopenNotifications(Long groupBuyId) {
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+        Long productId = groupBuy.getProduct().getProductId();
+
+        List<Long> memberIds = dibsRepository.findMemberIdsByProductId(productId);
+        if (memberIds.isEmpty()) {
+            return;
+        }
+
+        notificationPublisher.publish(
+                NotificationTemplateType.DIBS_REOPENED,
+                groupBuyId,
+                memberIds
+        );
+    }
+
+    /**
+     * 관심 상품에서 공동구매 마감 임박 알림 일괄 생성
+     */
+    @Transactional
+    public void dibsDeadlineNotifications() {
+        // 현재 시각 + 1시간 범위 내에 마감되는 공동구매 조회
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneHourLater = now.plusHours(1);
+
+        List<GroupBuy> expiringGroupBuys = groupBuyRepository.findByEndAtBetween(now, oneHourLater);
+
+        for (GroupBuy groupBuy : expiringGroupBuys) {
+            Long productId = groupBuy.getProduct().getProductId();
+
+            List<Long> memberIds = dibsRepository.findMemberIdsByProductId(productId);
+            if (memberIds.isEmpty()) continue;
+
+            notificationPublisher.publish(
+                    NotificationTemplateType.DIBS_DEADLINE,
+                    productId,
+                    memberIds
+            );
+        }
     }
 }

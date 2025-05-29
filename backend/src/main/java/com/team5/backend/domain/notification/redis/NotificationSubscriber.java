@@ -16,7 +16,6 @@ import com.team5.backend.domain.notification.repository.NotificationRepository;
 import com.team5.backend.domain.notification.template.NotificationTemplateFactory;
 import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.repository.OrderRepository;
-import com.team5.backend.domain.product.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ public class NotificationSubscriber implements MessageListener {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRequestRepository productRequestRepository;
     private final MemberRepository memberRepository;
-    private final ProductRepository productRepository;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -46,8 +44,8 @@ public class NotificationSubscriber implements MessageListener {
                         orderRepository.findById(event.resourceId()).orElse(null);
                 case REQUEST_APPROVED, REQUEST_REJECTED ->
                         productRequestRepository.findById(event.resourceId()).orElse(null);
-                case GROUP_CLOSED -> groupBuyRepository.findById(event.resourceId()).orElse(null);
-                case DIBS_REOPENED, DIBS_DEADLINE -> productRepository.findById(event.resourceId()).orElse(null);
+                case GROUP_CLOSED, DIBS_REOPENED, DIBS_DEADLINE ->
+                        groupBuyRepository.findById(event.resourceId()).orElse(null);
             };
 
             if (target == null) {

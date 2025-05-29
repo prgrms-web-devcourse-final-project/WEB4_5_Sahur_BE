@@ -111,4 +111,13 @@ public class NotificationController {
         return RsDataUtil.success("공동 구매 알림 일괄 생성 성공");
     }
 
+    @Operation(summary = "관심 상품 재오픈 알림", description = "관심 상품으로 설정한 상품이 재오픈시 알림 생성")
+    @PostMapping("/dibs/reopen")
+    public RsData<Empty> dibsReopenNotifications(
+            @PathVariable Long groupBuyId
+    ) {
+        notificationService.dibsReopenNotifications(groupBuyId);
+        return RsDataUtil.success("관심 상품 재오픈 알림 일괄 생성 성공");
+    }
+
 }
