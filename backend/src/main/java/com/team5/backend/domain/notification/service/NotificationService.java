@@ -202,6 +202,7 @@ public class NotificationService {
         List<GroupBuy> expiringGroupBuys = groupBuyRepository.findByEndAtBetween(now, oneHourLater);
 
         for (GroupBuy groupBuy : expiringGroupBuys) {
+            Long groupBuyId = groupBuy.getGroupBuyId();
             Long productId = groupBuy.getProduct().getProductId();
 
             List<Long> memberIds = dibsRepository.findMemberIdsByProductId(productId);
@@ -209,7 +210,7 @@ public class NotificationService {
 
             notificationPublisher.publish(
                     NotificationTemplateType.DIBS_DEADLINE,
-                    productId,
+                    groupBuyId,
                     memberIds
             );
         }

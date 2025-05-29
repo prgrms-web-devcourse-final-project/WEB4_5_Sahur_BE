@@ -73,13 +73,13 @@ public class NotificationTemplateFactory {
                         .toList();
             }
             case GROUP_CLOSED -> {
-                GroupBuy group = (GroupBuy) payload;
+                GroupBuy groupBuy = (GroupBuy) payload;
                 String message = (adminMessage != null)
-                        ? "[" + group.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다. 사유: " + adminMessage
-                        : "[" + group.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다.";
+                        ? "[" + groupBuy.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다. 사유: " + adminMessage
+                        : "[" + groupBuy.getProduct().getTitle() + "] 상품의 공동구매가 종료되었습니다.";
                 yield members.stream()
                         .map(member -> build(member, NotificationType.GROUP_BUY,
-                                "공동구매 종료 알림", message, "/groupBuy/" + group.getGroupBuyId()))
+                                "공동구매 종료 알림", message, "/groupBuy/" + groupBuy.getGroupBuyId()))
                         .toList();
             }
         };
