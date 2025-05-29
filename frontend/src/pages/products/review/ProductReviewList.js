@@ -31,14 +31,35 @@ const fetchWritableHistories = async (productId) => {
   return response.data.data
 }
 
+const fetchCurrentUser = async () => {
+  try {
+    const response = await axios.get("/api/v1/members/me", {
+      withCredentials: true,
+    })
+    return response.data.data
+  } catch (error) {
+    console.error("Error fetching current user:", error)
+    return null
+  }
+}
+
+const deleteReview = async (reviewId) => {
+  const response = await axios.delete(`/api/v1/reviews/${reviewId}`, {
+    withCredentials: true,
+  })
+  return response.data
+}
+
 const ProductReviewList = ({ product }) => {
   const [showReviewCard, setShowReviewCard] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedHistory, setSelectedHistory] = useState(null)
+  const [editReview, setEditReview] = useState(null)
   const [sortBy, setSortBy] = useState("LATEST")
   const [allReviews, setAllReviews] = useState([])
   const [currentPage, setCurrentPage] = useState(0)
   const [refreshKey, setRefreshKey] = useState(0) // 리뷰 목록 새로고침용 키
+  const [currentUser, setCurrentUser] = useState(null)
   const target = useRef(null)
 
   // 디버깅용 콘솔 로그
@@ -46,6 +67,11 @@ const ProductReviewList = ({ product }) => {
 
   const productId = product?.productId
   console.log("ProductReviewList - productId:", productId)
+
+  // 현재 로그인한 사용자 정보 가져오기
+  useEffect(() => {
+    fetchCurrentUser().then(setCurrentUser)
+  }, [])
 
   const {
     data: reviewData,
@@ -96,6 +122,18 @@ const ProductReviewList = ({ product }) => {
     },
   })
 
+  // 리뷰 삭제
+  const { mutate: deleteReviewMutate } = useApiMutation(deleteReview, {
+    onSuccess: () => {
+      alert("리뷰가 성공적으로 삭제되었습니다.")
+      handleReviewCreated() // 목록 새로고침
+    },
+    onError: (error) => {
+      console.error("Error deleting review:", error)
+      alert("리뷰 삭제에 실패했습니다.")
+    },
+  })
+
   // 에러 로깅
   useEffect(() => {
     if (error) {
@@ -105,10 +143,21 @@ const ProductReviewList = ({ product }) => {
 
   const handleCreateReview = () => {
     if (productId) {
+      setEditReview(null) // 새 리뷰 작성 모드
       fetchWritableHistoriesMutate(productId)
     } else {
       console.error("Cannot create review: productId is undefined")
     }
+  }
+
+  const handleEditReview = (review) => {
+    setEditReview(review)
+    setSelectedHistory(null)
+    setShowReviewCard(true)
+  }
+
+  const handleDeleteReview = (reviewId) => {
+    deleteReviewMutate(reviewId)
   }
 
   const handleSelectHistory = (history) => {
@@ -120,10 +169,11 @@ const ProductReviewList = ({ product }) => {
   const handleCloseReviewCard = () => {
     setShowReviewCard(false)
     setSelectedHistory(null)
+    setEditReview(null)
   }
 
   const handleReviewCreated = () => {
-    // 리뷰 작성 완료 후 리뷰 목록 완전 새로고침
+    // 리뷰 작성/수정/삭제 완료 후 리뷰 목록 완전 새로고침
     setCurrentPage(0)
     setAllReviews([])
     setRefreshKey((prev) => prev + 1) // 새로고침 키 증가로 완전 새로고침
@@ -211,6 +261,7 @@ const ProductReviewList = ({ product }) => {
                 <CreateReviewCard
                   handleClose={handleCloseReviewCard}
                   selectedHistory={selectedHistory}
+                  editReview={editReview}
                   onReviewCreated={handleReviewCreated}
                 />
               </div>
@@ -224,7 +275,13 @@ const ProductReviewList = ({ product }) => {
           ) : allReviews && allReviews.length > 0 ? (
             <>
               {allReviews.map((review, index) => (
-                <ProductReviewItem key={generateUniqueKey(review, index)} review={review} />
+                <ProductReviewItem
+                  key={generateUniqueKey(review, index)}
+                  review={review}
+                  currentUser={currentUser}
+                  onEdit={handleEditReview}
+                  onDelete={handleDeleteReview}
+                />
               ))}
               {/* 더보기 버튼 중앙 정렬 및 스타일 개선 */}
               {hasMoreReviews && (

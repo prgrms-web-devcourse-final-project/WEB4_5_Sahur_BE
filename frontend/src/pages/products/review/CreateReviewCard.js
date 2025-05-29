@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faStar as faStarSolid, faXmark } from "@fortawesome/free-solid-svg-icons"
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons"
 import Rating from "react-rating"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import CreateReviewImageBox from "./CreateReviewImageBox"
 import ReviewTextarea from "./ReviewTextarea"
 import axios from "axios"
@@ -23,6 +23,8 @@ const createReviewWithFormData = async (reviewData) => {
     historyId: reviewData.historyId,
     comment: reviewData.comment,
     rate: reviewData.rate,
+    keepImages: reviewData.keepImages || [], // 유지할 기존 이미지
+    removedImages: reviewData.removedImages || [], // 삭제할 이미지
   }
 
   formData.append(
@@ -32,14 +34,17 @@ const createReviewWithFormData = async (reviewData) => {
     }),
   )
 
-  // 이미지 파일들 추가
-  if (reviewData.images && reviewData.images.length > 0) {
-    reviewData.images.forEach((image, index) => {
+  // 새로 추가된 이미지 파일들 추가
+  if (reviewData.newImages && reviewData.newImages.length > 0) {
+    reviewData.newImages.forEach((image, index) => {
       formData.append("images", image)
     })
   }
 
-  const response = await axios.post("/api/v1/reviews", formData, {
+  const url = reviewData.isEdit ? `/api/v1/reviews/${reviewData.reviewId}` : "/api/v1/reviews"
+  const method = reviewData.isEdit ? "patch" : "post"
+
+  const response = await axios[method](url, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -53,9 +58,9 @@ const createReviewWithFormData = async (reviewData) => {
 const createReviewWithBase64 = async (reviewData) => {
   console.log("Base64 방식으로 리뷰 데이터 전송:", reviewData)
 
-  // 이미지 파일을 Base64로 변환
-  const imagePromises = reviewData.images
-    ? reviewData.images.map((file) => {
+  // 새로 추가된 이미지 파일을 Base64로 변환
+  const imagePromises = reviewData.newImages
+    ? reviewData.newImages.map((file) => {
         return new Promise((resolve, reject) => {
           const reader = new FileReader()
           reader.readAsDataURL(file)
@@ -70,19 +75,24 @@ const createReviewWithBase64 = async (reviewData) => {
     : []
 
   // 모든 이미지 변환이 완료될 때까지 대기
-  const imageBase64List = reviewData.images.length > 0 ? await Promise.all(imagePromises) : []
+  const newImageBase64List =
+    reviewData.newImages && reviewData.newImages.length > 0 ? await Promise.all(imagePromises) : []
 
   // API 요청 본문 구성
   const requestBody = {
     historyId: reviewData.historyId,
     comment: reviewData.comment,
     rate: reviewData.rate,
-    imageUrl: imageBase64List,
+    imageUrl: [...(reviewData.keepImages || []), ...newImageBase64List], // 기존 이미지 + 새 이미지
+    removedImages: reviewData.removedImages || [],
   }
 
   console.log("API 요청 본문:", requestBody)
 
-  const response = await axios.post("/api/v1/reviews", requestBody, {
+  const url = reviewData.isEdit ? `/api/v1/reviews/${reviewData.reviewId}` : "/api/v1/reviews"
+  const method = reviewData.isEdit ? "patch" : "post"
+
+  const response = await axios[method](url, requestBody, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -92,23 +102,27 @@ const createReviewWithBase64 = async (reviewData) => {
   return response.data
 }
 
-// 방법 3: 이미지 URL 방식 (JSON)
+// 방법 3: 이미지 URL 방식 (JSON) - 수정 모드에 최적화
 const createReviewWithImageUrls = async (reviewData) => {
   console.log("이미지 URL 방식으로 리뷰 데이터 전송:", reviewData)
 
-  // 이미지가 있으면 URL로 변환 (임시로 빈 배열)
-  const imageUrls = reviewData.images ? reviewData.images.map((file) => URL.createObjectURL(file)) : []
+  // 새로 추가된 이미지를 URL로 변환 (임시)
+  const newImageUrls = reviewData.newImages ? reviewData.newImages.map((file) => URL.createObjectURL(file)) : []
 
   const requestBody = {
     historyId: reviewData.historyId,
     comment: reviewData.comment,
     rate: reviewData.rate,
-    imageUrl: imageUrls,
+    imageUrl: [...(reviewData.keepImages || []), ...newImageUrls], // 기존 이미지 + 새 이미지
+    removedImages: reviewData.removedImages || [],
   }
 
   console.log("API 요청 본문:", requestBody)
 
-  const response = await axios.post("/api/v1/reviews", requestBody, {
+  const url = reviewData.isEdit ? `/api/v1/reviews/${reviewData.reviewId}` : "/api/v1/reviews"
+  const method = reviewData.isEdit ? "patch" : "post"
+
+  const response = await axios[method](url, requestBody, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -118,11 +132,35 @@ const createReviewWithImageUrls = async (reviewData) => {
   return response.data
 }
 
-const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => {
+const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated, editReview = null }) => {
   const [rating, setRating] = useState(5)
   const [reviewImageFileList, setReviewFileImageList] = useState([])
   const [reviewText, setReviewText] = useState("")
   const [uploadMethod, setUploadMethod] = useState("formdata") // 업로드 방식 선택
+  const [existingImages, setExistingImages] = useState([])
+  const [originalImages, setOriginalImages] = useState([]) // 원본 이미지 목록 보관
+  const [removedImages, setRemovedImages] = useState([])
+
+  const isEditMode = !!editReview
+
+  // 수정 모드일 때 기존 값으로 초기화
+  useEffect(() => {
+    if (isEditMode && editReview) {
+      setRating(editReview.rate || 5)
+      setReviewText(editReview.comment || "")
+      // 기존 이미지 URL 설정
+      const images = editReview.imageUrl || []
+      setExistingImages(images)
+      setOriginalImages(images) // 원본 이미지 목록 보관
+      setReviewFileImageList([])
+      setRemovedImages([])
+    }
+  }, [isEditMode, editReview])
+
+  const handleExistingImageRemove = (imageUrl) => {
+    setExistingImages((prev) => prev.filter((url) => url !== imageUrl))
+    setRemovedImages((prev) => [...prev, imageUrl])
+  }
 
   const { mutate: createReviewMutate, isLoading } = useApiMutation(
     (reviewData) => {
@@ -139,15 +177,15 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
     },
     {
       onSuccess: (data) => {
-        console.log("리뷰 작성 성공:", data)
-        alert("리뷰가 성공적으로 등록되었습니다!")
+        console.log("리뷰 작성/수정 성공:", data)
+        alert(isEditMode ? "리뷰가 성공적으로 수정되었습니다!" : "리뷰가 성공적으로 등록되었습니다!")
         if (onReviewCreated) {
           onReviewCreated()
         }
         handleClose()
       },
       onError: (error) => {
-        console.error("리뷰 작성 실패:", error)
+        console.error("리뷰 작성/수정 실패:", error)
         console.error("오류 상세:", error.response?.data)
 
         // 다른 방식으로 재시도
@@ -158,20 +196,22 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
             handleConfirmClick()
           }, 100)
         } else if (uploadMethod === "base64") {
-          console.log("Base64 실패, 이미지 없이 재시도...")
+          console.log("Base64 실패, 이미지 URL 방식으로 재시도...")
           setUploadMethod("imageurl")
           setTimeout(() => {
             handleConfirmClick()
           }, 100)
         } else {
-          alert(`리뷰 작성에 실패했습니다: ${error.response?.data?.message || error.message}`)
+          alert(
+            `리뷰 ${isEditMode ? "수정" : "작성"}에 실패했습니다: ${error.response?.data?.message || error.message}`,
+          )
         }
       },
     },
   )
 
   const handleConfirmClick = () => {
-    if (!selectedHistory) {
+    if (!isEditMode && !selectedHistory) {
       console.error("선택된 구매내역이 없습니다.")
       alert("구매내역을 선택해주세요.")
       return
@@ -182,18 +222,30 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
       return
     }
 
-    console.log("리뷰 작성 시작:", {
-      historyId: selectedHistory.historyId,
+    // 유지할 기존 이미지 계산 (삭제되지 않은 기존 이미지)
+    const keepImages = existingImages.filter((img) => !removedImages.includes(img))
+
+    console.log("리뷰 작성/수정 시작:", {
+      historyId: isEditMode ? editReview.historyId : selectedHistory.historyId,
       comment: reviewText.trim(),
       rate: rating,
-      imageCount: reviewImageFileList.length,
+      newImageCount: reviewImageFileList.length,
+      keepImageCount: keepImages.length,
+      removedImageCount: removedImages.length,
       method: uploadMethod,
+      isEdit: isEditMode,
     })
 
     const reviewData = {
-      historyId: selectedHistory.historyId,
+      historyId: isEditMode ? editReview.historyId : selectedHistory.historyId,
       comment: reviewText.trim(),
       rate: rating,
+      newImages: reviewImageFileList, // 새로 추가된 이미지 파일들
+      keepImages: keepImages, // 유지할 기존 이미지 URL들
+      removedImages: removedImages, // 삭제할 이미지 URL들
+      isEdit: isEditMode,
+      reviewId: isEditMode ? editReview.reviewId : null,
+      // 하위 호환성을 위해 기존 필드도 유지
       images: reviewImageFileList,
     }
 
@@ -205,7 +257,7 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
       <Card.Header>
         <Stack direction={"horizontal"} className={"justify-content-between align-items-center"}>
           <div></div>
-          <h4>리뷰 작성</h4>
+          <h4>{isEditMode ? "리뷰 수정" : "리뷰 작성"}</h4>
           <span className={"cursor-pointer"} onClick={handleClose}>
             <FontAwesomeIcon icon={faXmark}></FontAwesomeIcon>
           </span>
@@ -213,12 +265,14 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
       </Card.Header>
       <Card.Body>
         <Stack direction={"vertical"} gap={3} style={{ overflow: "auto", maxHeight: "280px" }}>
-          {selectedHistory && (
+          {(selectedHistory || editReview) && (
             <div className="bg-light p-2 rounded">
-              <small className="text-muted">선택된 구매내역</small>
-              <div>주문번호: {selectedHistory.historyId}</div>
+              <small className="text-muted">{isEditMode ? "수정할 리뷰" : "선택된 구매내역"}</small>
+              <div>주문번호: {isEditMode ? editReview.historyId : selectedHistory.historyId}</div>
               <div className="text-muted small">
-                구매일: {new Date(selectedHistory.createdAt || selectedHistory.orderDate).toLocaleDateString("ko-KR")}
+                {isEditMode
+                  ? `작성일: ${new Date(editReview.createdAt).toLocaleDateString("ko-KR")}`
+                  : `구매일: ${new Date(selectedHistory.createdAt || selectedHistory.orderDate).toLocaleDateString("ko-KR")}`}
               </div>
             </div>
           )}
@@ -234,13 +288,19 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
               emptySymbol={<FontAwesomeIcon icon={faStarRegular} color="#facc15" size="lg" />}
             />
           </div>
-          <CreateReviewImageBox imageFileList={reviewImageFileList} setImageFileList={setReviewFileImageList} />
+          <CreateReviewImageBox
+            imageFileList={reviewImageFileList}
+            setImageFileList={setReviewFileImageList}
+            existingImages={existingImages}
+            onExistingImageRemove={handleExistingImageRemove}
+          />
           <ReviewTextarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} />
 
-          {/* 디버깅용 업로드 방식 표시 */}
+          {/* 디버깅용 정보 표시 */}
           <div className="text-center">
             <small className="text-muted">
-              업로드 방식: {uploadMethod} | 이미지 개수: {reviewImageFileList.length}
+              업로드 방식: {uploadMethod} | 새 이미지: {reviewImageFileList.length} | 기존 이미지:{" "}
+              {existingImages.length} | 삭제된 이미지: {removedImages.length}
             </small>
           </div>
         </Stack>
@@ -251,7 +311,7 @@ const CreateReviewCard = ({ handleClose, selectedHistory, onReviewCreated }) => 
             취소
           </Button>
           <Button style={{ minWidth: "30px" }} onClick={handleConfirmClick} disabled={isLoading}>
-            {isLoading ? "작성 중..." : "완료"}
+            {isLoading ? (isEditMode ? "수정 중..." : "작성 중...") : isEditMode ? "수정" : "완료"}
           </Button>
         </Stack>
       </Card.Footer>
