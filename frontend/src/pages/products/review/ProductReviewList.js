@@ -38,6 +38,7 @@ const ProductReviewList = ({ product }) => {
   const [sortBy, setSortBy] = useState("LATEST")
   const [allReviews, setAllReviews] = useState([])
   const [currentPage, setCurrentPage] = useState(0)
+  const [refreshKey, setRefreshKey] = useState(0) // 리뷰 목록 새로고침용 키
   const target = useRef(null)
 
   // 디버깅용 콘솔 로그
@@ -52,7 +53,7 @@ const ProductReviewList = ({ product }) => {
     refetch: refetchReviews,
     error,
   } = useQuery(
-    ["productReviews", productId, currentPage, sortBy],
+    ["productReviews", productId, currentPage, sortBy, refreshKey],
     () =>
       fetchReviews({
         productId,
@@ -91,6 +92,7 @@ const ProductReviewList = ({ product }) => {
     },
     onError: (err) => {
       console.error("Error fetching writable histories:", err)
+      alert("구매내역을 불러오는 중 오류가 발생했습니다.")
     },
   })
 
@@ -121,16 +123,17 @@ const ProductReviewList = ({ product }) => {
   }
 
   const handleReviewCreated = () => {
-    // 리뷰 작성 완료 후 리뷰 목록 새로고침
+    // 리뷰 작성 완료 후 리뷰 목록 완전 새로고침
     setCurrentPage(0)
     setAllReviews([])
-    refetchReviews()
+    setRefreshKey((prev) => prev + 1) // 새로고침 키 증가로 완전 새로고침
   }
 
   const handleSortChange = (newSortBy) => {
     setSortBy(newSortBy)
     setCurrentPage(0)
     setAllReviews([])
+    setRefreshKey((prev) => prev + 1) // 정렬 변경 시에도 완전 새로고침
   }
 
   const handleLoadMore = () => {
@@ -151,6 +154,11 @@ const ProductReviewList = ({ product }) => {
   }
 
   const hasMoreReviews = reviewData && !reviewData.last
+
+  // 고유한 key 생성 함수
+  const generateUniqueKey = (review, index) => {
+    return `review-${review.reviewId || "no-id"}-${index}-${refreshKey}`
+  }
 
   return (
     <>
@@ -216,7 +224,7 @@ const ProductReviewList = ({ product }) => {
           ) : allReviews && allReviews.length > 0 ? (
             <>
               {allReviews.map((review, index) => (
-                <ProductReviewItem key={review.reviewId || index} review={review} />
+                <ProductReviewItem key={generateUniqueKey(review, index)} review={review} />
               ))}
               {/* 더보기 버튼 중앙 정렬 및 스타일 개선 */}
               {hasMoreReviews && (
