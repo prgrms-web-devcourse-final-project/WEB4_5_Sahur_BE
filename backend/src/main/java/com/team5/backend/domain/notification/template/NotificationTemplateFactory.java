@@ -4,19 +4,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.team5.backend.domain.dibs.entity.Dibs;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.product.entity.Product;
 
 @Component
 public class NotificationTemplateFactory {
 
-    public List<Notification> createAll(NotificationTemplateType type, Object payload, List<Member> members, Long groupBuyId, String adminMessage) {
+    public List<Notification> createAll(NotificationTemplateType type, Object payload, List<Member> members, String adminMessage) {
         return switch (type) {
             case PURCHASED -> {
                 Order order = (Order) payload;
@@ -57,23 +55,21 @@ public class NotificationTemplateFactory {
                         "상품 요청 반려", message, "/mypage/requests/me"));
             }
             case DIBS_REOPENED -> {
-                Dibs dibs = (Dibs) payload;
-                Product product = dibs.getProduct();
+                GroupBuy groupBuy = (GroupBuy) payload;
                 yield members.stream()
                         .map(member -> build(member, NotificationType.DIBS,
                                 "공동구매 재오픈",
-                                "관심 상품으로 등록한 [" + product.getTitle() + "] 상품의 공동구매가 다시 시작되었습니다.",
-                                "/groupBuy/" + groupBuyId))
+                                "관심 상품으로 등록한 [" + groupBuy.getProduct().getTitle() + "] 상품의 공동구매가 다시 시작되었습니다.",
+                                "/groupBuy/" + groupBuy.getGroupBuyId()))
                         .toList();
             }
             case DIBS_DEADLINE -> {
-                Dibs dibs = (Dibs) payload;
-                Product product = dibs.getProduct();
+                GroupBuy groupBuy = (GroupBuy) payload;
                 yield members.stream()
                         .map(member -> build(member, NotificationType.DIBS,
                                 "공동구매 마감 임박",
-                                "관심 상품으로 등록한 [" + product.getTitle() + "] 공동구매가 1시간 뒤 마감됩니다.",
-                                "/groupBuy/" + groupBuyId))
+                                "관심 상품으로 등록한 [" + groupBuy.getProduct().getTitle() + "] 공동구매가 1시간 뒤 마감됩니다.",
+                                "/groupBuy/" + groupBuy.getGroupBuyId()))
                         .toList();
             }
             case GROUP_CLOSED -> {

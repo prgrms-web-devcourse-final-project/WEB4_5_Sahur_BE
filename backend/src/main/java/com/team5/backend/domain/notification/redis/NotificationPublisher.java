@@ -17,26 +17,22 @@ public class NotificationPublisher {
 
     // 구매 완료, 주문 취소, 배송 중, 배송 완료, 요청 승인
     public void publish(NotificationTemplateType type, Long resourceId) {
-        publish(type, resourceId, null, null, null);
+        publish(type, resourceId, null, null);
     }
 
     // 요청 반려
     public void publish(NotificationTemplateType type, Long resourceId, String msg) {
-        publish(type, resourceId, null, null, msg);
+        publish(type, resourceId, null, msg);
     }
 
     // 관심 상품 재오픈, 관심 상품 마감 임박
-    public void publish(NotificationTemplateType type, Long resourceId, List<Long> memberIds, Long groupBuyId) {
-        publish(type, resourceId, memberIds, groupBuyId, null);
+    public void publish(NotificationTemplateType type, Long resourceId, List<Long> memberIds) {
+        publish(type, resourceId, memberIds, null);
     }
 
     // 공동 구매 종료
     public void publish(NotificationTemplateType type, Long resourceId, List<Long> memberIds, String msg) {
-        publish(type, resourceId, memberIds, null, msg);
-    }
-
-    public void publish(NotificationTemplateType type, Long resourceId, List<Long> memberIds, Long groupBuyId, String msg) {
-        NotificationEventMessage message = new NotificationEventMessage(type, resourceId, memberIds, groupBuyId, msg);
+        NotificationEventMessage message = new NotificationEventMessage(type, resourceId, memberIds, msg);
         redisTemplate.convertAndSend("notification-channel", message);
     }
 }
