@@ -4,6 +4,7 @@ import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.product.converter.StringListConverter;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,8 +38,9 @@ public class Product {
     @Column(nullable = false)
     private Integer price;
 
-    @Column
-    private Long dibCount;
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Long dibCount = 0L;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -54,6 +56,7 @@ public class Product {
     }
 
     public static Product create(Category category, String title, String description, List<String> imageUrl, Integer price) {
+
         return new Product(category, title, description, imageUrl, price);
     }
 
@@ -69,5 +72,17 @@ public class Product {
         this.category = category;
     }
 
+    public void increaseDibCount() {
+        if (this.dibCount == null) this.dibCount = 0L;
+        this.dibCount++;
+    }
+
+    public void decreaseDibCount() {
+        if (this.dibCount == null || this.dibCount <= 0) {
+            this.dibCount = 0L;
+            return;
+        }
+        this.dibCount--;
+    }
 }
 
