@@ -2,11 +2,13 @@ package com.team5.backend.domain.notification.redis;
 
 import java.util.List;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -64,8 +66,14 @@ public class NotificationSubscriber implements MessageListener {
 
             notificationRepository.saveAll(notifications);
 
+        } catch (DataAccessException dae) {
+            log.error("[Redis 알림 저장 실패] DB 접근 중 오류 발생", dae);
+        } catch (JsonProcessingException jpe) {
+            log.error("[Redis 알림 역직렬화 실패] 메시지 파싱 중 오류 발생", jpe);
+        } catch (IllegalArgumentException iae) {
+            log.error("[Redis 알림 처리 실패] 잘못된 요청", iae);
         } catch (Exception e) {
-            log.error("[Redis 알림 수신 실패]", e);
+            log.error("[Redis 알림 처리 중 알 수 없는 오류 발생]", e);
         }
     }
 }
