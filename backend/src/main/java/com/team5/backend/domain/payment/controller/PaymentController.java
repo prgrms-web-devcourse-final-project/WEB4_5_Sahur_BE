@@ -54,8 +54,8 @@ public class PaymentController {
     @PostMapping("/groupBuy/{groupBuyId}/cancel")
     public RsData<String> cancelPaymentsByGroupBuyId(
             @Parameter(description = "공동구매 ID") @PathVariable("groupBuyId") Long groupBuyId) {
-        paymentService.cancelPaymentsByGroupBuyId(groupBuyId, "공동구매 관련 결제 일괄 취소");
-        return RsDataUtil.success("결제 취소 성공", "공동구매 관련 결제 일괄 취소가 완료되었습니다.");
+            paymentService.cancelPaymentsByGroupBuyId(groupBuyId, "공동구매 관련 결제 일괄 취소");
+            return RsDataUtil.success("결제 취소 성공", "공동구매 관련 결제 일괄 취소가 완료되었습니다.");
     }
 
     @Operation(summary = "결제 취소", description = "해당 주문에 대한 결제 취소")

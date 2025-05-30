@@ -101,17 +101,15 @@ public class PaymentService {
         return payment.getPaymentKey();
     }
 
+    @Transactional
     public void cancelPaymentsByGroupBuyId(Long groupBuyId, String reason) {
         List<Order> orders = orderQueryService.getOrdersByGroupBuyId(groupBuyId);
+        log.info("조회된 주문 수: {}", orders.size());
 
         for (Order order : orders) {
             paymentRepository.findByOrder_OrderId(order.getOrderId())
                     .ifPresent(payment -> {
-                        try {
                             tossService.cancelPayment(payment.getPaymentKey(), reason);
-                        } catch (Exception e) {
-                            log.error("결제 취소 실패: orderId={}, paymentKey={}", order.getOrderId(), payment.getPaymentKey(), e);
-                        }
                     });
         }
     }
