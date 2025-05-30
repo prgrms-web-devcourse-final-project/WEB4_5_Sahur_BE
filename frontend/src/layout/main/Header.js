@@ -37,7 +37,7 @@ const Header = () => {
   const fetchCategories = async () => {
     try {
       setIsLoadingCategories(true)
-      const response = await fetch("/api/categories", {
+      const response = await fetch("/api/v1/categories", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
