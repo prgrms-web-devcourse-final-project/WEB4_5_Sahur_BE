@@ -1,21 +1,12 @@
 package com.team5.backend.domain.order.service;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.YearMonth;
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
@@ -32,9 +23,17 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.config.toss.TossPaymentConfig;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.OrderErrorCode;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -152,7 +151,7 @@ public class OrderService {
 
     @Transactional
     public void cancelOrdersByGroupBuy(Long groupBuyId) {
-        List<Order> orders = orderRepository.findAllByGroupBuy_GroupBuyId(groupBuyId);
+        List<Order> orders = orderQueryService.getOrdersByGroupBuyId(groupBuyId);
         if (orders.isEmpty()) {
             throw new CustomException(OrderErrorCode.ORDER_NOT_FOUND);
         }
