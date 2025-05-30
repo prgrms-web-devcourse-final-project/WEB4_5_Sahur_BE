@@ -16,7 +16,6 @@ import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
-import com.team5.backend.domain.notification.dto.NotificationListResDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.entity.Notification;
@@ -135,7 +134,7 @@ public class NotificationService {
      * 특정 회원의 알림 목록 조회
      */
     @Transactional(readOnly = true)
-    public NotificationListResDto getNotificationsByMember(PrincipalDetails userDetails, Pageable pageable) {
+    public Page<NotificationResDto> getNotificationsByMember(PrincipalDetails userDetails, Pageable pageable) {
         Long memberId = userDetails.getMember().getMemberId();
 
         if (!memberRepository.existsById(memberId)) {
@@ -145,14 +144,24 @@ public class NotificationService {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        Page<NotificationResDto> notifications =
-                notificationRepository.findByMemberMemberId(memberId, sortedPageable)
-                        .map(NotificationResDto::fromEntity);
-
-        long unreadCount = notificationRepository.countByMemberMemberIdAndIsReadFalse(memberId);
-
-        return NotificationListResDto.of(notifications, unreadCount);
+        return notificationRepository.findByMemberMemberId(memberId, sortedPageable)
+                .map(NotificationResDto::fromEntity);
     }
+
+    /**
+     * 특정 회원의 안 읽은 알림 개수 조회
+     */
+    @Transactional(readOnly = true)
+    public long getUnreadCountByMember(PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        return notificationRepository.countByMemberMemberIdAndIsReadFalse(memberId);
+    }
+
 
     /**
      * 공동 구매 종료시 알림 일괄 생성

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
-import com.team5.backend.domain.notification.dto.NotificationListResDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.service.NotificationService;
@@ -100,12 +99,21 @@ public class NotificationController {
 
     @Operation(summary = "내 알림 목록 조회", description = "접속 중인 회원의 알림 목록을 최신순으로 조회합니다.")
     @GetMapping("/member/list")
-    public RsData<NotificationListResDto> getMyNotifications(
+    public RsData<Page<NotificationResDto>> getMyNotifications(
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @PageableDefault(size = 5) Pageable pageable
     ) {
-        NotificationListResDto response = notificationService.getNotificationsByMember(userDetails, pageable);
+        Page<NotificationResDto> response = notificationService.getNotificationsByMember(userDetails, pageable);
         return RsDataUtil.success("회원 알림 목록 조회 성공", response);
+    }
+
+    @Operation(summary = "읽지 않은 알림 수 조회", description = "접속 중인 회원의 읽지 않은 알림 개수를 반환합니다.")
+    @GetMapping("/member/count")
+    public RsData<Long> getUnreadNotificationCount(
+            @AuthenticationPrincipal PrincipalDetails userDetails
+    ) {
+        long count = notificationService.getUnreadCountByMember(userDetails);
+        return RsDataUtil.success("읽지 않은 알림 수 조회 성공", count);
     }
 
     @Operation(summary = "공동 구매 강제 종료 알림 (관리자)", description = "관리자 페이지 내부에서 공동 구매를 직접 종료시 알림 생성")

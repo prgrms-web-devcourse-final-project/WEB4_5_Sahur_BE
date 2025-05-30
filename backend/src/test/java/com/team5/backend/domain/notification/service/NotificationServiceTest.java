@@ -20,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
-import com.team5.backend.domain.notification.dto.NotificationListResDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.entity.Notification;
@@ -163,12 +162,9 @@ class NotificationServiceTest {
         when(notificationRepository.findByMemberMemberId(eq(1L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(notification)));
 
-        NotificationListResDto result = notificationService.getNotificationsByMember(userDetails, pageable);
+        Page<NotificationResDto> result = notificationService.getNotificationsByMember(userDetails, pageable);
 
-        assertEquals(1, result.notifications().getTotalElements());
-        assertEquals(1L, result.unreadCount());
-
+        assertEquals(1, result.getTotalElements());
         verify(notificationRepository).findByMemberMemberId(eq(1L), any(Pageable.class));
-        verify(notificationRepository).countByMemberMemberIdAndIsReadFalse(1L);
     }
 }
