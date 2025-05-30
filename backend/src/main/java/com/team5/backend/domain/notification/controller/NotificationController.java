@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
+import com.team5.backend.domain.notification.dto.NotificationListResDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.service.NotificationService;
@@ -99,11 +100,11 @@ public class NotificationController {
 
     @Operation(summary = "내 알림 목록 조회", description = "접속 중인 회원의 알림 목록을 최신순으로 조회합니다.")
     @GetMapping("/member/list")
-    public RsData<Page<NotificationResDto>> getMyNotifications(
+    public RsData<NotificationListResDto> getMyNotifications(
             @AuthenticationPrincipal PrincipalDetails userDetails,
             @PageableDefault(size = 5) Pageable pageable
     ) {
-        Page<NotificationResDto> response = notificationService.getNotificationsByMember(userDetails, pageable);
+        NotificationListResDto response = notificationService.getNotificationsByMember(userDetails, pageable);
         return RsDataUtil.success("회원 알림 목록 조회 성공", response);
     }
 
