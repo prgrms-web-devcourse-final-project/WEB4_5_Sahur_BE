@@ -102,7 +102,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "공동 구매 강제 종료 알림 (관리자)", description = "관리자 페이지 내부에서 공동 구매를 직접 종료시 알림 생성")
-    @PostMapping("/groupBuy/close")
+    @PostMapping("/groupBuy/close/{groupBuyId}")
     public RsData<Empty> groupBuyCloseNotifications(
             @PathVariable Long groupBuyId,
             @RequestBody String message
@@ -112,7 +112,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "관심 상품 재오픈 알림", description = "관심 상품으로 설정한 상품이 재오픈시 알림 생성")
-    @PostMapping("/dibs/reopen")
+    @PostMapping("/dibs/reopen/{groupBuyId}")
     public RsData<Empty> dibsReopenNotifications(
             @PathVariable Long groupBuyId
     ) {
