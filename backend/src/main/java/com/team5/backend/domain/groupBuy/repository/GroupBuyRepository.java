@@ -55,6 +55,7 @@ public interface GroupBuyRepository extends JpaRepository<GroupBuy, Long> {
 
 
 
-
+    @Query("SELECT g FROM GroupBuy g WHERE g.deadline BETWEEN :now AND :oneHourLater")
+    List<GroupBuy> findByEndAtBetween(@Param("now") LocalDateTime now, @Param("oneHourLater") LocalDateTime oneHourLater);
 
 }

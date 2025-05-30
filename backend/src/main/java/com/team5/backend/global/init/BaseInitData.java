@@ -22,7 +22,9 @@ import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.entity.NotificationType;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.order.service.OrderIdGenerator;
@@ -61,6 +63,7 @@ public class BaseInitData implements CommandLineRunner {
     private final DibsRepository dibsRepository;
     private final HistoryRepository historyRepository;
     private final OrderIdGenerator orderIdGenerator;
+    private final NotificationPublisher notificationPublisher;
 
     private final List<String> reviewComments = List.of(
             "배송도 빠르고 제품도 만족해요!",
@@ -213,31 +216,34 @@ public class BaseInitData implements CommandLineRunner {
                             .build());
                 }
 
-
-                notificationRepository.save(Notification.builder()
-                        .member(buyer)
-                        .type(NotificationType.ORDER)
-                        .title("주문 완료 알림")
-                        .message(product.getTitle() + " 주문이 완료되었습니다.")
-                        .url("/orders/" + order.getOrderId())
-                        .isRead(false)
-                        .createdAt(LocalDateTime.now())
-                        .build());
-
-                if (i % 4 == 0) {
-                    notificationRepository.save(Notification.builder()
-                            .member(buyer)
-                            .type(NotificationType.EVENT)
-                            .title("이벤트 소식 #" + i)
-                            .message("신규 혜택 오픈!")
-                            .url("/events/" + i)
-                            .isRead(false)
+// 모든 일반 사용자에게 작성 가능한 히스토리 1개씩 추가
+                for (Member user : members) {
+                    historyRepository.save(History.builder()
+                            .member(user)
+                            .product(product)
+                            .groupBuy(groupBuy)
+                            .order(order)
+                            .writable(true)  // 작성 가능
                             .createdAt(LocalDateTime.now())
                             .build());
+                }
+
+                notificationPublisher.publish(NotificationTemplateType.PURCHASED, orderId);
+
+                if (i % 4 == 0) {
+//                    notificationRepository.save(Notification.builder()
+//                            .member(buyer)
+//                            .type(NotificationType.ORDER)
+//                            .title("이벤트 소식 #" + i)
+//                            .message("신규 혜택 오픈!")
+//                            .url("/events/" + i)
+//                            .isRead(false)
+//                            .createdAt(LocalDateTime.now())
+//                            .build());
                 } else {
                     notificationRepository.save(Notification.builder()
                             .member(requester)
-                            .type(NotificationType.ETC)
+                            .type(NotificationType.SYSTEM)
                             .title("시스템 공지")
                             .message("정기 점검 예정 안내")
                             .url("/notice")

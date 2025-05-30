@@ -3,17 +3,16 @@ package com.team5.backend.domain.payment.service;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.team5.backend.domain.history.entity.History;
-import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.notification.entity.Notification;
-import com.team5.backend.domain.notification.entity.NotificationType;
-import com.team5.backend.domain.notification.repository.NotificationRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.team5.backend.domain.history.entity.History;
+import com.team5.backend.domain.history.repository.HistoryRepository;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
@@ -36,7 +35,8 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final TossService tossService;
     private final HistoryRepository historyRepository;
-    private final NotificationRepository notificationRepository;
+
+    private final NotificationPublisher notificationPublisher;
 
     @Transactional
     public void savePayment(Long orderId, String paymentKey) {
@@ -61,16 +61,8 @@ public class PaymentService {
                 .build();
         historyRepository.save(history);
 
-        // Notification 생성
-        Notification notification = Notification.builder()
-                .member(order.getMember())
-                .type(NotificationType.ORDER)
-                .title("구매 완료 알림")
-                .message("[" + order.getProduct().getTitle() + "] 상품의 구매가 완료되었습니다.")
-                .url("/orders/" + order.getOrderId()) // 예시 URL
-                .isRead(false)
-                .build();
-        notificationRepository.save(notification);
+        // 구매 완료 알림 생성
+        notificationPublisher.publish(NotificationTemplateType.PURCHASED, orderId);
     }
 
     public String getPaymentKey(Long paymentId) {

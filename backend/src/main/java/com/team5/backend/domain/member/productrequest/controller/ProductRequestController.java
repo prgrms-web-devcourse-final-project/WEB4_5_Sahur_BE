@@ -114,9 +114,10 @@ public class ProductRequestController {
     @PatchMapping("/{productRequestId}/{confirm}")
     public RsData<ProductRequestDetailResDto> confirmRequest(
             @Parameter(description = "상품 요청 ID") @PathVariable Long productRequestId,
-            @Parameter(description = "처리 타입 (approve / reject)", example = "approve") @PathVariable String confirm
+            @Parameter(description = "처리 타입 (approve / reject)", example = "approve") @PathVariable String confirm,
+            @RequestBody(required = false) String message
     ) {
-        ProductRequestDetailResDto response = productRequestService.updateStatus(productRequestId, confirm);
+        ProductRequestDetailResDto response = productRequestService.updateStatus(productRequestId, confirm, message);
         return RsDataUtil.success("상품 요청 처리 완료", response);
     }
 

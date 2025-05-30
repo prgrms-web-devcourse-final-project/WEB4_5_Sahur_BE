@@ -16,6 +16,8 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.dto.OrderCreateReqDto;
 import com.team5.backend.domain.order.dto.OrderDetailResDto;
 import com.team5.backend.domain.order.dto.OrderListResDto;
@@ -48,6 +50,7 @@ public class OrderService {
 
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
+    private final NotificationPublisher notificationPublisher;
 
     public Order createOrder(OrderCreateReqDto request, Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -151,6 +154,9 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
         order.markAsCanceled();
+
+        // 주문 취소 알림 생성
+        notificationPublisher.publish(NotificationTemplateType.ORDER_CANCELED, orderId);
     }
 
     public OrderPaymentInfoResDto getOrderPaymentInfo(Long orderId) {

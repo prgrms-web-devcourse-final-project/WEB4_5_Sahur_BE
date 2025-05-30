@@ -1,21 +1,34 @@
 package com.team5.backend.domain.notification.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.team5.backend.domain.dibs.repository.DibsRepository;
+import com.team5.backend.domain.groupBuy.entity.GroupBuy;
+import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.entity.Notification;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
+import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.exception.code.NotificationErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +36,11 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final MemberRepository memberRepository;
+    private final GroupBuyRepository groupBuyRepository;
+    private final OrderRepository orderRepository;
+    private final DibsRepository dibsRepository;
+
+    private final NotificationPublisher notificationPublisher;
 
     /**
      * 알림 생성
@@ -64,9 +82,20 @@ public class NotificationService {
      * 알림 단건 조회
      */
     @Transactional(readOnly = true)
-    public NotificationResDto getNotificationById(Long id) {
+    public NotificationResDto getNotificationById(PrincipalDetails userDetails, Long id) {
+        Long memberId = userDetails.getMember().getMemberId();
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND);
+        }
+
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+        if (!notification.getMember().getMemberId().equals(memberId)) {
+            throw new CustomException(NotificationErrorCode.NOTIFICATION_ACCESS_DENIED);
+        }
+
         return NotificationResDto.fromEntity(notification);
     }
 
@@ -128,5 +157,88 @@ public class NotificationService {
 
         return notificationRepository.findByMemberMemberId(memberId, sortedPageable)
                 .map(NotificationResDto::fromEntity);
+    }
+
+    /**
+     * 특정 회원의 안 읽은 알림 개수 조회
+     */
+    @Transactional(readOnly = true)
+    public long getUnreadCountByMember(PrincipalDetails userDetails) {
+        Long memberId = userDetails.getMember().getMemberId();
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        return notificationRepository.countByMemberMemberIdAndIsReadFalse(memberId);
+    }
+
+
+    /**
+     * 공동 구매 종료시 알림 일괄 생성
+     */
+    @Transactional
+    public void groupBuyCloseNotifications(Long groupBuyId, String message) {
+        groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+
+        List<Long> memberIds = orderRepository.findParticipantMemberIdsByGroupBuyId(groupBuyId);
+        if (memberIds.isEmpty()) {
+            return;
+        }
+
+        notificationPublisher.publish(
+                NotificationTemplateType.GROUP_CLOSED,
+                groupBuyId,
+                memberIds,
+                message
+        );
+    }
+
+    /**
+     * 관심 상품에서 공동구매 재오픈 알림 일괄 생성
+     */
+    @Transactional
+    public void dibsReopenNotifications(Long groupBuyId) {
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new CustomException(GroupBuyErrorCode.GROUP_BUY_NOT_FOUND));
+        Long productId = groupBuy.getProduct().getProductId();
+
+        List<Long> memberIds = dibsRepository.findMemberIdsByProductId(productId);
+        if (memberIds.isEmpty()) {
+            return;
+        }
+
+        notificationPublisher.publish(
+                NotificationTemplateType.DIBS_REOPENED,
+                groupBuyId,
+                memberIds
+        );
+    }
+
+    /**
+     * 관심 상품에서 공동구매 마감 임박 알림 일괄 생성
+     */
+    @Transactional
+    public void dibsDeadlineNotifications() {
+        // 현재 시각 + 1시간 범위 내에 마감되는 공동구매 조회
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneHourLater = now.plusHours(1);
+
+        List<GroupBuy> expiringGroupBuys = groupBuyRepository.findByEndAtBetween(now, oneHourLater);
+
+        for (GroupBuy groupBuy : expiringGroupBuys) {
+            Long groupBuyId = groupBuy.getGroupBuyId();
+            Long productId = groupBuy.getProduct().getProductId();
+
+            List<Long> memberIds = dibsRepository.findMemberIdsByProductId(productId);
+            if (memberIds.isEmpty()) continue;
+
+            notificationPublisher.publish(
+                    NotificationTemplateType.DIBS_DEADLINE,
+                    groupBuyId,
+                    memberIds
+            );
+        }
     }
 }

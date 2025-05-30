@@ -14,6 +14,8 @@ import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.global.exception.CustomException;
@@ -29,6 +31,8 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final OrderRepository orderRepository;
     private final ShippingGenerator shippingGenerator;
+
+    private final NotificationPublisher notificationPublisher;
 
     public Delivery createDelivery(Long orderId, DeliveryReqDto request) {
         Order order = orderRepository.findById(orderId)
@@ -72,6 +76,7 @@ public class DeliveryService {
 
         delivery.updateDeliveryStatus(status);
         delivery.getOrder().setDelivery(delivery);  // 동기화
+        notifyDeliveryStatus(delivery);
 
         return new DeliveryStatusUpdateResDto(deliveryId, current, status, "성공");
     }
@@ -90,6 +95,7 @@ public class DeliveryService {
 
                 delivery.updateDeliveryStatus(next);
                 delivery.getOrder().setDelivery(delivery);  // 동기화
+                notifyDeliveryStatus(delivery);
 
                 results.add(new DeliveryStatusUpdateResDto(id, current, next, "성공"));
             } catch (CustomException e) {
@@ -104,5 +110,13 @@ public class DeliveryService {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
         deliveryRepository.delete(delivery);
+    }
+
+    public void notifyDeliveryStatus(Delivery delivery) {
+        Long orderId = delivery.getOrder().getOrderId();
+        switch (delivery.getStatus()) {
+            case INDELIVERY -> notificationPublisher.publish(NotificationTemplateType.IN_DELIVERY, orderId);
+            case COMPLETED -> notificationPublisher.publish(NotificationTemplateType.DELIVERY_DONE, orderId);
+        }
     }
 }

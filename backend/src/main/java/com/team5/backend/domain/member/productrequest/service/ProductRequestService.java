@@ -1,5 +1,16 @@
 package com.team5.backend.domain.member.productrequest.service;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.repository.CategoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
@@ -11,6 +22,8 @@ import com.team5.backend.domain.member.productrequest.dto.ProductRequestUpdateRe
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.global.exception.CustomException;
@@ -18,17 +31,8 @@ import com.team5.backend.global.exception.code.ProductRequestErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.ImageType;
 import com.team5.backend.global.util.ImageUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class ProductRequestService {
     private final MemberRepository memberRepository;
     private final ImageUtil imageUtil;
     private final ProductRepository productRepository;
+    private final NotificationPublisher notificationPublisher;
 
     @Transactional
     public ProductRequestDetailResDto createRequest(ProductRequestCreateReqDto dto, List<MultipartFile> imageFiles, PrincipalDetails userDetails) throws IOException {
@@ -148,12 +153,18 @@ public class ProductRequestService {
     }
 
     @Transactional
-    public ProductRequestDetailResDto updateStatus(Long productRequestId, String confirm) {
+    public ProductRequestDetailResDto updateStatus(Long productRequestId, String confirm, String message) {
         ProductRequest request = getRequestOrThrow(productRequestId);
 
         ProductRequestStatus newStatus = switch (confirm.toLowerCase()) {
-            case "approve" -> ProductRequestStatus.APPROVED;
-            case "reject" -> ProductRequestStatus.REJECTED;
+            case "approve" -> {
+                notificationPublisher.publish(NotificationTemplateType.REQUEST_APPROVED, productRequestId);
+                yield ProductRequestStatus.APPROVED;
+            }
+            case "reject" -> {
+                notificationPublisher.publish(NotificationTemplateType.REQUEST_REJECTED, productRequestId, message);
+                yield ProductRequestStatus.REJECTED;
+            }
             default -> throw new CustomException(ProductRequestErrorCode.INVALID_PRODUCT_REQUEST_STATUS);
         };
 

@@ -1,28 +1,45 @@
 package com.team5.backend.domain.notification.service;
 
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.notification.dto.*;
-import com.team5.backend.domain.notification.entity.Notification;
-import com.team5.backend.domain.notification.entity.NotificationType;
-import com.team5.backend.domain.notification.repository.NotificationRepository;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
-import com.team5.backend.global.security.PrincipalDetails;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.data.domain.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
+import com.team5.backend.domain.notification.dto.NotificationResDto;
+import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
+import com.team5.backend.domain.notification.entity.Notification;
+import com.team5.backend.domain.notification.entity.NotificationType;
+import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.global.security.PrincipalDetails;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class NotificationServiceTest {
 
-    @Mock private NotificationRepository notificationRepository;
-    @Mock private MemberRepository memberRepository;
+    @Mock
+    private NotificationRepository notificationRepository;
+    @Mock
+    private MemberRepository memberRepository;
 
     @InjectMocks
     private NotificationService notificationService;
@@ -46,7 +63,7 @@ class NotificationServiceTest {
         notification = Notification.builder()
                 .notificationId(1L)
                 .member(member)
-                .type(NotificationType.ETC)
+                .type(NotificationType.SYSTEM)
                 .title("알림 제목")
                 .message("알림 내용")
                 .url("/test")
@@ -59,7 +76,7 @@ class NotificationServiceTest {
     @DisplayName("알림 생성")
     void createNotification() {
         NotificationCreateReqDto dto = NotificationCreateReqDto.builder()
-                .type(NotificationType.ETC)
+                .type(NotificationType.SYSTEM)
                 .title("알림 제목")
                 .message("알림 내용")
                 .url("/test")
@@ -91,7 +108,7 @@ class NotificationServiceTest {
     void getNotificationById() {
         when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
-        NotificationResDto result = notificationService.getNotificationById(1L);
+        NotificationResDto result = notificationService.getNotificationById(userDetails, 1L);
 
         assertEquals("알림 제목", result.getTitle());
     }

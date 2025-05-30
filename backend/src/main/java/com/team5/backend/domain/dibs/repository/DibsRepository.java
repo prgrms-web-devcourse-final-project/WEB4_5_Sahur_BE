@@ -1,15 +1,17 @@
 package com.team5.backend.domain.dibs.repository;
 
-import com.team5.backend.domain.dibs.entity.Dibs;
-import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.team5.backend.domain.dibs.entity.Dibs;
+
+import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
 public interface DibsRepository extends JpaRepository<Dibs, Long> {
@@ -27,5 +29,7 @@ public interface DibsRepository extends JpaRepository<Dibs, Long> {
             countQuery = "SELECT COUNT(d) FROM Dibs d WHERE d.member.memberId = :memberId")
     Page<Dibs> findPageWithProductByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
-
+    @Query("SELECT d.member.memberId FROM Dibs d WHERE d.product.productId = :productId")
+    List<Long> findMemberIdsByProductId(@Param("productId") Long productId);
+    
 }
