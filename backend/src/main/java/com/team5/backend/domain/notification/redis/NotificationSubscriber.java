@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
@@ -33,6 +34,7 @@ public class NotificationSubscriber implements MessageListener {
     private final ProductRequestRepository productRequestRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     @Override
     public void onMessage(Message message, byte[] pattern) {
         try {
