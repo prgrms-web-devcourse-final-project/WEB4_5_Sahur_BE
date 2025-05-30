@@ -192,7 +192,7 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(buyer).product(product).createdAt(LocalDateTime.now()).build());
                 dibsRepository.save(Dibs.builder().member(requester).product(product).createdAt(LocalDateTime.now()).build());
 
-                // 기존 리뷰 5개 생성 (유지)
+                // 모든 상품에 대해 5개의 리뷰 생성
                 for (int j = 0; j < 5; j++) {
                     Member reviewer = members.get((i + j) % members.size());
 
@@ -201,7 +201,7 @@ public class BaseInitData implements CommandLineRunner {
                             .product(product)
                             .groupBuy(groupBuy)
                             .order(order)
-                            .writable(false)  // 기존 리뷰는 작성 불가 처리
+                            .writable(false)
                             .createdAt(LocalDateTime.now())
                             .build());
 
