@@ -2,12 +2,13 @@ package com.team5.backend.domain.payment.service;
 
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.notification.entity.Notification;
-import com.team5.backend.domain.notification.entity.NotificationType;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
 import com.team5.backend.domain.order.repository.OrderRepository;
+import com.team5.backend.domain.order.service.OrderQueryService;
 import com.team5.backend.domain.payment.dto.PaymentResDto;
 import com.team5.backend.domain.payment.entity.Payment;
 import com.team5.backend.domain.payment.repository.PaymentRepository;
@@ -36,7 +37,6 @@ public class PaymentService {
     private final HistoryRepository historyRepository;
     private final NotificationRepository notificationRepository;
     private final OrderQueryService orderQueryService;
-
     private final NotificationPublisher notificationPublisher;
 
     @Transactional

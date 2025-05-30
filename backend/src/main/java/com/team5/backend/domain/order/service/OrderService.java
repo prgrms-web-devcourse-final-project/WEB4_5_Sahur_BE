@@ -6,14 +6,9 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
-import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.template.NotificationTemplateType;
-import com.team5.backend.domain.order.dto.OrderCreateReqDto;
-import com.team5.backend.domain.order.dto.OrderDetailResDto;
-import com.team5.backend.domain.order.dto.OrderListResDto;
-import com.team5.backend.domain.order.dto.OrderPaymentInfoResDto;
-import com.team5.backend.domain.order.dto.OrderUpdateReqDto;
+import com.team5.backend.domain.order.dto.*;
 import com.team5.backend.domain.order.entity.FilterStatus;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
@@ -42,11 +37,11 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryService orderQueryService;
     private final MemberRepository memberRepository;
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final DeliveryRepository deliveryRepository;
-
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
     private final NotificationPublisher notificationPublisher;
