@@ -50,23 +50,13 @@ public class PaymentController {
         return RsDataUtil.success("결제 내역 조회 성공", dto);
     }
 
-//    @Operation(summary = "전체 결제 취소", description = "해당 공동구매 관련 전체 결제 취소")
-//    @PostMapping("/groupBuy/{groupBuyId}/cancel")
-//    public RsData<String> cancelPaymentsByGroupBuyId(
-//            @PathVariable("groupBuyId") Long groupBuyId,
-//            @RequestBody @Valid CancelReqDto request
-//    ) {
-//        List<Order> orders = orderService.getOrdersByGroupBuyId(groupBuyId);
-//
-//        if (orders.isEmpty()) {
-//            throw new CustomException(OrderErrorCode.ORDER_NOT_FOUND);
-//        }
-//
-//        paymentService.cancelPaymentsByOrders(orders, request.getCancelReason());
-//        orderService.cancelOrders(orders); // 상태 변경
-//
-//        return RsDataUtil.success("공동구매 관련 결제가 모두 취소되었습니다.", request.getCancelReason());
-//    }
+    @Operation(summary = "전체 결제 취소", description = "해당 공동구매 관련 전체 결제 취소")
+    @PostMapping("/groupBuy/{groupBuyId}/cancel")
+    public RsData<String> cancelPaymentsByGroupBuyId(
+            @Parameter(description = "공동구매 ID") @PathVariable("groupBuyId") Long groupBuyId) {
+        paymentService.cancelPaymentsByGroupBuyId(groupBuyId, "공동구매 관련 결제 일괄 취소");
+        return RsDataUtil.success("결제 취소 성공", "공동구매 관련 결제 일괄 취소가 완료되었습니다.");
+    }
 
     @Operation(summary = "결제 취소", description = "해당 주문에 대한 결제 취소")
     @PostMapping("/order/{orderId}/cancel")
