@@ -59,6 +59,9 @@ public class DibsService {
                 .build();
 
         Dibs saved = dibsRepository.save(dibs);
+
+        product.increaseDibCount();
+
         return DibsResDto.fromEntity(saved);
     }
 
@@ -73,6 +76,10 @@ public class DibsService {
                 .orElseThrow(() -> new CustomException(DibsErrorCode.DIBS_NOT_FOUND));
 
         dibsRepository.delete(dibs);
+
+        Product product = dibs.getProduct();
+        product.decreaseDibCount();
+        productRepository.save(product);
     }
 
     /**
@@ -112,7 +119,5 @@ public class DibsService {
             return DibsResDto.fromEntity(dibs, groupBuyDto);
         });
     }
-
-
 
 }
