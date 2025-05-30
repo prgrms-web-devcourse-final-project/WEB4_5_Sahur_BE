@@ -150,6 +150,18 @@ public class OrderService {
         return order;
     }
 
+    @Transactional
+    public void cancelOrdersByGroupBuy(Long groupBuyId) {
+        List<Order> orders = orderRepository.findAllByGroupBuy_GroupBuyId(groupBuyId);
+        if (orders.isEmpty()) {
+            throw new CustomException(OrderErrorCode.ORDER_NOT_FOUND);
+        }
+
+        for (Order order : orders) {
+            order.markAsCanceled();
+        }
+    }
+
     public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(OrderErrorCode.ORDER_NOT_FOUND));
