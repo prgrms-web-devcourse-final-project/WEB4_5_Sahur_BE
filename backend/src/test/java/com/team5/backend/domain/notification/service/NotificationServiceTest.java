@@ -108,7 +108,7 @@ class NotificationServiceTest {
     void getNotificationById() {
         when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
 
-        NotificationResDto result = notificationService.getNotificationById(1L);
+        NotificationResDto result = notificationService.getNotificationById(userDetails, 1L);
 
         assertEquals("알림 제목", result.getTitle());
     }

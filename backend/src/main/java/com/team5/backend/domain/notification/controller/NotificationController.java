@@ -65,9 +65,10 @@ public class NotificationController {
     @CheckAdmin
     @GetMapping("/{id}")
     public RsData<NotificationResDto> getNotificationById(
+            @AuthenticationPrincipal PrincipalDetails userDetails,
             @Parameter(description = "알림 ID") @PathVariable Long id
     ) {
-        NotificationResDto response = notificationService.getNotificationById(id);
+        NotificationResDto response = notificationService.getNotificationById(userDetails, id);
         return RsDataUtil.success("알림 조회 성공", response);
     }
 

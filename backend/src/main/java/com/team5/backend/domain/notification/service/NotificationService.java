@@ -82,9 +82,20 @@ public class NotificationService {
      * 알림 단건 조회
      */
     @Transactional(readOnly = true)
-    public NotificationResDto getNotificationById(Long id) {
+    public NotificationResDto getNotificationById(PrincipalDetails userDetails, Long id) {
+        Long memberId = userDetails.getMember().getMemberId();
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(NotificationErrorCode.MEMBER_NOT_FOUND);
+        }
+
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+        if (!notification.getMember().getMemberId().equals(memberId)) {
+            throw new CustomException(NotificationErrorCode.NOTIFICATION_ACCESS_DENIED);
+        }
+
         return NotificationResDto.fromEntity(notification);
     }
 
