@@ -4,6 +4,7 @@ import com.team5.backend.domain.history.dto.HistoryCreateReqDto;
 import com.team5.backend.domain.history.dto.HistoryResDto;
 import com.team5.backend.domain.history.dto.HistoryUpdateReqDto;
 import com.team5.backend.domain.history.service.HistoryService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.CustomException;
@@ -32,6 +33,7 @@ public class HistoryController {
     private final HistoryService historyService;
 
     @Operation(summary = "구매 이력 생성", description = "구매 이력을 생성합니다.")
+    @CheckAdmin
     @PostMapping
     public RsData<HistoryResDto> createHistory(
             @AuthenticationPrincipal PrincipalDetails userDetails,
@@ -42,6 +44,7 @@ public class HistoryController {
     }
 
     @Operation(summary = "전체 구매 이력 조회", description = "모든 구매 이력을 조회합니다 (최신순 정렬).")
+    @CheckAdmin
     @GetMapping
     public RsData<Page<HistoryResDto>> getAllHistories(
             @Parameter(description = "페이지 정보") @PageableDefault(size = 5) Pageable pageable) {
@@ -70,6 +73,7 @@ public class HistoryController {
     }
 
     @Operation(summary = "구매 이력 삭제", description = "구매 이력을 삭제합니다.")
+    @CheckAdmin
     @DeleteMapping("/{id}")
     public RsData<Empty> deleteHistory(
             @Parameter(description = "구매 이력 ID") @PathVariable Long id) {

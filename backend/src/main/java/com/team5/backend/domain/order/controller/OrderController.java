@@ -1,5 +1,6 @@
 package com.team5.backend.domain.order.controller;
 
+import com.team5.backend.global.annotation.CheckAdmin;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -62,6 +63,7 @@ public class OrderController {
     }
 
     @Operation(summary = "주문 목록 조회", description = "모든 주문 목록을 조회하거나 주문번호, 상태로 필터링할 수 있습니다.")
+    @CheckAdmin
     @GetMapping
     public RsData<Page<OrderListResDto>> getOrders(
             @RequestParam(required = false) Long orderId,
@@ -85,6 +87,7 @@ public class OrderController {
     }
 
     @Operation(summary = "이번 달 총 매출 조회", description = "주문 상태가 PAID (결제 완료)인 주문들에 대한 매출 총 합")
+    @CheckAdmin
     @GetMapping("/monthly-sales")
     public RsData<Long> getMonthlySales() {
         Long totalSales = orderService.getMonthlyCompletedSales();

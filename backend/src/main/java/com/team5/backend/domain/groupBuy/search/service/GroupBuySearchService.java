@@ -53,7 +53,6 @@ public class GroupBuySearchService {
                 .categoryId(groupBuy.getProduct().getCategory().getCategoryId())
                 .categoryType(groupBuy.getProduct().getCategory().getCategoryType().toString())
                 .keyword(groupBuy.getProduct().getCategory().getKeyword().toString())
-                .uid(groupBuy.getProduct().getCategory().getUid())
                 .build();
 
         groupBuySearchRepository.save(doc);
@@ -114,8 +113,7 @@ public class GroupBuySearchService {
                         .category(doc.getCategoryId() != null ? new CategoryDto(
                                 doc.getCategoryId(),
                                 safeEnum(CategoryType.class, doc.getCategoryType()),
-                                safeEnum(KeywordType.class, doc.getKeyword()),
-                                doc.getUid()
+                                safeEnum(KeywordType.class, doc.getKeyword())
                         ) : null)
                         .build())
                 .targetParticipants(doc.getTargetParticipants())

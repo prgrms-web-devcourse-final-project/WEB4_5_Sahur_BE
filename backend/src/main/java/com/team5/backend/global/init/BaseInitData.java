@@ -1,15 +1,5 @@
 package com.team5.backend.global.init;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
@@ -24,12 +14,12 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.member.entity.Member;
-import com.team5.backend.domain.member.member.entity.Role;
-import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
 import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
 import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
+import com.team5.backend.domain.member.member.entity.Member;
+import com.team5.backend.domain.member.member.entity.Role;
+import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.entity.NotificationType;
 import com.team5.backend.domain.notification.redis.NotificationPublisher;
@@ -45,8 +35,14 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.entity.Address;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -108,7 +104,6 @@ public class BaseInitData implements CommandLineRunner {
     public void run(String... args) {
         if (memberRepository.count() == 0) {
             List<Category> categories = new ArrayList<>();
-            int uid = 1;
             for (CategoryType type : CategoryType.values()) {
                 if (type == CategoryType.ALL) continue;
                 for (KeywordType keyword : KeywordType.ofParent(type)) {
@@ -116,7 +111,6 @@ public class BaseInitData implements CommandLineRunner {
                             Category.builder()
                                     .categoryType(type)
                                     .keyword(keyword)
-                                    .uid(uid++)
                                     .build()
                     ));
                 }
@@ -198,26 +192,39 @@ public class BaseInitData implements CommandLineRunner {
                 dibsRepository.save(Dibs.builder().member(buyer).product(product).createdAt(LocalDateTime.now()).build());
                 dibsRepository.save(Dibs.builder().member(requester).product(product).createdAt(LocalDateTime.now()).build());
 
-                boolean shouldWriteReview = i % 2 == 0;
+                // 기존 리뷰 5개 생성 (유지)
+                for (int j = 0; j < 5; j++) {
+                    Member reviewer = members.get((i + j) % members.size());
 
-                History history = historyRepository.save(History.builder()
-                        .member(buyer)
-                        .product(product)
-                        .groupBuy(groupBuy)
-                        .order(order)
-                        .writable(!shouldWriteReview)
-                        .createdAt(LocalDateTime.now())
-                        .build());
-
-                if (shouldWriteReview) {
-                    reviewRepository.save(Review.builder()
-                            .member(buyer)
+                    History reviewHistory = historyRepository.save(History.builder()
+                            .member(reviewer)
                             .product(product)
-                            .history(history)
-                            .comment(reviewComments.get(i % reviewComments.size()))
-                            .rate(3 + (i % 3))
+                            .groupBuy(groupBuy)
+                            .order(order)
+                            .writable(false)  // 기존 리뷰는 작성 불가 처리
                             .createdAt(LocalDateTime.now())
-                            .imageUrl(List.of("https://example.com/review/img" + i + ".jpg"))
+                            .build());
+
+                    reviewRepository.save(Review.builder()
+                            .member(reviewer)
+                            .product(product)
+                            .history(reviewHistory)
+                            .comment(reviewComments.get((i + j) % reviewComments.size()))
+                            .rate(3 + ((i + j) % 3))
+                            .createdAt(LocalDateTime.now())
+                            .imageUrl(List.of("https://example.com/review/img" + i + "_" + j + ".jpg"))
+                            .build());
+                }
+
+// 모든 일반 사용자에게 작성 가능한 히스토리 1개씩 추가
+                for (Member user : members) {
+                    historyRepository.save(History.builder()
+                            .member(user)
+                            .product(product)
+                            .groupBuy(groupBuy)
+                            .order(order)
+                            .writable(true)  // 작성 가능
+                            .createdAt(LocalDateTime.now())
                             .build());
                 }
 

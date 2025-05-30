@@ -2,6 +2,7 @@ package com.team5.backend.domain.delivery.controller;
 
 import java.util.List;
 
+import com.team5.backend.global.annotation.CheckAdmin;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,6 +71,7 @@ public class DeliveryController {
     }
 
     @Operation(summary = "전체 배송 조회", description = "전체 배송 정보 목록을 조회합니다.")
+    @CheckAdmin
     @GetMapping
     public RsData<Page<DeliveryResDto>> getAllDeliveries(
             @ParameterObject
@@ -80,6 +82,7 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 상태별 총 개수 조회", description = "기본 상태가 INDELIVERY (배송중)인 상품의 개수 반환")
+    @CheckAdmin
     @GetMapping("/count")
     public RsData<Long> getDeliveryCountByStatus(
             @RequestParam(required = false, defaultValue = "INDELIVERY") DeliveryStatus status
@@ -100,7 +103,7 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 상태 변경", description = "배송 상태를 특정 상태로 수정 (관리자)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @CheckAdmin
     @PatchMapping("/{deliveryId}")
     public RsData<DeliveryStatusUpdateResDto> updateDeliveryStatus(
             @Parameter(description = "배송 ID") @PathVariable Long deliveryId,
@@ -111,7 +114,7 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 상태 일괄 변경", description = "여러 배송 상태를 일괄 수정 (관리자)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @CheckAdmin
     @PatchMapping("/batch")
     public RsData<List<DeliveryStatusUpdateResDto>> updateDeliveryStatuses(
             @RequestBody @Valid DeliveryStatusUpdateReqDto request

@@ -3,6 +3,7 @@ package com.team5.backend.domain.review.controller;
 import com.team5.backend.domain.review.dto.*;
 import com.team5.backend.domain.review.entity.ReviewSortField;
 import com.team5.backend.domain.review.service.ReviewService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
@@ -37,6 +38,7 @@ public class ReviewController {
     }
 
     @Operation(summary = "전체 리뷰 조회", description = "모든 리뷰를 최신순 또는 평점순으로 페이징 조회합니다.")
+    @CheckAdmin
     @GetMapping
     public RsData<Page<ReviewResDto>> getAllReviews(
             @RequestParam(defaultValue = "LATEST") ReviewSortField sortBy,

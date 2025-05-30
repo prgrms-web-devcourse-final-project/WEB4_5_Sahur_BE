@@ -18,6 +18,7 @@ import com.team5.backend.domain.notification.dto.NotificationCreateReqDto;
 import com.team5.backend.domain.notification.dto.NotificationResDto;
 import com.team5.backend.domain.notification.dto.NotificationUpdateReqDto;
 import com.team5.backend.domain.notification.service.NotificationService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
@@ -40,6 +41,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @Operation(summary = "알림 생성", description = "새로운 알림을 생성합니다.")
+    @CheckAdmin
     @PostMapping
     public RsData<NotificationResDto> createNotification(
             @AuthenticationPrincipal PrincipalDetails userDetails,
@@ -50,6 +52,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "전체 알림 조회", description = "모든 알림을 최신순으로 조회합니다.")
+    @CheckAdmin
     @GetMapping
     public RsData<Page<NotificationResDto>> getAllNotifications(
             @PageableDefault(size = 5) Pageable pageable
@@ -59,6 +62,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "단건 알림 조회", description = "알림 ID로 특정 알림을 조회합니다.")
+    @CheckAdmin
     @GetMapping("/{id}")
     public RsData<NotificationResDto> getNotificationById(
             @Parameter(description = "알림 ID") @PathVariable Long id
@@ -68,6 +72,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "알림 수정 (전체)", description = "알림을 수정합니다.")
+    @CheckAdmin
     @PutMapping("/{id}")
     public RsData<NotificationResDto> updateNotification(
             @PathVariable Long id,
@@ -85,6 +90,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "알림 삭제", description = "알림을 삭제합니다.")
+    @CheckAdmin
     @DeleteMapping("/{id}")
     public RsData<Empty> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);

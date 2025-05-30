@@ -1,8 +1,8 @@
 import kakao from "../../assets/images/oauth/kakao.png"
 import naver from "../../assets/images/oauth/naver.png"
 import google from "../../assets/images/oauth/google.png"
-import {useState} from "react";
-import {Link, useNavigate} from "react-router-dom";
+import {useState, useEffect} from "react";
+import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import {isEmptyOrNull} from "../../utils/utils";
 import Spinner from "../../shared/Spinner";
 import useConfirm from "../../hooks/useConfirm";
@@ -15,6 +15,7 @@ import clsx from "clsx";
 
 const Login = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { openConfirm } = useConfirm();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -58,6 +59,21 @@ const Login = () => {
         }
     });
 
+    // 소셜 로그인 결과 처리
+    useEffect(() => {
+        const authStatus = searchParams.get('auth_status');
+        const authInfo = searchParams.get('info');
+        
+        if (authStatus === 'success') {
+            navigate('/main');
+        } else if (authInfo === 'auth_info') {
+            openConfirm({
+                title: '로그인 처리 중 오류가 발생했습니다.',
+                html: '다시 시도해주세요.',
+                showCancelButton: false
+            });
+        }
+    }, [searchParams, navigate, openConfirm]);
 
     return (
         <LoginLayout>

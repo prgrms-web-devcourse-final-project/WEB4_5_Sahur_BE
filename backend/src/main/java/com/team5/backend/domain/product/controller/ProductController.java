@@ -5,6 +5,7 @@ import com.team5.backend.domain.product.dto.ProductResDto;
 import com.team5.backend.domain.product.dto.ProductUpdateReqDto;
 import com.team5.backend.domain.product.entity.Product;
 import com.team5.backend.domain.product.service.ProductService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
@@ -18,6 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @Tag(name = "Product", description = "상품 관련 API")
 @RestController
@@ -28,9 +33,11 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(summary = "상품 생성", description = "새로운 상품을 등록합니다.")
+    @CheckAdmin
     @PostMapping
-    public RsData<ProductResDto> createProduct(@RequestBody @Valid ProductCreateReqDto request) {
-        ProductResDto response = productService.createProduct(request);
+    public RsData<ProductResDto> createProduct(@RequestPart(value = "request", required = false) @Valid ProductCreateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles) throws IOException {
+        ProductResDto response = productService.createProduct(request, imageFiles);
         return RsDataUtil.success("상품 생성 성공", response);
     }
 
@@ -55,18 +62,21 @@ public class ProductController {
     }
 
     @Operation(summary = "상품 수정", description = "상품 ID로 기존 상품 정보를 수정합니다.")
-    @PutMapping("/{productId}")
+    @CheckAdmin
+    @PatchMapping("/{productId}")
     public RsData<ProductResDto> updateProduct(
             @Parameter(description = "상품 ID") @PathVariable Long productId,
-            @RequestBody @Valid ProductUpdateReqDto request) {
-        ProductResDto response = productService.updateProduct(productId, request);
+            @RequestPart(value = "request", required = false) @Valid ProductUpdateReqDto request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles) throws IOException {
+        ProductResDto response = productService.updateProduct(productId, request, imageFiles);
         return RsDataUtil.success("상품 수정 성공", response);
     }
 
     @Operation(summary = "상품 삭제", description = "상품 ID로 상품을 삭제합니다.")
+    @CheckAdmin
     @DeleteMapping("/{productId}")
     public RsData<Empty> deleteProduct(
-            @Parameter(description = "상품 ID") @PathVariable Long productId) {
+            @Parameter(description = "상품 ID") @PathVariable Long productId) throws IOException {
         productService.deleteProduct(productId);
         return RsDataUtil.success("상품 삭제 성공");
     }
