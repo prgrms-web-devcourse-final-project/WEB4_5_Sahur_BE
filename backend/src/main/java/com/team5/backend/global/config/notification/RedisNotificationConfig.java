@@ -4,33 +4,27 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.team5.backend.domain.notification.redis.NotificationSubscriber;
+import com.team5.backend.domain.notification.redis.NotificationEventMessage;
 
 @Configuration
 public class RedisNotificationConfig {
 
-    @Bean
-    public RedisMessageListenerContainer redisContainer(
-            RedisConnectionFactory connectionFactory,
-            NotificationSubscriber subscriber) {
-
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(subscriber, new ChannelTopic("notification-channel"));
-        return container;
-    }
-
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+    @Bean(name = "notificationRedisTemplate")
+    public RedisTemplate<String, NotificationEventMessage> notificationRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, NotificationEventMessage> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
+
+        // 직렬화 방식 지정
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(NotificationEventMessage.class));
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(NotificationEventMessage.class));
+
+        template.afterPropertiesSet();
         return template;
+
     }
 }
