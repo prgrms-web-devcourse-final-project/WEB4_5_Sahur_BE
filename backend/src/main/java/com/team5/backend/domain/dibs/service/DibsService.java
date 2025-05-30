@@ -59,8 +59,8 @@ public class DibsService {
                 .build();
 
         Dibs saved = dibsRepository.save(dibs);
-
         product.increaseDibCount();
+        productRepository.save(product);
 
         return DibsResDto.fromEntity(saved);
     }

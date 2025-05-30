@@ -40,6 +40,7 @@ public class Product {
 
     @Column(nullable = false)
     @ColumnDefault("0")
+    @Builder.Default
     private Long dibCount = 0L;
 
     @Column(nullable = false)
@@ -73,7 +74,9 @@ public class Product {
     }
 
     public void increaseDibCount() {
-        if (this.dibCount == null) this.dibCount = 0L;
+        if (this.dibCount == null){
+            this.dibCount = 0L;
+        }
         this.dibCount++;
     }
 
