@@ -1,5 +1,15 @@
 package com.team5.backend.global.init;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.category.entity.Category;
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.category.entity.KeywordType;
@@ -14,15 +24,17 @@ import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.history.entity.History;
 import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
-import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
-import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.entity.Role;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequest;
+import com.team5.backend.domain.member.productrequest.entity.ProductRequestStatus;
+import com.team5.backend.domain.member.productrequest.repository.ProductRequestRepository;
 import com.team5.backend.domain.notification.entity.Notification;
 import com.team5.backend.domain.notification.entity.NotificationType;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
 import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.domain.order.service.OrderIdGenerator;
@@ -33,14 +45,8 @@ import com.team5.backend.domain.product.repository.ProductRepository;
 import com.team5.backend.domain.review.entity.Review;
 import com.team5.backend.domain.review.repository.ReviewRepository;
 import com.team5.backend.global.entity.Address;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -61,6 +67,7 @@ public class BaseInitData implements CommandLineRunner {
     private final DibsRepository dibsRepository;
     private final HistoryRepository historyRepository;
     private final OrderIdGenerator orderIdGenerator;
+    private final NotificationPublisher notificationPublisher;
 
     private final List<String> reviewComments = List.of(
             "배송도 빠르고 제품도 만족해요!",
@@ -214,30 +221,22 @@ public class BaseInitData implements CommandLineRunner {
                             .build());
                 }
 
-                notificationRepository.save(Notification.builder()
-                        .member(buyer)
-                        .type(NotificationType.ORDER)
-                        .title("주문 완료 알림")
-                        .message(product.getTitle() + " 주문이 완료되었습니다.")
-                        .url("/orders/" + order.getOrderId())
-                        .isRead(false)
-                        .createdAt(LocalDateTime.now())
-                        .build());
+                notificationPublisher.publish(NotificationTemplateType.PURCHASED, orderId);
 
                 if (i % 4 == 0) {
-                    notificationRepository.save(Notification.builder()
-                            .member(buyer)
-                            .type(NotificationType.EVENT)
-                            .title("이벤트 소식 #" + i)
-                            .message("신규 혜택 오픈!")
-                            .url("/events/" + i)
-                            .isRead(false)
-                            .createdAt(LocalDateTime.now())
-                            .build());
+//                    notificationRepository.save(Notification.builder()
+//                            .member(buyer)
+//                            .type(NotificationType.ORDER)
+//                            .title("이벤트 소식 #" + i)
+//                            .message("신규 혜택 오픈!")
+//                            .url("/events/" + i)
+//                            .isRead(false)
+//                            .createdAt(LocalDateTime.now())
+//                            .build());
                 } else {
                     notificationRepository.save(Notification.builder()
                             .member(requester)
-                            .type(NotificationType.ETC)
+                            .type(NotificationType.SYSTEM)
                             .title("시스템 공지")
                             .message("정기 점검 예정 안내")
                             .url("/notice")
