@@ -30,9 +30,9 @@ spring:
 logging:
   level:
     org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
-    org.springframework.transaction.interceptor: TRACE
+    org.hibernate.orm.jdbc.bind: DEBUG
+    org.hibernate.orm.jdbc.extract: DEBUG
+    org.springframework.transaction.interceptor: DEBUG
 
 custom:
   elastic:
