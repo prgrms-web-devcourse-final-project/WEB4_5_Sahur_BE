@@ -15,8 +15,7 @@
 
 ### 1. 프로젝트 - 퉁 하자
 
-### 🌍 퉁하자
-- [도메인](https://www.devapi.store/) - 개발중  
+### 🌍 퉁하자 - [링크](https://www.devapi.store/)  
 <이미지>
 
 ---
@@ -49,36 +48,41 @@
 ## 🛠 기술 스택
 
 ### 💻 언어
-
-<img src="https://img.shields.io/badge/java-FF3D00?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+![java](https://img.shields.io/badge/java-FF3D00.svg?style=for-the-badge&logo=java&logoColor=white)
+![javascript](https://img.shields.io/badge/javascrip-F7DF1E.svg?style=for-the-badge&logo=javascrip&logoColor=white)
 
 ### ⚙ 프레임워크 및 라이브러리
-<img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/nextdotjs-000000?style=for-the-badge&logo=nextdotjs&logoColor=white"> <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white">
+![springboot](https://img.shields.io/badge/springboot-6DB33F.svg?style=for-the-badge&logo=springboot&logoColor=white)
+![react](https://img.shields.io/badge/react-61DAFB.svg?style=for-the-badge&logo=react&logoColor=white)
 
 ### 🗄 데이터베이스
-
 ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
-![Kafka](https://img.shields.io/badge/kafka-%231F20.svg?style=for-the-badge&logo=apachekafka&logoColor=white)
+![elasticsearch](https://img.shields.io/badge/elasticsearch-005571.svg?style=for-the-badge&logo=elasticsearch&logoColor=white)
+![amazons3](https://img.shields.io/badge/amazons3-569A31.svg?style=for-the-badge&logo=amazons3&logoColor=white)
 
 ### 🛠 IDE 및 개발 도구
-
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=for-the-badge&logo=intellij-idea&logoColor=white)
 ![Visual Studio Code](https://img.shields.io/badge/Visual%20Studio%20Code-0078d7.svg?style=for-the-badge&logo=visual-studio-code&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+
+### 🌏 DevOps 및 Infra
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+![terraform](https://img.shields.io/badge/terraform-844FBA.svg?style=for-the-badge&logo=terraform&logoColor=white)
 
 ### 🔧 버전 관리 및 협업 도구
-
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
+![githubactions](https://img.shields.io/badge/githubactions-2088FF.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)
 ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
 ![Slack](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)
 ![Zep](https://img.shields.io/badge/Zep-6001D2?style=for-the-badge&logo=Zep&logoColor=white)
 
-### 🖥️ 모니터링
-<img src="https://img.shields.io/badge/prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white"> <img src="https://img.shields.io/badge/grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white">
+### 🖥️ 모니터링 및 스트레스 테스트
+![prometheus](https://img.shields.io/badge/prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)
+![grafana](https://img.shields.io/badge/grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![k6](https://img.shields.io/badge/k6-7D64FF?style=for-the-badge&logo=k6&logoColor=white)
 
 ## 📌 추가 문서
 
@@ -94,4 +98,3 @@
 
 ### 🛠 Git 컨벤션
 - [Notion-Link](https://www.notion.so/1db3550b7b5581448cccfcf428df25c7?pvs=4)
-
