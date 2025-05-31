@@ -28,6 +28,7 @@ import MyPageRequests from "../pages/mypage/requests/MyPageRequests";
 import MyPageDibs from "../pages/mypage/dibs/MyPageDibs";
 import MyPageReviews from "../pages/mypage/reviews/MyPageReviews";
 import MyPageProfile from "../pages/mypage/profile/MyPageProfile";
+import MyPageOrdersDetail from "../pages/mypage/orders/MyPageOrdersDetail";
 
 const BaseRoutes = () => {
     return (
@@ -60,6 +61,7 @@ const BaseRoutes = () => {
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<MyPageDashboard />} />
                 <Route path="orders" element={<MyPageOrders />} />
+                <Route path="orders/:orderId" element={<MyPageOrdersDetail />} />
                 <Route path="payments" element={<MyPagePayments />} />
                 <Route path="requests" element={<MyPageRequests />} />
                 <Route path="dibs" element={<MyPageDibs />} />
