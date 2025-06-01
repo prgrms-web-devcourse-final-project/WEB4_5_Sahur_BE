@@ -2,7 +2,7 @@ package com.team5.backend.domain.notification.redis;
 
 import java.util.List;
 
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
@@ -66,12 +66,12 @@ public class NotificationSubscriber implements MessageListener {
 
             notificationRepository.saveAll(notifications);
 
-        } catch (DataAccessException dae) {
-            log.error("[Redis 알림 저장 실패] DB 접근 중 오류 발생", dae);
+        } catch (DataIntegrityViolationException dive) {
+            log.error("[Redis 알림 저장 실패] 무결성 위반 또는 중복 키: {}", dive.getMessage(), dive);
         } catch (JsonProcessingException jpe) {
-            log.error("[Redis 알림 역직렬화 실패] 메시지 파싱 중 오류 발생", jpe);
+            log.error("[Redis 알림 역직렬화 실패] JSON 파싱 오류: {}", jpe.getOriginalMessage(), jpe);
         } catch (IllegalArgumentException iae) {
-            log.error("[Redis 알림 처리 실패] 잘못된 요청", iae);
+            log.error("[Redis 알림 처리 실패] 잘못된 파라미터: {}", iae.getMessage(), iae);
         } catch (Exception e) {
             log.error("[Redis 알림 처리 중 알 수 없는 오류 발생]", e);
         }

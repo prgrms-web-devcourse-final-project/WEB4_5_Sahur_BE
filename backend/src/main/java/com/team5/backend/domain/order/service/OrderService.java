@@ -4,6 +4,8 @@ import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
+import com.team5.backend.domain.groupBuy.service.GroupBuyService;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.redis.NotificationPublisher;
@@ -42,6 +44,10 @@ public class OrderService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final DeliveryRepository deliveryRepository;
+    private final HistoryRepository historyRepository;
+
+    private final GroupBuyService groupBuyService;
+
     private final OrderIdGenerator orderIdGenerator;
     private final TossPaymentConfig tossPaymentConfig;
     private final NotificationPublisher notificationPublisher;
@@ -58,6 +64,10 @@ public class OrderService {
 
         Long orderId = orderIdGenerator.generateOrderId();
         Order order = Order.create(orderId, member, groupBuy, product, request.getQuantity());
+
+        // 공동구매 참여 수 증가
+        groupBuyService.updateParticipantCount(order.getGroupBuy().getGroupBuyId(), order.getQuantity(), true);
+
         return orderRepository.save(order);
     }
 
@@ -163,6 +173,9 @@ public class OrderService {
 
         // 주문 취소 알림 생성
         notificationPublisher.publish(NotificationTemplateType.ORDER_CANCELED, orderId);
+
+        // 공동구매 참여 수 감소
+        groupBuyService.updateParticipantCount(order.getGroupBuy().getGroupBuyId(), order.getQuantity(), false);
     }
 
     public OrderPaymentInfoResDto getOrderPaymentInfo(Long orderId) {
@@ -190,8 +203,11 @@ public class OrderService {
                 deliveryRepository.delete(order.getDelivery());
             }
 
-            // log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
-            // historyRepository.deleteByOrder_OrderId(orderId);
+            boolean hasHistory = historyRepository.existsByOrder_OrderId(orderId);
+            if (hasHistory) {
+                log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
+                historyRepository.deleteByOrder_OrderId(orderId);
+            }
 
             orderRepository.delete(order);
             log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", orderId);

@@ -1,8 +1,28 @@
 package com.team5.backend.domain.groupBuy.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.team5.backend.domain.category.entity.CategoryType;
 import com.team5.backend.domain.dibs.repository.DibsRepository;
-import com.team5.backend.domain.groupBuy.dto.*;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyCreateReqDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyDetailResDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyPatchReqDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyResDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyStatusResDto;
+import com.team5.backend.domain.groupBuy.dto.GroupBuyUpdateReqDto;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.entity.GroupBuySortField;
 import com.team5.backend.domain.groupBuy.entity.GroupBuyStatus;
@@ -16,18 +36,8 @@ import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.GroupBuyErrorCode;
 import com.team5.backend.global.security.PrincipalDetails;
 import com.team5.backend.global.util.JwtUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -113,7 +123,6 @@ public class GroupBuyService {
                 .findRecentGroupBuysByMember(memberId, noSortPageable)
                 .map(this::toDto);
     }
-
 
 
     @Transactional(readOnly = true)
@@ -254,5 +263,17 @@ public class GroupBuyService {
             case DEADLINE_SOON -> Sort.by(Sort.Order.asc("deadline"));
             default -> Sort.unsorted();
         };
+    }
+
+    @Transactional
+    public void updateParticipantCount(Long groupBuyId, int quantity, boolean isIncrease) {
+        GroupBuy groupBuy = groupBuyRepository.findById(groupBuyId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 공동구매입니다."));
+
+        if (isIncrease) {
+            groupBuy.increaseParticipantCount(quantity);
+        } else {
+            groupBuy.decreaseParticipantCount(quantity);
+        }
     }
 }
