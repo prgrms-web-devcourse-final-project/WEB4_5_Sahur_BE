@@ -1,26 +1,5 @@
 package com.team5.backend.domain.delivery.controller;
 
-import java.util.List;
-
-import com.team5.backend.global.annotation.CheckAdmin;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryResDto;
 import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateReqDto;
@@ -28,17 +7,23 @@ import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
 import com.team5.backend.domain.delivery.entity.Delivery;
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.delivery.service.DeliveryService;
+import com.team5.backend.global.annotation.CheckAdmin;
 import com.team5.backend.global.dto.Empty;
 import com.team5.backend.global.dto.RsData;
 import com.team5.backend.global.exception.RsDataUtil;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import lombok.RequiredArgsConstructor;
-
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "Delivery", description = "배송 관련 API")
 @RestController
@@ -92,25 +77,15 @@ public class DeliveryController {
     }
 
     @Operation(summary = "배송 정보 수정", description = "배송 정보 전체를 수정합니다.")
-    @PutMapping("/{deliveryId}")
+    @PatchMapping("/{orderId}")
     public RsData<DeliveryResDto> updateDelivery(
-            @Parameter(description = "배송 ID") @PathVariable Long deliveryId,
-            @RequestBody @Valid DeliveryReqDto request
-    ) {
-        Delivery delivery = deliveryService.updateDeliveryInfo(deliveryId, request);
-        DeliveryResDto response = DeliveryResDto.fromEntity(delivery);
-        return RsDataUtil.success("배송 정보 수정 성공", response);
-    }
-
-    @Operation(summary = "배송 상태 변경", description = "배송 상태를 특정 상태로 수정 (관리자)")
-    @CheckAdmin
-    @PatchMapping("/{deliveryId}")
-    public RsData<DeliveryStatusUpdateResDto> updateDeliveryStatus(
-            @Parameter(description = "배송 ID") @PathVariable Long deliveryId,
+            @Parameter(description = "주문 ID") @PathVariable Long orderId,
+            @RequestBody @Valid DeliveryReqDto request,
             @RequestParam(name = "status") DeliveryStatus status
     ) {
-        DeliveryStatusUpdateResDto response = deliveryService.updateDeliveryStatus(deliveryId, status);
-        return RsDataUtil.success("배송 상태 변경 완료", response);
+        Delivery delivery = deliveryService.updateDeliveryInfo(orderId, request, status);
+        DeliveryResDto response = DeliveryResDto.fromEntity(delivery);
+        return RsDataUtil.success("배송 정보 수정 성공", response);
     }
 
     @Operation(summary = "배송 상태 일괄 변경", description = "여러 배송 상태를 일괄 수정 (관리자)")
