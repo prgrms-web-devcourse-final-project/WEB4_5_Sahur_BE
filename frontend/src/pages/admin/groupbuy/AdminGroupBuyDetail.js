@@ -32,7 +32,7 @@ const getCategoryTypeLabel = (categoryType) => {
   return labels[categoryType] || categoryType;
 };
 
-// keyword를 한글로 변환하는 함수
+// keyword를 ��글로 변환하는 함수
 const getKeywordLabel = (keyword) => {
   const labels = {
     // 패션 의류
@@ -679,12 +679,38 @@ const AdminGroupBuyDetail = () => {
             <div className="d-flex gap-2">
               {isGroupBuyClosed ? (
                 <Button
-                  variant="outline-warning"
+                  variant="danger"
                   onClick={handleCancelOrder}
                   disabled={isCancelling}
-                  style={{ borderRadius: "6px", padding: "8px 24px" }}
+                  style={{
+                    borderRadius: "6px",
+                    padding: "10px 20px",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    backgroundColor: "#dc3545",
+                    borderColor: "#dc3545",
+                    boxShadow: "0 2px 4px rgba(220, 53, 69, 0.2)",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isCancelling) {
+                      e.target.style.backgroundColor = "#c82333";
+                      e.target.style.borderColor = "#bd2130";
+                      e.target.style.transform = "translateY(-1px)";
+                      e.target.style.boxShadow =
+                        "0 4px 8px rgba(220, 53, 69, 0.3)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isCancelling) {
+                      e.target.style.backgroundColor = "#dc3545";
+                      e.target.style.borderColor = "#dc3545";
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow =
+                        "0 2px 4px rgba(220, 53, 69, 0.2)";
+                    }
+                  }}
                 >
-                  {isCancelling ? "취소 처리 중..." : "주문 취소"}
+                  {isCancelling ? "취소 처리 중..." : "🚫 주문 취소"}
                 </Button>
               ) : (
                 <Button
