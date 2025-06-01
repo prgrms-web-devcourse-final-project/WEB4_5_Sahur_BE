@@ -16,7 +16,7 @@
 ### 1. 프로젝트 - 퉁 하자
 
 ### 🌍 퉁하자 - [링크](https://www.devapi.store/)  
-<이미지>
+![Image](https://github.com/user-attachments/assets/5129d720-3891-43bd-809a-1e1417f0c6e0)
 
 ---
 
