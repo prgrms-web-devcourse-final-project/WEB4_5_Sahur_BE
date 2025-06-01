@@ -113,6 +113,13 @@ public class OrderController {
         return RsDataUtil.success("주문 정보가 수정되었습니다.", OrderUpdateResDto.from(order));
     }
 
+    @Operation(summary = "전체 주문 취소", description = "해당 공동구매 관련 전체 주문을 취소합니다.")
+    @DeleteMapping("/{groupBuyId}/cancel")
+    public RsData<Empty> cancelOrdersByGroupBuy(@PathVariable Long groupBuyId) {
+        orderService.cancelOrdersByGroupBuy(groupBuyId);
+        return RsDataUtil.success("주문이 성공적으로 취소되었습니다.");
+    }
+
     @Operation(summary = "주문 취소", description = "주문을 취소합니다.")
     @DeleteMapping("/{orderId}")
     public RsData<Empty> cancelOrder(

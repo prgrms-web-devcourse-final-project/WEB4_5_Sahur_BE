@@ -9,7 +9,6 @@ import Payment from "../pages/payment/Payment";
 import PaymentSuccess from "../pages/payment/PaymentSuccess";
 import PaymentFail from "../pages/payment/PaymentFail";
 import AdminDashboard from "../pages/admin/dashboard/AdminDashboard";
-import MypageDashboard from "../pages/mypage/MypageDashboard";
 import AdminLayout from "../layout/admin/AdminLayout";
 import Layout from "../layout/main/Layout";
 import AdminProducts from "../pages/admin/products/AdminProducts";
@@ -21,6 +20,16 @@ import AdminProductsRequestDetail
     from "../pages/admin/products/AdminProductsRequestDetail";
 import AdminGroupBuyDetail from "../pages/admin/groupbuy/AdminGroupBuyDetail";
 import AdminOrdersDetail from "../pages/admin/orders/AdminOrdersDetail";
+import MyPageLayout from "../layout/mypage/MyPageLayout";
+import MyPageDashboard from "../pages/mypage/dashboard/MyPageDashboard";
+import MyPageOrders from "../pages/mypage/orders/MyPageOrders";
+import MyPagePayments from "../pages/mypage/payments/MyPagePayments";
+import MyPageRequests from "../pages/mypage/requests/MyPageRequests";
+import MyPageDibs from "../pages/mypage/dibs/MyPageDibs";
+import MyPageReviews from "../pages/mypage/reviews/MyPageReviews";
+import MyPageProfile from "../pages/mypage/profile/MyPageProfile";
+import MyPageOrdersDetail from "../pages/mypage/orders/MyPageOrdersDetail";
+import MyPageRequest from "../pages/mypage/requests/MyPageRequest";
 
 const BaseRoutes = () => {
     return (
@@ -49,9 +58,18 @@ const BaseRoutes = () => {
                 <Route path="orders/:orderId" element={<AdminOrdersDetail />} />
                 <Route path="reviews" element={<AdminReviews />} />
             </Route>
-            <Route path="/mypage" element={<Layout />}>
+            <Route path="/mypage" element={<MyPageLayout />}>
                 <Route index element={<Navigate to="dashboard" replace />} />
-                <Route path="dashboard" element={<MypageDashboard />} />
+                <Route path="dashboard" element={<MyPageDashboard />} />
+                <Route path="orders" element={<MyPageOrders />} />
+                <Route path="orders/:orderId" element={<MyPageOrdersDetail />} />
+                <Route path="payments" element={<MyPagePayments />} />
+                <Route path="requests" element={<MyPageRequests />} />
+                <Route path="request" element={<MyPageRequest />} />
+                <Route path="request/patch" element={<MyPageRequest />} />
+                <Route path="dibs" element={<MyPageDibs />} />
+                <Route path="reviews" element={<MyPageReviews />} />
+                <Route path="profile" element={<MyPageProfile />} />
             </Route>
             {/* 에러페이지 */}
             <Route path={"*"} element={<Error404 />} />

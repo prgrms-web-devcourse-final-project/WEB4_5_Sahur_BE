@@ -1,0 +1,50 @@
+.detailButton {
+  border: 1px solid #E2E8F0;
+  font-family: Noto Sans KR;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  color: #020817 !important;
+}
+
+.detailButton:hover,
+.detailButton:focus,
+.detailButton:active {
+  background-color: transparent !important;
+  border-color: black !important; /* 필요에 따라 유지 */
+  color: black !important;
+  box-shadow: none !important;
+}
+
+.textInControl {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointerEvents: none;
+}
+
+.groupBuyDesc {
+  background: #FEFCE8;
+  //margin: 20px;
+  padding: 15px;
+}
+
+.groupBuyDescTitle {
+  font-family: Noto Sans KR;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 20px;
+  color: #854D0E;
+}
+
+.groupBuyDescSubTitle {
+  font-family: Noto Sans KR;
+  font-weight: 350;
+  font-size: 14px;
+  line-height: 20px;
+  color: #A16207;
+}

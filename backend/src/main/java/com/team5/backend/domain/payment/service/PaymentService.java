@@ -1,29 +1,29 @@
 package com.team5.backend.domain.payment.service;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
+import com.team5.backend.domain.history.entity.History;
+import com.team5.backend.domain.history.repository.HistoryRepository;
+import com.team5.backend.domain.notification.redis.NotificationPublisher;
+import com.team5.backend.domain.notification.repository.NotificationRepository;
+import com.team5.backend.domain.notification.template.NotificationTemplateType;
+import com.team5.backend.domain.order.entity.Order;
+import com.team5.backend.domain.order.entity.OrderStatus;
+import com.team5.backend.domain.order.repository.OrderRepository;
+import com.team5.backend.domain.order.service.OrderQueryService;
+import com.team5.backend.domain.payment.dto.PaymentResDto;
+import com.team5.backend.domain.payment.entity.Payment;
+import com.team5.backend.domain.payment.repository.PaymentRepository;
+import com.team5.backend.global.exception.CustomException;
+import com.team5.backend.global.exception.code.PaymentErrorCode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.team5.backend.domain.history.entity.History;
-import com.team5.backend.domain.history.repository.HistoryRepository;
-import com.team5.backend.domain.notification.redis.NotificationPublisher;
-import com.team5.backend.domain.notification.template.NotificationTemplateType;
-import com.team5.backend.domain.order.entity.Order;
-import com.team5.backend.domain.order.entity.OrderStatus;
-import com.team5.backend.domain.order.repository.OrderRepository;
-import com.team5.backend.domain.payment.dto.PaymentResDto;
-import com.team5.backend.domain.payment.entity.Payment;
-import com.team5.backend.domain.payment.repository.PaymentRepository;
-import com.team5.backend.global.exception.CustomException;
-import com.team5.backend.global.exception.code.PaymentErrorCode;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -35,7 +35,8 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final TossService tossService;
     private final HistoryRepository historyRepository;
-
+    private final NotificationRepository notificationRepository;
+    private final OrderQueryService orderQueryService;
     private final NotificationPublisher notificationPublisher;
 
     @Transactional
@@ -98,5 +99,18 @@ public class PaymentService {
         Payment payment = paymentRepository.findByOrder_OrderId(orderId)
                 .orElseThrow(() -> new CustomException(PaymentErrorCode.PAYMENT_NOT_FOUND_BY_ORDER));
         return payment.getPaymentKey();
+    }
+
+    @Transactional
+    public void cancelPaymentsByGroupBuyId(Long groupBuyId, String reason) {
+        List<Order> orders = orderQueryService.getOrdersByGroupBuyId(groupBuyId);
+        log.info("조회된 주문 수: {}", orders.size());
+
+        for (Order order : orders) {
+            paymentRepository.findByOrder_OrderId(order.getOrderId())
+                    .ifPresent(payment -> {
+                            tossService.cancelPayment(payment.getPaymentKey(), reason);
+                    });
+        }
     }
 }
