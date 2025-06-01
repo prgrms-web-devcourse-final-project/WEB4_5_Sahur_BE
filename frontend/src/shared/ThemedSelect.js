@@ -1,11 +1,13 @@
 import Select from 'react-select';
 import { useMemo } from 'react';
 
-const ThemedSelect = ({ options, variant = 'primary' }) => {
+const ThemedSelect = ({ options, variant = 'primary', defaultValue, components }) => {
     const customStyles = useMemo(() => createSelectStyles(variant), [variant]);
 
     return (
         <Select
+            defaultValue={defaultValue}
+            components={components}
             options={options}
             styles={customStyles}
             placeholder="선택하세요"

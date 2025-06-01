@@ -1,0 +1,21 @@
+.wrapper {
+  display: flex;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.main {
+  flex-grow: 1;
+  transition: all 0.3s ease;
+}
+
+.mainShrink {
+  width: calc(100% - 400px); // sidebar 너비만큼 줄어듦
+}
+
+.sidebar {
+  width: 400px;
+  background-color: #f8f9fa;
+  border-left: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
