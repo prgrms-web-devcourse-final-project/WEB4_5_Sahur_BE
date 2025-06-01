@@ -29,6 +29,7 @@ import MyPageDibs from "../pages/mypage/dibs/MyPageDibs";
 import MyPageReviews from "../pages/mypage/reviews/MyPageReviews";
 import MyPageProfile from "../pages/mypage/profile/MyPageProfile";
 import MyPageOrdersDetail from "../pages/mypage/orders/MyPageOrdersDetail";
+import MyPageRequest from "../pages/mypage/requests/MyPageRequest";
 
 const BaseRoutes = () => {
     return (
@@ -64,6 +65,8 @@ const BaseRoutes = () => {
                 <Route path="orders/:orderId" element={<MyPageOrdersDetail />} />
                 <Route path="payments" element={<MyPagePayments />} />
                 <Route path="requests" element={<MyPageRequests />} />
+                <Route path="request" element={<MyPageRequest />} />
+                <Route path="request/patch" element={<MyPageRequest />} />
                 <Route path="dibs" element={<MyPageDibs />} />
                 <Route path="reviews" element={<MyPageReviews />} />
                 <Route path="profile" element={<MyPageProfile />} />

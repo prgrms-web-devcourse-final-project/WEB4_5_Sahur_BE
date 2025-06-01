@@ -1,0 +1,61 @@
+.customProgress :global(.progress-bar) {
+  background-color: #A855F7 !important;
+}
+
+.imageWrapper {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.groupBuyCardBorder {
+  border: 1px solid #E2E8F0
+}
+
+/* Badge 위치 및 커스터마이징 */
+.badgeTopRight {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 0.7rem;
+  min-width: inherit;
+  //padding: 4px 8px;
+  font-weight: 600;
+  background-color: #fff !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+.sortButton {
+  width: 75px;
+  height: 26px;
+  border-radius: 6px;
+  border-width: 1px;
+  border: 1px solid #E2E8F0;
+  font-size: 14px;
+  font-weight: 500;
+  color: black;
+  background: #FFFFFF;
+}
+
+.active {
+  background: #C084FC;
+  color: white;
+  border-color: #C084FC;
+}
+
+:global(.page-item.active) {
+  background: #C084FC;
+  color: white;
+  border-color: #C084FC;
+  border-radius: 8px;
+}
+
+
+
