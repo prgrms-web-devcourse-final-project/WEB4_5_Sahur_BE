@@ -17,7 +17,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -95,5 +97,22 @@ public class HistoryController {
         List<HistoryResDto> writableHistories = historyService.getWritableHistories(productId, userDetails);
         return RsDataUtil.success("리뷰 작성 가능한 구매 이력 조회 성공", writableHistories);
     }
+
+    @Operation(summary = "리뷰 작성 가능한 내 구매 이력 조회 (최신순, 페이징)", description = "현재 로그인한 사용자의 writable = true 인 구매 이력을 최신순으로 페이징 조회합니다.")
+    @GetMapping("/writable")
+    public RsData<Page<HistoryResDto>> getMyWritableHistories(
+            @AuthenticationPrincipal PrincipalDetails userDetails,
+            @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "5") int size) {
+
+        Pageable sortedPageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdAt")));
+
+        Page<HistoryResDto> writableHistories = historyService.getMyWritableHistories(userDetails, sortedPageable);
+        return RsDataUtil.success("리뷰 작성 가능한 구매 이력 페이징 조회 성공", writableHistories);
+    }
+
+
+
+
 
 }

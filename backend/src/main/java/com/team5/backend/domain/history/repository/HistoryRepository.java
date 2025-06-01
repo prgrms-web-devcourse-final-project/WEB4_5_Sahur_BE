@@ -43,4 +43,8 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
     void deleteByOrder_OrderId(Long orderId);
 
+    Page<History> findByMember_MemberIdAndWritableTrue(Long memberId, Pageable pageable);
+
+
+
 }
