@@ -100,6 +100,22 @@ public class BaseInitData implements CommandLineRunner {
             "편리한 청소 기능이 탑재된 고양이 화장실."
     );
 
+    private final List<String> imageUrls = List.of(
+            "https://thumbnail7.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/2459/57455de7e5f90f3ccc26b7c3c43969b48659534f77c7ffaec8a652c4280f.jpg",
+            "https://www.berluti.com/on/demandware.static/-/Sites-masterCatalog_Berluti/default/dwfe8d6c16/images/N235741_makore-slim-leather-wallet_cacao-intenso_berluti_01.jpg?sw=100&sfrm=jpg",
+            "https://www.cosinkorea.com/data/photos/20220208/art_16454207300855_82771c.jpg",
+            "https://www.nssound.co.kr/data/goods/8/835/8330A.view.jpeg",
+            "https://godomall.speedycdn.net/634854f35f19a5e1ce9d74d8f4e988d0/goods/186800750/image/main/186800750_main_039.jpg",
+            "https://cdn.cuckoo.co.kr/upload_cuckoo/_bo_mall/product/6163af13-06b7-4852-a9bb-0f52d8fa2264.png",
+            "https://domecome.com/web/product/big/202209/c82bc9be189cc2f73688a826bbab0e6e.jpg",
+            "https://img-cf.kurly.com/hdims/resize/%3E720x/quality/90/src/shop/data/goodsview/20221017/gv40000436718_1.jpg",
+            "https://ae01.alicdn.com/kf/S2b89e7c92516439196f0a5552d1bafd8T.jpg",
+            "https://img.freepik.com/free-photo/aromatic-oil-diffuser-bottle-spa-product_53876-133299.jpg",
+            "https://wizdomapp.com/wp-content/uploads/2024/08/Amazon-Books-803x490.jpg",
+            "https://godomall.speedycdn.net/5a0cb0c16248a5372b043d5534b9ba47/goods/186796794/image/magnify/186796794_magnify_114.jpg",
+            "https://bff-images.bemypet.kr/media/medias/product/364-%EB%A7%81%ED%8E%AB_uv_%EA%B3%A0%EC%96%91%EC%9D%B4_%ED%99%94%EC%9E%A5%EC%8B%A4.jpg"
+    );
+
     @Override
     public void run(String... args) {
         if (memberRepository.count() == 0) {
@@ -142,7 +158,7 @@ public class BaseInitData implements CommandLineRunner {
                 Category category = categories.get(i % categories.size());
                 String title = productTitles.get(i % productTitles.size());
                 String description = productDescriptions.get(i % productDescriptions.size());
-                String imageUrl = "https://i.pravatar.cc/150?img=" + i + ".jpg";
+                String imageUrl = imageUrls.get(i % imageUrls.size());
 
                 productRequestRepository.save(ProductRequest.builder()
                         .member(requester)
@@ -171,7 +187,7 @@ public class BaseInitData implements CommandLineRunner {
                         .targetParticipants(5 + (i % 4))
                         .currentParticipantCount((i % 6) + 1)
                         .round(1 + (i % 3))
-                        .deadline(LocalDateTime.now().plusDays(5 - (i % 3)))
+                        .deadline(LocalDateTime.now().plusDays(20 - (i % 3)))
                         .status(GroupBuyStatus.ONGOING)
                         .build());
 
