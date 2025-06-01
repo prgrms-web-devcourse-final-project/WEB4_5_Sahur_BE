@@ -1,5 +1,6 @@
 package com.team5.backend.global.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Component
 public class ImageUtil {
 
@@ -156,17 +158,21 @@ public class ImageUtil {
     }
 
     // 단일 이미지 삭제
-    public void deleteImage(String imagePath) throws IOException {
+    public boolean deleteImage(String imagePath) throws IOException {
 
         if (imagePath == null || imagePath.trim().isEmpty()) {
-            return ;
+            return false;
         }
 
         try {
             String key = extractKeyFromUrl(imagePath);
             deleteFromS3(key);
+            log.info("S3 이미지 삭제 성공: {}", imagePath);
+            return true;
         } catch (Exception e) {
-            throw new IOException("S3 객체 삭제 실패: " + e.getMessage(), e);
+            // S3 삭제 실패 (파일이 없는 경우 포함)
+            log.warn("S3 이미지 삭제 실패: {}, 오류: {}", imagePath, e.getMessage());
+            return false;
         }
     }
 
