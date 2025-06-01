@@ -15,6 +15,7 @@ import com.team5.backend.domain.delivery.repository.DeliveryRepository;
 import com.team5.backend.domain.groupBuy.entity.GroupBuy;
 import com.team5.backend.domain.groupBuy.repository.GroupBuyRepository;
 import com.team5.backend.domain.groupBuy.service.GroupBuyService;
+import com.team5.backend.domain.history.repository.HistoryRepository;
 import com.team5.backend.domain.member.member.entity.Member;
 import com.team5.backend.domain.member.member.repository.MemberRepository;
 import com.team5.backend.domain.notification.redis.NotificationPublisher;
@@ -48,6 +49,7 @@ public class OrderService {
     private final GroupBuyRepository groupBuyRepository;
     private final ProductRepository productRepository;
     private final DeliveryRepository deliveryRepository;
+    private final HistoryRepository historyRepository;
 
     private final GroupBuyService groupBuyService;
 
@@ -194,8 +196,11 @@ public class OrderService {
                 deliveryRepository.delete(order.getDelivery());
             }
 
-            // log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
-            // historyRepository.deleteByOrder_OrderId(orderId);
+            boolean hasHistory = historyRepository.existsByOrder_OrderId(orderId);
+            if (hasHistory) {
+                log.info("[Order Cleanup] 연결된 구매 이력 삭제: orderId={}", orderId);
+                historyRepository.deleteByOrder_OrderId(orderId);
+            }
 
             orderRepository.delete(order);
             log.info("[Order Cleanup] 주문 삭제 완료: orderId={}", orderId);
