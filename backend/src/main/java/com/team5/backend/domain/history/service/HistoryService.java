@@ -127,4 +127,14 @@ public class HistoryService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Page<HistoryResDto> getMyWritableHistories(PrincipalDetails userDetails, Pageable pageable) {
+        Long memberId = userDetails.getMember().getMemberId();
+
+        return historyRepository.findByMember_MemberIdAndWritableTrue(memberId, pageable)
+                .map(HistoryResDto::fromEntity);
+    }
+
+
+
 }
