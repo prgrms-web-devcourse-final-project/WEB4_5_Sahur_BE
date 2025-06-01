@@ -55,28 +55,16 @@ public class DeliveryService {
         return deliveryRepository.countByStatus(status);
     }
 
-    public Delivery updateDeliveryInfo(Long deliveryId, DeliveryReqDto request) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
+    public Delivery updateDeliveryInfo(Long orderId, DeliveryReqDto request, DeliveryStatus status) {
+        Delivery delivery = deliveryRepository.findByOrder_OrderId(orderId)
                 .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
         delivery.updateDeliveryInfo(request);
-        return delivery;
-    }
-
-    public DeliveryStatusUpdateResDto updateDeliveryStatus(Long deliveryId, DeliveryStatus status) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
-
-        DeliveryStatus current = delivery.getStatus();
-
-        if (!current.canTransitionTo(status)) {
-            throw new CustomException(DeliveryErrorCode.INVALID_STATUS_TRANSITION);
-        }
-
         delivery.updateDeliveryStatus(status);
-        delivery.getOrder().setDelivery(delivery);  // 동기화
-        notifyDeliveryStatus(delivery);
 
-        return new DeliveryStatusUpdateResDto(deliveryId, current, status, "성공");
+        delivery.getOrder().setDelivery(delivery);
+
+        notifyDeliveryStatus(delivery);
+        return delivery;
     }
 
     public List<DeliveryStatusUpdateResDto> updateDeliveryStatuses(DeliveryStatusUpdateReqDto request) {
