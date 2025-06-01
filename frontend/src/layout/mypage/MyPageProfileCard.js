@@ -9,7 +9,26 @@ const MyPageProfileCard = () => {
   const navigate = useNavigate();
   const [member, setMember] = useState(null);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "";
+  // API_BASE_URL 직접 선언
+  const API_BASE_URL =
+    process.env.REACT_APP_API_URL || "https://api.devapi.store";
+
+  // 이미지 URL 처리 함수
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) {
+      // 기본 프로필 이미지는 API 서버에서 제공
+      return `${API_BASE_URL}/images/default-profile.png`;
+    }
+
+    // 외부 URL인 경우 (소셜 로그인)
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+      return imageUrl;
+    }
+
+    // 내부 경로인 경우 API 베이스 URL과 결합
+    const cleanPath = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+    return `${API_BASE_URL}${cleanPath}`;
+  };
 
   // 회원 정보 조회 API
   const userProfileMutation = useMutation(
@@ -25,20 +44,6 @@ const MyPageProfileCard = () => {
       },
     }
   );
-
-  // 이미지 URL 처리 함수
-  const getImageUrl = (imageUrl) => {
-    if (!imageUrl) {
-      return `${API_BASE_URL}/images/default-profile.png`;
-    }
-
-    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-      return imageUrl;
-    }
-
-    const cleanPath = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-    return `${API_BASE_URL}${cleanPath}`;
-  };
 
   useEffect(() => {
     userProfileMutation.mutate();
