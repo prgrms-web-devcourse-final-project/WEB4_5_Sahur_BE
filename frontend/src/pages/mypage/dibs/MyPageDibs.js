@@ -67,10 +67,6 @@ const MyPageDibs = () => {
 
   return (
     <>
-      <div className="mb-4">
-        <h2 className="fw-bold mb-3">관심 상품</h2>
-      </div>
-
       {dibsItems.length === 0 ? (
         <div className="text-center py-5">
           <p className="fs-5 mb-2">관심 상품이 없습니다.</p>
