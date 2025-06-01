@@ -1,13 +1,12 @@
 package com.team5.backend.domain.order.dto;
 
-import java.time.LocalDateTime;
-
 import com.team5.backend.domain.delivery.entity.DeliveryStatus;
 import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.entity.OrderStatus;
-
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -17,6 +16,7 @@ public class OrderListResDto {
     private String nickname;
     private Long groupBuyId;
     private Long productId;
+    private String imageUrl;
     private String productTitle;
     private Integer totalPrice;
     private String status;
@@ -43,6 +43,7 @@ public class OrderListResDto {
                 .nickname(order.getMember().getNickname())
                 .groupBuyId(order.getGroupBuy().getGroupBuyId())
                 .productId(order.getProduct().getProductId())
+                .imageUrl(order.getProduct().getImageUrl().getFirst())
                 .productTitle(order.getProduct().getTitle())
                 .totalPrice(order.getTotalPrice())
                 .status(statusStr)
