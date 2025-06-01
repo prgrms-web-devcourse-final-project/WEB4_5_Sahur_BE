@@ -23,7 +23,7 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
 
         return new OpenAPI()
-                // .addServersItem(server)
+                 .addServersItem(server)
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new io.swagger.v3.oas.models.security.SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP) // HTTP 타입으로 설정
