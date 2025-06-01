@@ -1,13 +1,5 @@
 package com.team5.backend.domain.delivery.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.team5.backend.domain.delivery.dto.DeliveryReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateReqDto;
 import com.team5.backend.domain.delivery.dto.DeliveryStatusUpdateResDto;
@@ -20,8 +12,14 @@ import com.team5.backend.domain.order.entity.Order;
 import com.team5.backend.domain.order.repository.OrderRepository;
 import com.team5.backend.global.exception.CustomException;
 import com.team5.backend.global.exception.code.DeliveryErrorCode;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -84,9 +82,9 @@ public class DeliveryService {
     public List<DeliveryStatusUpdateResDto> updateDeliveryStatuses(DeliveryStatusUpdateReqDto request) {
         List<DeliveryStatusUpdateResDto> results = new ArrayList<>();
 
-        for (Long id : request.deliveryIds()) {
+        for (Long orderId : request.orderIds()) {
             try {
-                Delivery delivery = deliveryRepository.findById(id)
+                Delivery delivery = deliveryRepository.findByOrder_OrderId(orderId)
                         .orElseThrow(() -> new CustomException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
                 DeliveryStatus current = delivery.getStatus();
@@ -97,9 +95,9 @@ public class DeliveryService {
                 delivery.getOrder().setDelivery(delivery);  // 동기화
                 notifyDeliveryStatus(delivery);
 
-                results.add(new DeliveryStatusUpdateResDto(id, current, next, "성공"));
+                results.add(new DeliveryStatusUpdateResDto(orderId, current, next, "성공"));
             } catch (CustomException e) {
-                results.add(new DeliveryStatusUpdateResDto(id, null, null, "실패: " + e.getMessage()));
+                results.add(new DeliveryStatusUpdateResDto(orderId, null, null, "실패: " + e.getMessage()));
             }
         }
 
