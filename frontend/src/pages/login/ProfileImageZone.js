@@ -1,51 +1,69 @@
-import React, {useEffect, useRef, useState} from 'react';
-import noImage from "../../assets/images/no-image.png"
-import {Button} from "react-bootstrap";
+import { useEffect, useRef, useState } from "react";
+import noImage from "../../assets/images/no-image.png";
 
-function ProfileImageZone({ handleProfileImageChange }) {
-    const fileInputRef = useRef(null);
-    const [previewUrl, setPreviewUrl] = useState();
+function ProfileImageZone({ handleProfileImageChange, initialImageUrl }) {
+  const fileInputRef = useRef(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
-    const handleButtonClick = () => {
-        fileInputRef.current.click(); // 버튼 클릭 시 숨겨진 파일 선택창 열기
-    };
+  // 초기 이미지 URL이 있으면 설정
+  useEffect(() => {
+    if (initialImageUrl) {
+      setPreviewUrl(initialImageUrl);
+    }
+  }, [initialImageUrl]);
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+  const handleButtonClick = () => {
+    fileInputRef.current.click(); // 버튼 클릭 시 숨겨진 파일 선택창 열기
+  };
 
-        const imageUrl = URL.createObjectURL(file);
-        setPreviewUrl(imageUrl);
-        handleProfileImageChange(file)
-    };
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    return (
-        <div>
-            <img src={previewUrl ? previewUrl : noImage}
-                 alt="프로필"
-                 style={previewUrl ? {
-                     width: "210px",
-                     height: "210px",
-                     objectFit: 'cover',
-                     borderRadius: '50%',
-                     display: 'block',
-                     margin: 'auto' } :
-                     { width: "100%", objectFit: "cover" }}
-                 onClick={handleButtonClick}
-                 className={"cursor-pointer"}
-            />
-            <br />
+    const imageUrl = URL.createObjectURL(file);
+    setPreviewUrl(imageUrl);
+    handleProfileImageChange(file);
+  };
 
-            <input type="file"
-                   accept="image/*"
-                   ref={fileInputRef}
-                   style={{ display: 'none' }}
-                   onChange={handleFileChange}
-            />
-        </div>
-    );
+  return (
+    <div>
+      <img
+        src={previewUrl || noImage}
+        alt="프로필"
+        style={
+          previewUrl
+            ? {
+                width: "210px",
+                height: "210px",
+                objectFit: "cover",
+                borderRadius: "50%",
+                display: "block",
+                margin: "auto",
+                cursor: "pointer",
+              }
+            : {
+                width: "210px",
+                height: "210px",
+                objectFit: "cover",
+                display: "block",
+                margin: "auto",
+                cursor: "pointer",
+              }
+        }
+        onClick={handleButtonClick}
+        className={"cursor-pointer"}
+      />
+      <br />
+
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+    </div>
+  );
 }
 
 export default ProfileImageZone;
-
-
