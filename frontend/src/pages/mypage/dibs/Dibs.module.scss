@@ -1,5 +1,5 @@
 .customProgress :global(.progress-bar) {
-  background-color: #A855F7 !important;
+  background-color: #a855f7 !important;
 }
 
 .imageWrapper {
@@ -15,7 +15,7 @@
 }
 
 .groupBuyCardBorder {
-  border: 1px solid #E2E8F0
+  border: 1px solid #e2e8f0;
 }
 
 /* Badge 위치 및 커스터마이징 */
@@ -37,25 +37,22 @@
   height: 26px;
   border-radius: 6px;
   border-width: 1px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #e2e8f0;
   font-size: 14px;
   font-weight: 500;
   color: black;
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .active {
-  background: #C084FC;
+  background: #c084fc;
   color: white;
-  border-color: #C084FC;
+  border-color: #c084fc;
 }
 
 :global(.page-item.active) {
-  background: #C084FC;
+  background: #c084fc;
   color: white;
-  border-color: #C084FC;
+  border-color: #c084fc;
   border-radius: 8px;
 }
-
-
-

@@ -160,9 +160,12 @@ public class MemberService {
 
         // 프로필 이미지 처리
         if (newProfileImage != null && !newProfileImage.isEmpty()) {
-            // 기존 이미지 삭제
+            // 기존 이미지 삭제 시도 (S3에 없어도 DB는 새 이미지로 업데이트됨)
             if (existingMember.getImageUrl() != null && !existingMember.getImageUrl().isBlank()) {
-                imageUtil.deleteImage(existingMember.getImageUrl());
+                boolean deleteSuccess = imageUtil.deleteImage(existingMember.getImageUrl());
+                if (!deleteSuccess) {
+                    log.info("S3에 파일이 없었지만 DB의 imageUrl은 새 이미지로 업데이트됩니다: {}", existingMember.getImageUrl());
+                }
             }
 
             // 새 이미지 업로드 및 DTO에 반영
