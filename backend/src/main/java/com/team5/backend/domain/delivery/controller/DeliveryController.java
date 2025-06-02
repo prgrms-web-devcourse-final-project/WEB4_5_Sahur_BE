@@ -76,7 +76,7 @@ public class DeliveryController {
         return RsDataUtil.success("배송 상태별 개수 조회 성공", count);
     }
 
-    @Operation(summary = "배송 정보 수정", description = "배송 정보 전체를 수정합니다.")
+    @Operation(summary = "배송 정보 수정", description = "배송 정보를 수정합니다.")
     @PatchMapping("/{orderId}")
     public RsData<DeliveryResDto> updateDelivery(
             @Parameter(description = "주문 ID") @PathVariable Long orderId,
