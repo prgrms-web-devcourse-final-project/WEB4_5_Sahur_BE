@@ -13,7 +13,6 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class DeliveryReqDto {
 
-    @NotBlank(message = "우편번호는 필수 입력 항목입니다.")
     private String zipCode;
 
     @NotBlank(message = "도로명/지번 주소는 필수 입력 항목입니다.")
