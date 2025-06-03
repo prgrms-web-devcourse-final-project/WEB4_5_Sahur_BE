@@ -86,6 +86,9 @@
 
 ## 📌 추가 문서
 
+### 🧭 아키텍처
+![Image](https://github.com/user-attachments/assets/025051d3-d58d-463d-ae1b-217da1060a20)
+
 ### 🔗 ERD
 ![Image](https://github.com/user-attachments/assets/0ca13535-ea53-49e2-9741-661e6cdabe39)
 
